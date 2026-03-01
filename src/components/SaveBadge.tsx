@@ -14,20 +14,20 @@ const SaveBadge = ({ amount }: SaveBadgeProps) => {
   return (
     <div
       dir="rtl"
-      className="inline-flex items-center rounded-full border border-sale bg-background overflow-hidden h-9"
+      className="inline-flex flex-row-reverse items-center rounded-md border border-sale bg-background overflow-hidden h-9"
     >
-      {/* Text section */}
-      <span className="flex items-center gap-1 px-3 text-sale font-bold text-sm whitespace-nowrap">
-        وفر {amount.toFixed(2)} <SarIcon className="w-3.5 h-3.5" />
-      </span>
+      {/* Flame icon section - right side */}
+      <div className="w-9 h-9 flex items-center justify-center overflow-hidden flex-shrink-0">
+        <Flame className="w-5 h-5 text-sale animate-flame-pulse" />
+      </div>
 
       {/* Dotted divider */}
       <div className="w-px h-5 border-r border-dashed border-sale" />
 
-      {/* Flame icon section */}
-      <div className="w-9 h-9 flex items-center justify-center overflow-hidden flex-shrink-0">
-        <Flame className="w-5 h-5 text-sale animate-flame-pulse" />
-      </div>
+      {/* Text section - left side */}
+      <span className="flex items-center gap-1 px-3 text-sale font-bold text-sm whitespace-nowrap">
+        وفر {amount.toFixed(2)} <SarIcon className="w-3.5 h-3.5" />
+      </span>
     </div>
   );
 };
