@@ -12,7 +12,7 @@ const SarIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
 
 const SaveBadge = ({ amount }: SaveBadgeProps) => {
   return (
-    <div dir="ltr" className="inline-flex items-center rounded-md border border-sale bg-background overflow-hidden h-9">
+    <div dir="ltr" className="inline-flex items-center rounded-none border border-red-800 bg-background overflow-hidden h-9">
       {/* Text section - left side */}
       <span dir="rtl" className="flex items-center gap-1 px-3 text-sale font-bold text-sm whitespace-nowrap">
         وفر {amount.toFixed(2)} <SarIcon className="w-3.5 h-3.5" />
