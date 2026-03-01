@@ -183,7 +183,7 @@ const ProductDetails = () => {
         </div>
         {/* Action Buttons Row */}
         <div className="flex gap-2 px-2 py-2">
-          <button className="flex-1 py-2.5 bg-foreground text-background font-normal text-[11px] flex items-center justify-center gap-2">
+          <button onClick={handleBuyNow} className="flex-1 py-2.5 bg-foreground text-background font-normal text-[11px] flex items-center justify-center gap-2">
             <ShoppingCart className="w-3.5 h-3.5" />
             <span>إضافة للسلة</span>
           </button>
