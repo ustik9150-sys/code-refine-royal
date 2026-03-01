@@ -54,11 +54,11 @@ const StoreFooter = () => {
               إرثٌ بدأ باسم إبراهيم القرشي، ويستمر بروح إبراق
             </p>
             <div className="flex items-center justify-center gap-6">
+              <img src={commercialRegister} alt="السجل التجاري" className="h-14" />
               <div>
                 <p className="text-sm text-store-secondary mb-1">السجل التجاري</p>
                 <b className="text-sm text-store-primary">7007030076</b>
               </div>
-              <img src={commercialRegister} alt="السجل التجاري" className="h-14" />
               <div>
                 <p className="text-sm text-store-secondary mb-1">الرقم الضريبي</p>
                 <b className="text-sm text-store-primary">300213684208886</b>
