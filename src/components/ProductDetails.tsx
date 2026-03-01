@@ -127,45 +127,6 @@ const ProductDetails = () => {
           </div>
         </section>
 
-        {/* Price bottom section */}
-        <div className="bg-secondary p-5 rounded-md rounded-b-none">
-          <div className="flex items-center justify-between">
-            <label className="text-store-primary font-bold">السعر</label>
-            <div className="flex items-center gap-4">
-              <span className="font-bold text-xl text-sale">222 ر.س</span>
-              <span className="text-store-secondary line-through">1,119 ر.س</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Quantity & Add to cart */}
-        <section className="bg-secondary p-5 rounded-md rounded-t-none border-t border-border">
-          <div className="flex items-center justify-between mb-5">
-            <label className="font-bold text-store-primary">الكمية</label>
-            <div className="flex items-center border border-border rounded-md bg-background">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-9 h-9 flex items-center justify-center text-store-secondary hover:text-store-primary transition-colors"
-                aria-label="تقليل الكمية"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="w-12 text-center text-store-primary font-medium">{quantity}</span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-9 h-9 flex items-center justify-center text-store-secondary hover:text-store-primary transition-colors"
-                aria-label="زيادة الكمية"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <button className="w-full bg-primary text-primary-foreground py-3 rounded-md font-bold text-base hover:opacity-90 transition-opacity flex items-center justify-center gap-2.5">
-            <span>🛒</span>
-            <span>إضافة للسلة</span>
-          </button>
-        </section>
       </div>
 
       {/* Sticky Mobile Bottom Bar */}
