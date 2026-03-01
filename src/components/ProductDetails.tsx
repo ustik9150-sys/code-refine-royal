@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Heart, Share2, CheckCircle, Minus, Plus, ShoppingCart } from "lucide-react";
-import EmailLoginSheet from "@/components/EmailLoginSheet";
+import LoginModal from "@/components/LoginModal";
 import productImage from "@/assets/product-main.jpg";
 import SaveBadge from "@/components/SaveBadge";
 import barcodeIcon from "@/assets/barcode-icon.png";
@@ -200,8 +200,8 @@ const ProductDetails = () => {
       {/* Spacer for sticky bar on mobile */}
       <div className="h-24 lg:hidden" />
 
-      {/* Email Login Bottom Sheet */}
-      <EmailLoginSheet
+      {/* Login Modal */}
+      <LoginModal
         open={showLoginSheet}
         onClose={() => setShowLoginSheet(false)}
         onSuccess={handleLoginSuccess}
