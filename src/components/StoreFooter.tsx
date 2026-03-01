@@ -1,4 +1,5 @@
 import logo from "@/assets/logo.png";
+import commercialRegister from "@/assets/commercial-register.avif";
 
 const footerLinks = [
   { label: "من نحن", href: "#" },
@@ -52,10 +53,15 @@ const StoreFooter = () => {
             <p className="text-sm text-footer-text leading-6 mb-6">
               إرثٌ بدأ باسم إبراهيم القرشي، ويستمر بروح إبراق
             </p>
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-6">
+              <div>
+                <p className="text-sm text-store-secondary mb-1">السجل التجاري</p>
+                <b className="text-sm text-store-primary">7007030076</b>
+              </div>
+              <img src={commercialRegister} alt="السجل التجاري" className="h-14" />
               <div>
                 <p className="text-sm text-store-secondary mb-1">الرقم الضريبي</p>
-                <b className="text-sm text-store-primary">300213684200003</b>
+                <b className="text-sm text-store-primary">300213684208886</b>
               </div>
             </div>
           </div>
