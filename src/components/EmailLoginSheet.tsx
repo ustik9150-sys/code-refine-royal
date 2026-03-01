@@ -79,7 +79,7 @@ const EmailLoginSheet: React.FC<EmailLoginSheetProps> = ({ open, onClose, onSucc
         {/* User icon */}
         <div className="flex justify-center mb-4">
           <div className="w-16 h-16 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center">
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="#b8860b" xmlns="http://www.w3.org/2000/svg">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg">
               <path d="M16 16c4.412 0 8-3.588 8-8s-3.588-8-8-8-8 3.588-8 8 3.588 8 8 8zM16 2.667c2.941 0 5.333 2.392 5.333 5.333s-2.392 5.333-5.333 5.333-5.333-2.392-5.333-5.333 2.392-5.333 5.333-5.333zM16 18.667c-7.476 0-13.333 3.66-13.333 8.333v3.667c0 0.736 0.597 1.333 1.333 1.333s1.333-0.597 1.333-1.333v-3.667c0-3.019 4.984-5.667 10.667-5.667s10.667 2.648 10.667 5.667v3.667c0 0.736 0.597 1.333 1.333 1.333s1.333-0.597 1.333-1.333v-3.667c0-4.673-5.857-8.333-13.333-8.333z"/>
             </svg>
           </div>
