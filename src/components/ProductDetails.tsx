@@ -57,7 +57,7 @@ const ProductDetails = () => {
 
         {/* Availability */}
         <div className="flex items-center gap-1.5 mb-5 text-green-600">
-          <Check className="w-4 h-4" />
+          <Check className="w-4 h-4 ml-1.5" />
           <span className="text-sm">متوفر</span>
         </div>
 
