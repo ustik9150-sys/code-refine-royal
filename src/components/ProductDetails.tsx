@@ -50,8 +50,8 @@ const ProductDetails = () => {
 
         {/* Price */}
         <div className="flex items-center gap-4 my-2 flex-wrap">
-          <span className="font-bold text-xl text-sale flex items-center gap-1">222 <SarIcon className="w-4 h-4" /></span>
-          <span className="text-store-secondary line-through flex items-center gap-1">1,119 <SarIcon className="w-3.5 h-3.5" /></span>
+          <span className="font-bold text-xl text-sale flex items-center gap-1">222 ر.س</span>
+          <span className="text-store-secondary line-through flex items-center gap-1">1,119 ر.س</span>
           <SaveBadge amount={897} />
         </div>
 
@@ -128,8 +128,8 @@ const ProductDetails = () => {
           <div className="flex items-center justify-between">
             <label className="text-store-primary font-bold">السعر</label>
             <div className="flex items-center gap-4">
-              <span className="font-bold text-xl text-sale flex items-center gap-1">222 <SarIcon className="w-4 h-4" /></span>
-              <span className="text-store-secondary line-through flex items-center gap-1">1,119 <SarIcon className="w-3.5 h-3.5" /></span>
+              <span className="font-bold text-xl text-sale">222 ر.س</span>
+              <span className="text-store-secondary line-through">1,119 ر.س</span>
             </div>
           </div>
         </div>
