@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { X } from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 
 /* ─── Email Step ─── */
 interface EmailStepProps {
@@ -83,7 +83,6 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
     if (!/^\d*$/.test(value)) return;
     const next = [...otp];
     if (value.length > 1) {
-      // Handle paste
       const digits = value.replace(/\D/g, "").slice(0, 4).split("");
       digits.forEach((d, i) => { if (i < 4) next[i] = d; });
       setOtp(next);
@@ -123,10 +122,8 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
     }
     setLoading(true);
     setError("");
-    // Simulate OTP verification
     await new Promise((r) => setTimeout(r, 1200));
     const code = otp.join("");
-    // For demo: accept any 4 digits
     if (code.length === 4) {
       setLoading(false);
       onVerified();
@@ -139,7 +136,6 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
   const handleResend = () => {
     if (countdown > 0) return;
     setCountdown(30);
-    // Simulate resend
   };
 
   const formatTime = (s: number) => {
@@ -150,7 +146,6 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
 
   return (
     <div className="space-y-5">
-      {/* Back arrow (top-right in RTL) */}
       <button
         onClick={onBack}
         className="absolute top-4 right-4 w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition"
@@ -168,7 +163,6 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
       </p>
       <p className="text-sm font-bold text-foreground text-center" dir="ltr">{email}</p>
 
-      {/* OTP Boxes */}
       <div className="flex justify-center gap-3" dir="ltr" onPaste={handlePaste}>
         {otp.map((digit, i) => (
           <input
@@ -187,7 +181,6 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
       </div>
       {error && <p className="text-red-500 text-xs text-center">{error}</p>}
 
-      {/* Verify Button */}
       <button
         onClick={handleVerify}
         disabled={!isFilled || loading}
@@ -196,7 +189,6 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
         {loading ? "جاري التحقق..." : "تحقق"}
       </button>
 
-      {/* Resend Timer */}
       <p className="text-sm text-gray-500 text-center">
         {countdown > 0 ? (
           <>يمكنك إعادة الإرسال بعد {formatTime(countdown)}</>
@@ -210,6 +202,191 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
   );
 };
 
+/* ─── Registration Step ─── */
+const COUNTRY_CODES = [
+  { code: "+966", label: "🇸🇦 +966" },
+  { code: "+971", label: "🇦🇪 +971" },
+  { code: "+973", label: "🇧🇭 +973" },
+  { code: "+965", label: "🇰🇼 +965" },
+  { code: "+968", label: "🇴🇲 +968" },
+  { code: "+974", label: "🇶🇦 +974" },
+  { code: "+962", label: "🇯🇴 +962" },
+  { code: "+20", label: "🇪🇬 +20" },
+];
+
+interface RegistrationStepProps {
+  email: string;
+  onComplete: (data: { firstName: string; lastName: string; phone: string; countryCode: string }) => void;
+}
+
+const RegistrationStep: React.FC<RegistrationStepProps> = ({ email, onComplete }) => {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+966");
+  const [showCodes, setShowCodes] = useState(false);
+  const [errors, setErrors] = useState<{ firstName?: string; lastName?: string; phone?: string }>({});
+  const [touched, setTouched] = useState<{ firstName?: boolean; lastName?: boolean; phone?: boolean }>({});
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const codeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setTimeout(() => firstNameRef.current?.focus(), 100);
+  }, []);
+
+  // Close country code dropdown on outside click
+  useEffect(() => {
+    if (!showCodes) return;
+    const handler = (e: MouseEvent) => {
+      if (codeRef.current && !codeRef.current.contains(e.target as Node)) {
+        setShowCodes(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showCodes]);
+
+  const validate = useCallback(() => {
+    const e: typeof errors = {};
+    if (!firstName.trim()) e.firstName = "يرجى إدخال الاسم الأول";
+    if (!lastName.trim()) e.lastName = "يرجى إدخال الاسم الأخير";
+    const digits = phone.replace(/\D/g, "");
+    if (!digits) {
+      e.phone = "يرجى إدخال رقم الجوال";
+    } else if (digits.length < 9) {
+      e.phone = "رقم الجوال يجب أن يكون 9 أرقام على الأقل";
+    }
+    return e;
+  }, [firstName, lastName, phone]);
+
+  const currentErrors = validate();
+  const isValid = Object.keys(currentErrors).length === 0;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setTouched({ firstName: true, lastName: true, phone: true });
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+    const cleanPhone = phone.replace(/\D/g, "");
+    onComplete({ firstName: firstName.trim(), lastName: lastName.trim(), phone: cleanPhone, countryCode });
+  };
+
+  const handleBlur = (field: keyof typeof touched) => {
+    setTouched((t) => ({ ...t, [field]: true }));
+    setErrors(validate());
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* First Name */}
+      <div>
+        <label className="block text-sm font-medium text-foreground text-right mb-1.5">اسمك الكريم</label>
+        <input
+          ref={firstNameRef}
+          type="text"
+          placeholder="الاسم الأول"
+          value={firstName}
+          onChange={(e) => { setFirstName(e.target.value); if (errors.firstName) setErrors((er) => ({ ...er, firstName: undefined })); }}
+          onBlur={() => handleBlur("firstName")}
+          className="w-full h-11 rounded-lg border border-gray-300 px-3 text-sm text-right placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-foreground/20 focus:border-foreground/40 transition bg-white"
+        />
+        {touched.firstName && currentErrors.firstName && (
+          <p className="text-red-500 text-xs text-right mt-1">{currentErrors.firstName}</p>
+        )}
+      </div>
+
+      {/* Last Name */}
+      <div>
+        <label className="block text-sm font-medium text-foreground text-right mb-1.5">الاسم الأخير</label>
+        <input
+          type="text"
+          placeholder="الاسم الأخير"
+          value={lastName}
+          onChange={(e) => { setLastName(e.target.value); if (errors.lastName) setErrors((er) => ({ ...er, lastName: undefined })); }}
+          onBlur={() => handleBlur("lastName")}
+          className="w-full h-11 rounded-lg border border-gray-300 px-3 text-sm text-right placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-foreground/20 focus:border-foreground/40 transition bg-white"
+        />
+        {touched.lastName && currentErrors.lastName && (
+          <p className="text-red-500 text-xs text-right mt-1">{currentErrors.lastName}</p>
+        )}
+      </div>
+
+      {/* Phone */}
+      <div>
+        <label className="block text-sm font-medium text-foreground text-right mb-1.5">رقم الجوال</label>
+        <div className="flex gap-0 rounded-lg border border-gray-300 overflow-hidden bg-white">
+          {/* Phone input (takes most space) */}
+          <input
+            type="tel"
+            dir="ltr"
+            inputMode="numeric"
+            placeholder="051 234 5678"
+            value={phone}
+            onChange={(e) => {
+              const val = e.target.value.replace(/[^\d\s]/g, "");
+              setPhone(val);
+              if (errors.phone) setErrors((er) => ({ ...er, phone: undefined }));
+            }}
+            onBlur={() => handleBlur("phone")}
+            className="flex-1 h-11 px-3 text-sm text-left placeholder:text-gray-400 focus:outline-none bg-transparent border-none"
+          />
+          {/* Country code selector */}
+          <div ref={codeRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setShowCodes(!showCodes)}
+              className="h-11 px-3 flex items-center gap-1 text-sm font-medium text-foreground border-l border-gray-300 hover:bg-gray-50 transition whitespace-nowrap"
+            >
+              <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+              <span>{countryCode}</span>
+            </button>
+            {showCodes && (
+              <div className="absolute bottom-full right-0 mb-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                {COUNTRY_CODES.map((cc) => (
+                  <button
+                    key={cc.code}
+                    type="button"
+                    onClick={() => { setCountryCode(cc.code); setShowCodes(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition ${countryCode === cc.code ? "bg-gray-50 font-medium" : ""}`}
+                  >
+                    {cc.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        {touched.phone && currentErrors.phone && (
+          <p className="text-red-500 text-xs text-right mt-1">{currentErrors.phone}</p>
+        )}
+      </div>
+
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={!isValid}
+        className="w-full h-12 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        التسجيل
+      </button>
+    </form>
+  );
+};
+
+/* ─── Helper ─── */
+function goToCheckout() {
+  window.location.href = "/checkout";
+}
+
+function hasCustomerProfile(): boolean {
+  return !!(
+    localStorage.getItem("customer_first_name") &&
+    localStorage.getItem("customer_last_name") &&
+    localStorage.getItem("customer_phone")
+  );
+}
+
 /* ─── Login Modal Shell ─── */
 interface LoginModalProps {
   open: boolean;
@@ -217,8 +394,10 @@ interface LoginModalProps {
   onSuccess: (email: string) => void;
 }
 
+type Step = "email" | "otp" | "register";
+
 const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => {
-  const [step, setStep] = useState<"email" | "otp">("email");
+  const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
 
   useEffect(() => {
@@ -248,23 +427,44 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
 
   const handleOtpVerified = useCallback(() => {
     window.dispatchEvent(new CustomEvent("otp_verified", { detail: { email } }));
-    onSuccess(email);
+    // If profile already exists, skip registration
+    if (hasCustomerProfile()) {
+      onSuccess(email);
+      goToCheckout();
+    } else {
+      setStep("register");
+    }
   }, [email, onSuccess]);
+
+  const handleRegistrationComplete = useCallback((data: { firstName: string; lastName: string; phone: string; countryCode: string }) => {
+    localStorage.setItem("customer_first_name", data.firstName);
+    localStorage.setItem("customer_last_name", data.lastName);
+    localStorage.setItem("customer_phone", data.phone);
+    localStorage.setItem("customer_country_code", data.countryCode);
+    window.dispatchEvent(new CustomEvent("customer_profile_completed", {
+      detail: { email, firstName: data.firstName, lastName: data.lastName, phone: data.phone, countryCode: data.countryCode },
+    }));
+    onSuccess(email);
+    goToCheckout();
+  }, [email, onSuccess]);
+
+  const handleBack = useCallback(() => {
+    if (step === "otp") setStep("email");
+    else if (step === "register") setStep("otp");
+  }, [step]);
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[100]" dir="rtl">
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 animate-fade-in" onClick={onClose} />
-      {/* Sheet */}
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div
         role="dialog"
         aria-modal="true"
-        className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl px-6 pt-5 pb-8 animate-slide-up"
+        className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl px-6 pt-5 pb-8"
         style={{ animation: "login-slide-up 300ms ease-out forwards" }}
       >
-        {/* Close button (top-left in RTL) */}
+        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-4 left-4 text-red-500 hover:text-red-600 transition-colors"
@@ -272,6 +472,19 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
         >
           <X className="w-6 h-6" />
         </button>
+
+        {/* Back button (OTP & Register steps) */}
+        {(step === "otp" || step === "register") && (
+          <button
+            onClick={handleBack}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition"
+            aria-label="رجوع"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
+        )}
 
         {/* User icon */}
         <div className="flex justify-center mb-4">
@@ -285,11 +498,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
         {/* Title */}
         <h2 className="text-center text-lg font-bold text-foreground mb-5">تسجيل الدخول</h2>
 
-        {step === "email" ? (
-          <EmailStep onSubmit={handleEmailSubmit} />
-        ) : (
-          <OtpStep email={email} onVerified={handleOtpVerified} onBack={() => setStep("email")} />
-        )}
+        {step === "email" && <EmailStep onSubmit={handleEmailSubmit} />}
+        {step === "otp" && <OtpStep email={email} onVerified={handleOtpVerified} onBack={handleBack} />}
+        {step === "register" && <RegistrationStep email={email} onComplete={handleRegistrationComplete} />}
       </div>
 
       <style>{`
