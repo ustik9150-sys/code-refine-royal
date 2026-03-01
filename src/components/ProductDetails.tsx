@@ -133,14 +133,12 @@ const ProductDetails = () => {
         </section>
 
         {/* Payment Methods */}
-        <section className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <img src={applePayIcon} alt="Apple Pay" className="h-8" />
-            <img src={bankIcon} alt="تحويل بنكي" className="h-8" />
-            <img src={codIcon} alt="الدفع عند الاستلام" className="h-8" />
-            <img src={sbcIcon} alt="SBC" className="h-8" />
-          </div>
+        <section className="flex items-center justify-center gap-3 mb-5">
           <img src={madeInKsaIcon} alt="صنع في السعودية" className="h-8" />
+          <img src={applePayIcon} alt="Apple Pay" className="h-8" />
+          <img src={bankIcon} alt="تحويل بنكي" className="h-8" />
+          <img src={codIcon} alt="الدفع عند الاستلام" className="h-8" />
+          <img src={sbcIcon} alt="SBC" className="h-8" />
         </section>
 
       </div>
