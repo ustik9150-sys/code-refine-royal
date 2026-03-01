@@ -22,12 +22,13 @@ const ProductDetails = () => {
   const [showLoginSheet, setShowLoginSheet] = useState(false);
 
   const handleBuyNow = useCallback(() => {
-    const savedEmail = localStorage.getItem("customer_email");
-    if (savedEmail) {
-      // Already logged in, proceed with purchase
-      console.log("Proceeding with purchase for:", savedEmail);
+    const hasProfile = localStorage.getItem("customer_first_name") && localStorage.getItem("customer_phone");
+    if (hasProfile) {
+      // Profile complete, go to checkout
+      window.location.href = "/checkout";
       return;
     }
+    // Clear stale email to restart flow
     setShowLoginSheet(true);
   }, []);
 
