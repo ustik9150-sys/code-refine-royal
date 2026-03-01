@@ -61,7 +61,7 @@ const ProductDetails = () => {
         <div className="flex items-center gap-1.5 mb-5 text-green-600">
           <span className="relative flex items-center justify-center">
             <span className="absolute w-5 h-5 rounded-full bg-green-500/40 animate-availability-ping" />
-            <CheckCircle className="w-5 h-5 ml-1.5 relative z-10" />
+            <CheckCircle className="w-5 h-5 relative z-10" />
           </span>
           <span className="text-sm">متوفر</span>
         </div>
