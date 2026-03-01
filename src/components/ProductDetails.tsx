@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Heart, Share2, CheckCircle, Minus, Plus, ShoppingCart } from "lucide-react";
 import productImage from "@/assets/product-main.jpg";
 import SaveBadge from "@/components/SaveBadge";
+import barcodeIcon from "@/assets/barcode-icon.png";
 
 const SarIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -116,13 +117,13 @@ const ProductDetails = () => {
         </div>
 
         {/* Model number */}
-        <section className="bg-secondary p-5 rounded-md mb-5">
+        <section className="bg-background p-4 rounded-md mb-5 border border-border">
           <div className="flex items-center justify-between">
-            <span className="text-store-primary font-bold flex items-center gap-1">
-              <span className="text-store-secondary">📦</span>
+            <span className="text-store-primary text-sm flex items-center gap-1">
+              <img src={barcodeIcon} alt="باركود" className="w-5 h-5" />
               <span>رقم الموديل</span>
             </span>
-            <span className="text-sm text-store-secondary">7287120302040</span>
+            <span className="text-xs text-store-secondary">7287120302040</span>
           </div>
         </section>
 
