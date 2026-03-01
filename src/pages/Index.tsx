@@ -1,12 +1,27 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import StoreHeader from "@/components/StoreHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import ProductDetails from "@/components/ProductDetails";
+import StoreFooter from "@/components/StoreFooter";
+
+const breadcrumbItems = [
+  { label: "الرئيسية", href: "/" },
+  { label: "عروض يوم التأسيس", href: "#" },
+  { label: "باقة المسك" },
+];
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen flex flex-col bg-background">
+      <StoreHeader />
+      
+      <main className="flex-1">
+        <div className="container">
+          <Breadcrumbs items={breadcrumbItems} />
+          <ProductDetails />
+        </div>
+      </main>
+
+      <StoreFooter />
     </div>
   );
 };
