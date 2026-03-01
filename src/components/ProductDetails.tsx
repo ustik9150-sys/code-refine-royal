@@ -3,6 +3,10 @@ import { Heart, Share2, CheckCircle, Minus, Plus, ShoppingCart } from "lucide-re
 import productImage from "@/assets/product-main.jpg";
 import SaveBadge from "@/components/SaveBadge";
 import barcodeIcon from "@/assets/barcode-icon.png";
+import applePayIcon from "@/assets/apple_pay_mini.avif";
+import bankIcon from "@/assets/bank_mini.avif";
+import codIcon from "@/assets/cod_mini.avif";
+import sbcIcon from "@/assets/sbc.avif";
 
 const SarIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -125,6 +129,14 @@ const ProductDetails = () => {
             </span>
             <span className="text-xs text-store-secondary">7287120302040</span>
           </div>
+        </section>
+
+        {/* Payment Methods */}
+        <section className="flex items-center justify-center gap-3 mb-5">
+          <img src={applePayIcon} alt="Apple Pay" className="h-8" />
+          <img src={bankIcon} alt="تحويل بنكي" className="h-8" />
+          <img src={codIcon} alt="الدفع عند الاستلام" className="h-8" />
+          <img src={sbcIcon} alt="SBC" className="h-8" />
         </section>
 
       </div>
