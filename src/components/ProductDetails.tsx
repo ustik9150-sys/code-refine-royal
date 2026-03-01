@@ -166,6 +166,42 @@ const ProductDetails = () => {
           </button>
         </section>
       </div>
+
+      {/* Sticky Mobile Bottom Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border lg:hidden">
+        {/* Quantity Row */}
+        <div className="flex items-center border-b border-border">
+          <button
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            className="w-12 h-11 flex items-center justify-center text-store-primary border-l border-border text-lg"
+            aria-label="تقليل الكمية"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+          <span className="flex-1 text-center text-store-primary font-medium text-base">{quantity}</span>
+          <button
+            onClick={() => setQuantity(quantity + 1)}
+            className="w-12 h-11 flex items-center justify-center text-store-primary border-r border-border text-lg"
+            aria-label="زيادة الكمية"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+        {/* Action Buttons Row */}
+        <div className="flex">
+          <button className="flex-1 py-3 bg-foreground text-background font-bold text-sm flex items-center justify-center gap-2">
+            <span>🛒</span>
+            <span>إضافة للسلة</span>
+          </button>
+          <button className="flex-1 py-3 bg-background text-foreground font-bold text-sm flex items-center justify-center gap-2 border-r border-border">
+            <span>💳</span>
+            <span>اشتري الآن</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Spacer for sticky bar on mobile */}
+      <div className="h-24 lg:hidden" />
     </div>
   );
 };
