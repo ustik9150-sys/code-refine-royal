@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, Share2, Check, Minus, Plus } from "lucide-react";
+import { Heart, Share2, CheckCircle, Minus, Plus } from "lucide-react";
 import productImage from "@/assets/product-main.jpg";
 
 const ProductDetails = () => {
@@ -57,7 +57,7 @@ const ProductDetails = () => {
 
         {/* Availability */}
         <div className="flex items-center gap-1.5 mb-5 text-green-600">
-          <Check className="w-4 h-4 ml-1.5" />
+          <CheckCircle className="w-5 h-5 ml-1.5" />
           <span className="text-sm">متوفر</span>
         </div>
 
