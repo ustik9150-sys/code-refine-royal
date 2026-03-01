@@ -12,18 +12,18 @@ const SarIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
 
 const SaveBadge = ({ amount }: SaveBadgeProps) => {
   return (
-    <div dir="ltr" className="inline-flex items-center rounded-none border border-red-800 bg-background overflow-hidden h-9">
+    <div dir="ltr" className="inline-flex items-center rounded-none border border-red-800 bg-background overflow-hidden h-7">
       {/* Text section - left side */}
-      <span dir="rtl" className="flex items-center gap-1 px-3 text-sale font-bold text-sm whitespace-nowrap">
-        وفر {amount.toFixed(2)} <SarIcon className="w-3.5 h-3.5" />
+      <span dir="rtl" className="flex items-center gap-1 px-2 text-sale font-bold text-xs whitespace-nowrap">
+        وفر {amount.toFixed(2)} ر.س
       </span>
 
       {/* Dotted divider */}
-      <div className="w-px h-5 border-r border-dashed border-sale" />
+      <div className="w-px h-4 border-r border-dashed border-sale" />
 
       {/* Flame icon section - right side */}
-      <div className="w-9 h-9 flex items-center justify-center overflow-hidden flex-shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 animate-flame-pulse" viewBox="0 0 512.165 512.165" aria-hidden="true">
+      <div className="w-7 h-7 flex items-center justify-center overflow-hidden flex-shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 animate-flame-pulse" viewBox="0 0 512.165 512.165" aria-hidden="true">
           <path fill="#ff001e" d="m437.476 320.656c-.004-.05-.007-.101-.011-.15-1.541-21.368-5.481-39.513-12.39-57.037-.093-.265-.193-.528-.302-.79-.395-.951-39.225-95.684-21.044-147.746 1.641-4.697.845-9.901-2.123-13.894s-7.716-6.249-12.691-6.037c-1.333.058-28.492 1.565-57.3 26.911-25.213-52.021-29.194-107.287-29.235-107.89-.341-5.227-3.383-9.896-8.026-12.32-4.644-2.425-10.213-2.249-14.697.457-39.788 24.034-70.525 53.365-91.356 87.18-16.82 27.302-27.192 57.459-30.829 89.634-2.184 19.327-1.665 37.002-.054 51.85.746 6.879-6.125 12.051-12.529 9.432l-38.613-15.797c-2.632-1.077-5.512-1.525-8.32-1.073-5.912.952-10.518 5.194-12.095 10.682-3.504 12.189-6.128 23.455-8.023 34.441-6.596 38.261-3.897 77.447 7.802 113.325 11.762 36.068 32.059 67.129 58.697 89.824 31.481 26.822 69.604 40.477 111.176 40.477 22.939 0 46.93-4.158 71.431-12.557 38.865-13.321 69.645-39.707 89.011-76.303 16.095-30.419 23.739-66.863 21.521-102.619z"/>
           <path fill="#ffeb00" d="m296.687 260.081c-3.792-5.657-10.918-8.056-17.356-5.829-6.438 2.223-10.57 8.503-10.063 15.295 1.789 23.976-.608 94.475-33.954 103.618-28.387 7.787-43.529-5.362-45-6.726-3.681-4.013-9.084-5.533-14.39-4.261-5.342 1.285-9.38 5.573-10.805 10.879-.283 1.053-2.793 10.461-3.851 16.59-6.784 39.356 6.081 78.356 33.576 101.781 16.127 13.74 35.578 20.736 56.725 20.736 11.536 0 23.58-2.084 35.855-6.292 19.779-6.78 36.691-21.121 48.908-41.475 10.219-17.024 16.161-36.889 16.305-54.5.366-45.31-16.889-91.515-55.95-149.816z"/>
         </svg>
