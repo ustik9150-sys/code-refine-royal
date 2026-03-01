@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        main: ['Tajawal', 'sans-serif'],
+        main: ['PingARLT', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
