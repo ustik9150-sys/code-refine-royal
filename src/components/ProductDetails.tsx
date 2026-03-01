@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, Share2, CheckCircle, Minus, Plus } from "lucide-react";
+import { Heart, Share2, CheckCircle, Minus, Plus, ShoppingCart } from "lucide-react";
 import productImage from "@/assets/product-main.jpg";
 import SaveBadge from "@/components/SaveBadge";
 
@@ -190,7 +190,7 @@ const ProductDetails = () => {
         {/* Action Buttons Row */}
         <div className="flex">
           <button className="flex-1 py-3 bg-foreground text-background font-bold text-sm flex items-center justify-center gap-2">
-            <span>🛒</span>
+            <ShoppingCart className="w-4 h-4" />
             <span>إضافة للسلة</span>
           </button>
           <button className="flex-1 py-3 bg-background text-foreground font-bold text-sm flex items-center justify-center gap-2 border-r border-border">
