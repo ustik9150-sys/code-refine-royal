@@ -171,11 +171,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
             <div>
               <h3 className="text-sm font-bold text-foreground text-right mb-2">طريقة الدفع</h3>
               <div className="border border-gray-200 rounded-xl px-4 py-3 bg-white flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
-                    + 16.09 ﷼
-                  </div>
-                </div>
                 <div className="flex items-center gap-3">
                   <img src={codIcon} alt="COD" className="w-7 h-7 object-contain opacity-60" />
                   <span className="text-sm font-medium text-foreground">دفع عند الاستلام</span>
