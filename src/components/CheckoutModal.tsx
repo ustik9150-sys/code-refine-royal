@@ -4,6 +4,7 @@ import avatarMale from "@/assets/avatar_male.png";
 import codIcon from "@/assets/cod-icon.png";
 import paymentMethodIcon from "@/assets/payment-method-icon.png";
 import shippingIcon from "@/assets/shipping-icon.svg";
+import locationIcon from "@/assets/location-icon.svg";
 
 interface CheckoutModalProps {
   open: boolean;
@@ -137,7 +138,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
               {/* ── Shipping Address ── */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-foreground">عنوان الشحن</h3>
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <img src={locationIcon} alt="" className="w-5 h-5" />
+                    <span>عنوان الشحن</span>
+                  </h3>
                   <button className="text-sm text-teal-600 flex items-center gap-1 hover:underline">
                     <span className="text-base leading-none">+</span>
                     <span>عنوان جديد</span>
