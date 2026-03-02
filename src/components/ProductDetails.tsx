@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Heart, Share2, CheckCircle, Minus, Plus, ShoppingCart } from "lucide-react";
 import LoginModal from "@/components/LoginModal";
+import CheckoutModal from "@/components/CheckoutModal";
 import productImage from "@/assets/product-main.jpg";
 import SaveBadge from "@/components/SaveBadge";
 import barcodeIcon from "@/assets/barcode-icon.png";
@@ -20,22 +21,21 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showLoginSheet, setShowLoginSheet] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const handleBuyNow = useCallback(() => {
     const hasProfile = localStorage.getItem("customer_first_name") && localStorage.getItem("customer_phone");
     if (hasProfile) {
-      // Profile complete, go to checkout
-      window.location.href = "/checkout";
+      setShowCheckout(true);
       return;
     }
-    // Clear stale email to restart flow
     setShowLoginSheet(true);
   }, []);
 
   const handleLoginSuccess = useCallback((email: string) => {
     setShowLoginSheet(false);
-    // Resume purchase action
-    console.log("Login successful, proceeding with purchase for:", email);
+    // After login+registration, open checkout
+    setShowCheckout(true);
   }, []);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
@@ -206,6 +206,13 @@ const ProductDetails = () => {
         open={showLoginSheet}
         onClose={() => setShowLoginSheet(false)}
         onSuccess={handleLoginSuccess}
+      />
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        open={showCheckout}
+        onClose={() => setShowCheckout(false)}
+        totalAmount={222}
       />
     </div>
   );
