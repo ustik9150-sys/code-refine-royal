@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { X, ChevronDown, Wallet } from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 import avatarMale from "@/assets/avatar_male.png";
+import codIcon from "@/assets/cod-icon.png";
 
 interface CheckoutModalProps {
   open: boolean;
@@ -171,7 +172,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
               <h3 className="text-sm font-bold text-foreground text-right mb-2">طريقة الدفع</h3>
               <div className="border-2 border-foreground rounded-xl p-4 bg-gray-50 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <Wallet className="w-5 h-5 text-green-600" />
+                  <img src={codIcon} alt="COD" className="w-6 h-6 object-contain" />
                 </div>
                 <div className="flex-1 text-right">
                   <p className="text-sm font-bold text-foreground">الدفع عند الاستلام</p>
