@@ -169,13 +169,16 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
 
             {/* Payment Method - COD Only */}
             <div>
-              <h3 className="text-sm font-bold text-foreground text-right mb-2">طريقة الدفع</h3>
+              <h3 className="text-sm font-bold text-foreground text-right mb-2 flex items-center justify-end gap-2">
+                <span>طريقة الدفع</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-foreground opacity-70">
+                  <rect x="2" y="6" width="20" height="12" rx="2" />
+                  <circle cx="12" cy="12" r="2.5" />
+                </svg>
+              </h3>
               <div className="border-2 border-foreground rounded-lg px-4 py-3 bg-white flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-foreground opacity-70">
-                    <rect x="2" y="6" width="20" height="12" rx="2" />
-                    <circle cx="12" cy="12" r="2.5" />
-                  </svg>
+                  <img src={codIcon} alt="COD" className="w-7 h-7 object-contain opacity-60" />
                   <span className="text-sm font-medium text-foreground">دفع عند الاستلام</span>
                 </div>
                 <div className="w-5 h-5 rounded-full border-2 border-foreground flex items-center justify-center flex-shrink-0">
