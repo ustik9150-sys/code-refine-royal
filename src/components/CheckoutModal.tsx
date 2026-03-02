@@ -84,7 +84,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
               <p className="text-base font-bold text-foreground">مرحباً، {firstName} {lastName}</p>
               <p className="text-sm text-gray-500">إتمام الدفع</p>
             </div>
-            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0 order-first">
               <img src={avatarMale} alt="avatar" className="w-full h-full object-cover" />
             </div>
           </div>
