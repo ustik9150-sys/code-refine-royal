@@ -175,6 +175,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
                   <img src={codIcon} alt="COD" className="w-7 h-7 object-contain opacity-60" />
                   <span className="text-sm font-medium text-foreground">دفع عند الاستلام</span>
                 </div>
+                <div className="w-5 h-5 rounded-full border-2 border-foreground flex items-center justify-center flex-shrink-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-foreground" />
+                </div>
               </div>
             </div>
 
