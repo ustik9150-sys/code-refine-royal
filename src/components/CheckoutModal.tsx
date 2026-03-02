@@ -177,8 +177,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-foreground">دفع عند الاستلام</span>
                   <img src={codIcon} alt="COD" className="w-7 h-7 object-contain opacity-60" />
+                  <span className="text-sm font-medium text-foreground">دفع عند الاستلام</span>
                 </div>
               </div>
             </div>
