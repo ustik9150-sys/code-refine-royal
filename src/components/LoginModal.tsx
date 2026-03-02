@@ -375,10 +375,6 @@ const RegistrationStep: React.FC<RegistrationStepProps> = ({ email, onComplete }
 };
 
 /* ─── Helper ─── */
-function goToCheckout() {
-  window.location.href = "/checkout";
-}
-
 function hasCustomerProfile(): boolean {
   return !!(
     localStorage.getItem("customer_first_name") &&
@@ -430,7 +426,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
     // If profile already exists, skip registration
     if (hasCustomerProfile()) {
       onSuccess(email);
-      goToCheckout();
     } else {
       setStep("register");
     }
@@ -445,7 +440,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
       detail: { email, firstName: data.firstName, lastName: data.lastName, phone: data.phone, countryCode: data.countryCode },
     }));
     onSuccess(email);
-    goToCheckout();
   }, [email, onSuccess]);
 
   const handleBack = useCallback(() => {
