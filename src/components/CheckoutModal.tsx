@@ -3,6 +3,7 @@ import { X, ChevronDown } from "lucide-react";
 import avatarMale from "@/assets/avatar_male.png";
 import codIcon from "@/assets/cod-icon.png";
 import paymentMethodIcon from "@/assets/payment-method-icon.png";
+import shippingIcon from "@/assets/shipping-icon.svg";
 
 interface CheckoutModalProps {
   open: boolean;
@@ -159,7 +160,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
 
               {/* ── Shipping Company ── */}
               <div className="space-y-2">
-                <h3 className="text-sm font-bold text-foreground">شركة الشحن</h3>
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <img src={shippingIcon} alt="" className="w-5 h-5" />
+                  <span>شركة الشحن</span>
+                </h3>
                 <div className="relative">
                   <select
                     value={shippingCompany}
