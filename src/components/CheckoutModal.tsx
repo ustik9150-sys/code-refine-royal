@@ -171,8 +171,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
             {/* Payment Method - COD Only */}
             <div>
               <h3 className="text-sm font-bold text-foreground text-right mb-2 flex items-center justify-end gap-2">
-                <span>طريقة الدفع</span>
                 <img src={paymentMethodIcon} alt="طريقة الدفع" className="w-5 h-5 object-contain" />
+                <span>طريقة الدفع</span>
               </h3>
               <div className="border-2 border-foreground rounded-lg px-4 py-3 bg-white flex items-center justify-between">
                 <div className="flex items-center gap-3">
