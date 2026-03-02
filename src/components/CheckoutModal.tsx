@@ -170,17 +170,17 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
 
             {/* Payment Method - COD Only */}
             <div>
-              <h3 className="text-sm font-bold text-foreground mb-2 flex items-center justify-center gap-2">
-                <img src={paymentMethodIcon} alt="طريقة الدفع" className="w-5 h-5 object-contain" />
+              <h3 className="text-sm font-bold text-foreground mb-2 flex items-center justify-end gap-2">
                 <span>طريقة الدفع</span>
+                <img src={paymentMethodIcon} alt="طريقة الدفع" className="w-5 h-5 object-contain" />
               </h3>
-              <div className="relative border-2 border-foreground rounded-lg px-4 py-3 bg-white flex items-center justify-center">
-                <div className="flex items-center gap-3">
-                  <img src={codIcon} alt="COD" className="w-7 h-7 object-contain opacity-60" />
-                  <span className="text-sm font-medium text-foreground">دفع عند الاستلام</span>
-                </div>
-                <div className="absolute right-4 w-5 h-5 rounded-full border-2 border-foreground flex items-center justify-center flex-shrink-0">
+              <div className="border-2 border-foreground rounded-lg px-4 py-3 bg-white flex items-center justify-between">
+                <div className="w-5 h-5 rounded-full border-2 border-foreground flex items-center justify-center flex-shrink-0">
                   <div className="w-2.5 h-2.5 rounded-full bg-foreground" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-foreground">دفع عند الاستلام</span>
+                  <img src={codIcon} alt="COD" className="w-7 h-7 object-contain opacity-60" />
                 </div>
               </div>
             </div>
