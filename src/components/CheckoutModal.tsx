@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { X, ChevronDown } from "lucide-react";
 import avatarMale from "@/assets/avatar_male.png";
 import codIcon from "@/assets/cod-icon.png";
+import paymentMethodIcon from "@/assets/payment-method-icon.png";
 
 interface CheckoutModalProps {
   open: boolean;
@@ -171,10 +172,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
             <div>
               <h3 className="text-sm font-bold text-foreground text-right mb-2 flex items-center justify-end gap-2">
                 <span>طريقة الدفع</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-foreground opacity-70">
-                  <rect x="2" y="6" width="20" height="12" rx="2" />
-                  <circle cx="12" cy="12" r="2.5" />
-                </svg>
+                <img src={paymentMethodIcon} alt="طريقة الدفع" className="w-5 h-5 object-contain" />
               </h3>
               <div className="border-2 border-foreground rounded-lg px-4 py-3 bg-white flex items-center justify-between">
                 <div className="flex items-center gap-3">
