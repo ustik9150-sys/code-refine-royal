@@ -62,6 +62,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
 
   if (!open) return null;
 
+  const customerName = `${firstName} ${lastName}`.trim() || "عميل";
+
   return (
     <div className="fixed inset-0 z-[100]" dir="rtl">
       {/* Overlay */}
@@ -71,30 +73,30 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
       <div
         role="dialog"
         aria-modal="true"
-        className="absolute bottom-0 inset-x-0 bg-background rounded-t-2xl max-h-[90vh] flex flex-col"
+        className="absolute bottom-0 inset-x-0 bg-background rounded-t-2xl max-h-[90vh] flex flex-col shadow-2xl"
         style={{ animation: "checkout-slide-up 300ms ease-out forwards" }}
       >
         {/* ── Header ── */}
-        <div className="relative px-5 pt-5 pb-3 border-b border-border flex-shrink-0">
-          {/* Close – top left (in RTL: left = visual left) */}
+        <div className="relative px-5 pt-5 pb-4 border-b border-border flex-shrink-0">
+          {/* Close – visual top-left */}
           <button
             onClick={onClose}
-            className="absolute top-4 start-4 text-destructive hover:opacity-80 transition-opacity"
+            className="absolute top-4 left-4 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="إغلاق"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
 
-          {/* Avatar + greeting – aligned to end (right in RTL) */}
-          <div className="flex items-center gap-3 justify-end pe-1">
+          {/* Avatar + greeting – right side */}
+          <div className="flex items-center gap-3 justify-end">
             <div className="text-end">
-              <p className="text-base font-bold text-foreground leading-snug">
-                مرحباً، {firstName} {lastName}
+              <p className="text-base font-bold text-foreground leading-relaxed">
+                مرحبًا، {customerName}
               </p>
-              <p className="text-sm text-muted-foreground">إتمام الدفع</p>
+              <p className="text-xs text-muted-foreground mt-0.5">إتمام الدفع</p>
             </div>
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-border flex-shrink-0">
-              <img src={avatarMale} alt="avatar" className="w-full h-full object-cover" />
+            <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-border flex-shrink-0">
+              <img src={avatarMale} alt="الصورة الشخصية" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -104,88 +106,89 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
           {orderComplete ? (
             /* ── Success State ── */
             <div className="px-6 py-12 text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-foreground">تم تأكيد طلبك بنجاح!</h3>
-              <p className="text-sm text-muted-foreground">سيتم التواصل معك لتأكيد موعد التوصيل</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">سيتم التواصل معك لتأكيد موعد التوصيل</p>
               <p className="text-sm text-muted-foreground">طريقة الدفع: الدفع عند الاستلام</p>
               <button
                 onClick={onClose}
-                className="w-full h-12 bg-foreground text-background rounded-lg font-medium text-sm mt-4"
+                className="w-full h-12 bg-foreground text-background rounded-xl font-medium text-sm mt-4 hover:opacity-90 transition-opacity"
               >
                 إغلاق
               </button>
             </div>
           ) : (
-            <div className="px-5 pt-5 pb-24 space-y-5">
+            <div className="px-5 pt-5 pb-28 space-y-6">
               {/* ── Total Summary ── */}
-              <div className="bg-muted/50 rounded-xl p-4 space-y-2">
+              <div className="bg-muted/40 rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-bold text-foreground">الإجمالي</p>
-                  <p className="text-lg font-bold text-foreground">{totalAmount} ﷼</p>
+                  <p className="text-xl font-bold text-foreground" dir="rtl">
+                    {totalAmount} ريال
+                  </p>
                 </div>
-                <p className="text-sm text-teal-600 cursor-pointer hover:underline text-end">لديك كوبون تخفيض؟</p>
-                <button className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground w-full pt-1">
+                <p className="text-xs text-primary cursor-pointer hover:underline text-start">لديك كوبون تخفيض؟</p>
+                <button className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground w-full pt-1">
                   <span>تفاصيل الفاتورة</span>
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="w-3.5 h-3.5" />
                 </button>
               </div>
 
               {/* ── Shipping Address – City ── */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <img src={locationIcon} alt="" className="w-5 h-5" />
                   <span>عنوان الشحن</span>
                 </h3>
-                <label className="text-sm font-medium text-foreground">المدينة</label>
-                <input
-                  type="text"
-                  value={shippingAddress}
-                  onChange={(e) => { setShippingAddress(e.target.value); setErrors((er) => ({ ...er, address: undefined })); }}
-                  placeholder="اكتب اسم المدينة"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  autoCapitalize="words"
-                  spellCheck={false}
-                  className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
-                />
-                <p className="text-xs text-muted-foreground">اكتب اسم المدينة يدويًا بدون اختيار من قائمة</p>
-                {errors.address && <p className="text-destructive text-xs mt-1">{errors.address}</p>}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">المدينة</label>
+                  <input
+                    type="text"
+                    value={shippingAddress}
+                    onChange={(e) => { setShippingAddress(e.target.value); setErrors((er) => ({ ...er, address: undefined })); }}
+                    placeholder="اكتب اسم المدينة"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="words"
+                    spellCheck={false}
+                    className="w-full h-12 rounded-xl border border-input bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
+                  />
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">اكتب اسم المدينة يدويًا بدون اختيار من قائمة</p>
+                  {errors.address && <p className="text-destructive text-xs font-medium">{errors.address}</p>}
+                </div>
               </div>
 
               {/* ── Shipping Company – Saqrix Only ── */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <img src={shippingIcon} alt="" className="w-5 h-5" />
                   <span>شركة الشحن</span>
                 </h3>
-                <div className="border-2 border-foreground rounded-lg px-4 py-3 flex items-center gap-3">
+                <div className="border-2 border-foreground rounded-xl px-4 py-3.5 flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full border-2 border-foreground flex items-center justify-center flex-shrink-0">
                     <div className="w-2.5 h-2.5 rounded-full bg-foreground" />
                   </div>
-                  <span className="text-sm font-medium text-foreground flex-1">Saqrix Shipping (Standard)</span>
+                  <span className="text-sm font-medium text-foreground flex-1">شحن Saqrix (عادي)</span>
                   <img src={saqrixLogo} alt="Saqrix" className="w-7 h-7 object-contain flex-shrink-0" />
                 </div>
               </div>
 
               {/* ── Payment Method – COD Only ── */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <img src={paymentMethodIcon} alt="" className="w-5 h-5 object-contain" />
                   <span>طريقة الدفع</span>
                 </h3>
-                <div className="border-2 border-foreground rounded-lg px-4 py-3 flex items-center gap-3">
-                  {/* Radio – far right in RTL (first in DOM) */}
+                <div className="border-2 border-foreground rounded-xl px-4 py-3.5 flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full border-2 border-foreground flex items-center justify-center flex-shrink-0">
                     <div className="w-2.5 h-2.5 rounded-full bg-foreground" />
                   </div>
-                  {/* Label */}
-                  <span className="text-sm font-medium text-foreground flex-1">دفع عند الاستلام</span>
-                  {/* Icon – far left in RTL (last in DOM) */}
-                  <img src={codIcon} alt="COD" className="w-7 h-7 object-contain opacity-70 flex-shrink-0" />
+                  <span className="text-sm font-medium text-foreground flex-1">الدفع عند الاستلام</span>
+                  <img src={codIcon} alt="الدفع عند الاستلام" className="w-7 h-7 object-contain opacity-70 flex-shrink-0" />
                 </div>
               </div>
             </div>
@@ -194,10 +197,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
 
         {/* ── Sticky CTA ── */}
         {!orderComplete && (
-          <div className="sticky bottom-0 inset-x-0 bg-background border-t border-border px-5 py-4 flex-shrink-0">
+          <div className="absolute bottom-0 inset-x-0 bg-background border-t border-border px-5 py-4 flex-shrink-0">
             <button
               onClick={handleSubmit}
-              className="w-full h-12 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+              className="w-full h-12 bg-foreground text-background rounded-xl font-bold text-sm hover:opacity-90 transition-opacity"
             >
               إتمام الطلب
             </button>
