@@ -3,7 +3,7 @@ import { Search, User, ShoppingCart, Menu, X, ChevronDown, Globe } from "lucide-
 import logo from "@/assets/logo.png";
 
 const menuItems = [
-  { label: "عروض يوم التأسيس", href: "#" },
+  { label: "عروض رمضان المبارك", href: "#" },
   {
     label: "العطور",
     href: "#",
@@ -83,7 +83,7 @@ const StoreHeader = () => {
             </button>
           </div>
           <a href="/" className="flex items-center justify-center">
-            <img src={logo} alt="إبراق | IBRAQ Logo" className="h-12" />
+            <img src={logo} alt="ساكريكس | SAQRIX" className="h-12" />
           </a>
           <div className="flex items-center gap-3">
             <button className="text-store-primary" aria-label="بحث">
@@ -102,7 +102,7 @@ const StoreHeader = () => {
         <div className="container flex items-center justify-between py-3">
           <div className="flex items-center gap-6">
             <a href="/" className="shrink-0">
-              <img src={logo} alt="إبراق | IBRAQ Logo" className="h-12" />
+              <img src={logo} alt="ساكريكس | SAQRIX" className="h-12" />
             </a>
             <nav>
               <ul className="flex items-center gap-5 text-sm">
