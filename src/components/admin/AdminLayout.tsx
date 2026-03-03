@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Navigate, Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAdmin } from "@/hooks/useAdmin";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import {
   ShoppingCart,
   Package,
@@ -9,6 +12,7 @@ import {
   LogOut,
   Menu,
   X,
+  Lock,
 } from "lucide-react";
 
 const navItems = [
@@ -17,8 +21,91 @@ const navItems = [
   { to: "/admin/settings", icon: Settings, label: "الإعدادات" },
 ];
 
+function AdminLogin() {
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<"email" | "otp">("email");
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({ email: email.trim() });
+    if (error) {
+      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+    } else {
+      setStep("otp");
+      toast({ title: "تم إرسال رمز التحقق إلى بريدك" });
+    }
+    setLoading(false);
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp.trim()) return;
+    setLoading(true);
+    const { error } = await supabase.auth.verifyOtp({ email, token: otp.trim(), type: "email" });
+    if (error) {
+      toast({ title: "خطأ", description: "رمز التحقق غير صحيح", variant: "destructive" });
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-muted p-4" dir="rtl">
+      <div className="bg-card rounded-2xl border border-border p-8 w-full max-w-sm space-y-6">
+        <div className="text-center space-y-2">
+          <div className="w-12 h-12 bg-foreground/10 rounded-full flex items-center justify-center mx-auto">
+            <Lock className="w-6 h-6 text-foreground" />
+          </div>
+          <h1 className="text-xl font-bold text-foreground">لوحة التحكم</h1>
+          <p className="text-sm text-muted-foreground">سجل دخولك للمتابعة</p>
+        </div>
+
+        {step === "email" ? (
+          <form onSubmit={handleSendOtp} className="space-y-4">
+            <Input
+              type="email"
+              placeholder="البريد الإلكتروني"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              dir="ltr"
+              className="text-center"
+            />
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "جاري الإرسال..." : "إرسال رمز التحقق"}
+            </Button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerify} className="space-y-4">
+            <p className="text-sm text-center text-muted-foreground">أدخل رمز التحقق المرسل إلى</p>
+            <p className="text-sm text-center font-medium" dir="ltr">{email}</p>
+            <Input
+              type="text"
+              placeholder="رمز التحقق"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              dir="ltr"
+              className="text-center tracking-widest"
+              maxLength={8}
+            />
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "جاري التحقق..." : "تحقق"}
+            </Button>
+            <button type="button" onClick={() => setStep("email")} className="w-full text-sm text-muted-foreground hover:text-foreground">
+              تغيير البريد
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminLayout() {
-  const { isAdmin, loading } = useAdmin();
+  const { isAdmin, loading, isAuthenticated } = useAdmin();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
@@ -30,8 +117,23 @@ export default function AdminLayout() {
     );
   }
 
+  if (!isAuthenticated) {
+    return <AdminLogin />;
+  }
+
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted p-4" dir="rtl">
+        <div className="bg-card rounded-2xl border border-border p-8 text-center space-y-4 max-w-sm">
+          <Lock className="w-12 h-12 text-destructive mx-auto" />
+          <h2 className="text-lg font-bold text-foreground">غير مصرح</h2>
+          <p className="text-sm text-muted-foreground">ليس لديك صلاحية الوصول للوحة التحكم</p>
+          <Button variant="outline" onClick={() => { supabase.auth.signOut(); }}>
+            تسجيل الخروج
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   const handleLogout = async () => {
