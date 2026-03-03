@@ -1,8 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Heart, Share2, CheckCircle, Minus, Plus, ShoppingCart } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import LoginModal from "@/components/LoginModal";
 import CheckoutModal from "@/components/CheckoutModal";
-import productImage from "@/assets/product-main.jpg";
+import fallbackImage from "@/assets/product-main.jpg";
 import SaveBadge from "@/components/SaveBadge";
 import barcodeIcon from "@/assets/barcode-icon.png";
 import applePayIcon from "@/assets/apple_pay_mini.avif";
@@ -17,11 +18,52 @@ const SarIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 );
 
+type Product = {
+  id: string;
+  name_ar: string;
+  description_ar: string | null;
+  price: number;
+  compare_at_price: number | null;
+  inventory: number;
+  sku: string | null;
+  status: string;
+};
+
 const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showLoginSheet, setShowLoginSheet] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [productImage, setProductImage] = useState<string>(fallbackImage);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      // Fetch the first active product
+      const { data } = await supabase
+        .from("products")
+        .select("*")
+        .eq("status", "active")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (data) {
+        setProduct(data as Product);
+        // Fetch main image
+        const { data: imgs } = await supabase
+          .from("product_images")
+          .select("url")
+          .eq("product_id", data.id)
+          .eq("is_main", true)
+          .maybeSingle();
+        if (imgs?.url) setProductImage(imgs.url);
+      }
+      setLoading(false);
+    })();
+  }, []);
 
   const handleBuyNow = useCallback(() => {
     const hasProfile = localStorage.getItem("customer_first_name") && localStorage.getItem("customer_phone");
@@ -34,10 +76,53 @@ const ProductDetails = () => {
 
   const handleLoginSuccess = useCallback((email: string) => {
     setShowLoginSheet(false);
-    // After login+registration, open checkout
     setShowCheckout(true);
   }, []);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 animate-pulse">
+        <div className="lg:w-1/2 h-80 bg-muted rounded-md" />
+        <div className="lg:w-1/2 space-y-4">
+          <div className="h-8 bg-muted rounded w-1/2" />
+          <div className="h-6 bg-muted rounded w-1/3" />
+          <div className="h-20 bg-muted rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback to hardcoded values if no product in DB
+  const name = product?.name_ar || "باقة المسك";
+  const price = product?.price ?? 222;
+  const compareAtPrice = product?.compare_at_price ?? 1119;
+  const savings = compareAtPrice > price ? compareAtPrice - price : 0;
+  const skuCode = product?.sku || "7287120302040";
+  const inStock = product ? product.inventory > 0 : true;
+  const description = product?.description_ar || null;
+
+  // Parse description into structured content
+  const renderDescription = () => {
+    if (!description) {
+      // Fallback hardcoded description
+      return (
+        <>
+          <p className="font-bold mb-2">مجموعة متكاملة صُممت خصيصًا لعشّاق المسك.</p>
+          <p className="mb-2">تمزج بين النعومة والانتعاش والنقاء، لتمنحك إحساسًا دائمًا بالنظافة والصفاء</p>
+          <p className="mb-2">تشمل عطور مسك أيقونية بأحجام كاملة، ومجموعة مني عملية، إضافة إلى زيوت مسك مركّزة لعشّاق العطور العميقة، مما يجعلها مثالية للاستخدام اليومي، للتنسيق العطري، أو كهدية أنيقة وراقية.</p>
+        </>
+      );
+    }
+    // Render DB description as paragraphs
+    return description.split("\n").map((line, i) => {
+      if (!line.trim()) return null;
+      if (line.startsWith("•")) {
+        return <li key={i} className="mr-4">{line.replace("•", "").trim()}</li>;
+      }
+      // Check if next lines are bullets
+      return <p key={i} className={`${line.includes(":") ? "font-bold mt-3" : ""} mb-1`}>{line}</p>;
+    });
+  };
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
@@ -46,7 +131,7 @@ const ProductDetails = () => {
         <div className="relative rounded-md overflow-hidden bg-secondary">
           <img
             src={productImage}
-            alt="باقة المسك"
+            alt={name}
             className="w-full h-auto object-contain"
           />
           <div className="absolute top-4 left-4 flex gap-2 z-10">
@@ -70,25 +155,27 @@ const ProductDetails = () => {
       {/* Product Info */}
       <div className="lg:w-1/2">
         <h1 className="text-xl md:text-2xl font-bold text-store-primary leading-10">
-          باقة المسك
+          {name}
         </h1>
 
         {/* Price */}
         <div className="flex items-center gap-4 my-2 flex-wrap">
-          <span className="font-bold text-xl text-sale flex items-center gap-1">222 ر.س</span>
-          <span className="text-store-secondary line-through flex items-center gap-1">1,119 ر.س</span>
-          <SaveBadge amount={897} />
+          <span className="font-bold text-xl text-sale flex items-center gap-1">{price} ر.س</span>
+          {compareAtPrice > price && (
+            <span className="text-store-secondary line-through flex items-center gap-1">{compareAtPrice.toLocaleString()} ر.س</span>
+          )}
+          {savings > 0 && <SaveBadge amount={savings} />}
         </div>
 
         <small className="text-store-secondary mb-3 block text-sm">السعر شامل الضريبة</small>
 
         {/* Availability */}
-        <div className="flex items-center gap-1.5 mb-5 text-green-600">
+        <div className={`flex items-center gap-1.5 mb-5 ${inStock ? "text-green-600" : "text-red-500"}`}>
           <span className="relative flex items-center justify-center">
-            <span className="absolute w-5 h-5 rounded-full bg-green-500/40 animate-availability-ping" />
+            {inStock && <span className="absolute w-5 h-5 rounded-full bg-green-500/40 animate-availability-ping" />}
             <CheckCircle className="w-5 h-5 relative z-10" />
           </span>
-          <span className="text-sm">متوفر</span>
+          <span className="text-sm">{inStock ? "متوفر" : "غير متوفر"}</span>
         </div>
 
         {/* Description */}
@@ -98,39 +185,7 @@ const ProductDetails = () => {
               showFullDescription ? "max-h-[2000px]" : "max-h-[84px]"
             }`}
           >
-            <p className="font-bold mb-2">مجموعة متكاملة صُممت خصيصًا لعشّاق المسك.</p>
-            <p className="mb-2">
-              تمزج بين النعومة والانتعاش والنقاء، لتمنحك إحساسًا دائمًا بالنظافة والصفاء
-            </p>
-            <p className="mb-2">
-              تشمل عطور مسك أيقونية بأحجام كاملة، ومجموعة مني عملية، إضافة إلى زيوت مسك مركّزة لعشّاق العطور العميقة، مما يجعلها مثالية للاستخدام اليومي، للتنسيق العطري، أو كهدية أنيقة وراقية.
-            </p>
-
-            <p className="font-bold mt-4 mb-2">العطور الرئيسية (75 مل):</p>
-            <ul className="list-disc pr-5 mb-4 space-y-1">
-              <li>مسك خاص</li>
-              <li>مسك باودر</li>
-              <li>مسك عبق الرمان</li>
-              <li>مسك الفجر</li>
-            </ul>
-
-            <p className="font-bold mb-2">مجموعة ميني مسك (10 مل):</p>
-            <ul className="list-disc pr-5 mb-4 space-y-1">
-              <li>مسك خاص</li>
-              <li>مسك باودر</li>
-              <li>مسك عبق الرمان</li>
-              <li>مسك البلوبيري</li>
-              <li>مسك الشمس</li>
-              <li>مسك الفجر</li>
-            </ul>
-
-            <p className="font-bold mb-2">مجموعة زيوت المسك (4 × 6 مل):</p>
-            <ul className="list-disc pr-5 space-y-1">
-              <li>مسك الفجر</li>
-              <li>مسك الشمس</li>
-              <li>مسك القمر</li>
-              <li>مسك الليل</li>
-            </ul>
+            {renderDescription()}
           </article>
           <button
             onClick={() => setShowFullDescription(!showFullDescription)}
@@ -147,7 +202,7 @@ const ProductDetails = () => {
               <img src={barcodeIcon} alt="باركود" className="w-5 h-5" />
               <span>رقم الموديل</span>
             </span>
-            <span className="text-xs text-store-secondary">7287120302040</span>
+            <span className="text-xs text-store-secondary">{skuCode}</span>
           </div>
         </section>
 
@@ -159,12 +214,10 @@ const ProductDetails = () => {
           <img src={codIcon} alt="الدفع عند الاستلام" className="h-8" />
           <img src={sbcIcon} alt="SBC" className="h-8" />
         </section>
-
       </div>
 
       {/* Sticky Mobile Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border lg:hidden">
-        {/* Quantity Row */}
         <div className="flex items-center border-b border-border">
           <button
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -182,7 +235,6 @@ const ProductDetails = () => {
             <Plus className="w-4 h-4" />
           </button>
         </div>
-        {/* Action Buttons Row */}
         <div className="flex gap-2 px-2 py-2">
           <button onClick={handleBuyNow} className="flex-1 py-2.5 bg-foreground text-background font-normal text-[11px] flex items-center justify-center gap-2">
             <ShoppingCart className="w-3.5 h-3.5" />
@@ -198,21 +250,18 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      {/* Spacer for sticky bar on mobile */}
       <div className="h-24 lg:hidden" />
 
-      {/* Login Modal */}
       <LoginModal
         open={showLoginSheet}
         onClose={() => setShowLoginSheet(false)}
         onSuccess={handleLoginSuccess}
       />
 
-      {/* Checkout Modal */}
       <CheckoutModal
         open={showCheckout}
         onClose={() => setShowCheckout(false)}
-        totalAmount={222}
+        totalAmount={price}
       />
     </div>
   );
