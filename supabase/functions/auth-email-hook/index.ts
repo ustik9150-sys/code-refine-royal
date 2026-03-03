@@ -16,9 +16,9 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'تأكيد البريد الإلكتروني - ساكريكس',
+  signup: 'رمز التحقق - ساكريكس',
   invite: 'تمت دعوتك للانضمام إلى ساكريكس',
-  magiclink: 'رابط تسجيل الدخول - ساكريكس',
+  magiclink: 'رمز التحقق - ساكريكس',
   recovery: 'إعادة تعيين كلمة المرور - ساكريكس',
   email_change: 'تأكيد تغيير البريد الإلكتروني - ساكريكس',
   reauthentication: 'رمز التحقق - ساكريكس',
