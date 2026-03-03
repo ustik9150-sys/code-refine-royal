@@ -14,6 +14,271 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action_type: string
+          admin_id: string
+          after_snapshot: Json | null
+          before_snapshot: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action_type: string
+          admin_id: string
+          after_snapshot?: Json | null
+          before_snapshot?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string
+          after_snapshot?: Json | null
+          before_snapshot?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          id: string
+          notes: string | null
+          order_number: number
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          shipping_cost: number
+          shipping_method: Database["public"]["Enums"]["shipping_method"]
+          status: Database["public"]["Enums"]["order_status"]
+          subtotal: number
+          total: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          id?: string
+          notes?: string | null
+          order_number?: number
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          shipping_cost?: number
+          shipping_method?: Database["public"]["Enums"]["shipping_method"]
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          notes?: string | null
+          order_number?: number
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          shipping_cost?: number
+          shipping_method?: Database["public"]["Enums"]["shipping_method"]
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      product_images: {
+        Row: {
+          created_at: string
+          id: string
+          is_main: boolean
+          product_id: string
+          sort_order: number
+          storage_path: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_main?: boolean
+          product_id: string
+          sort_order?: number
+          storage_path?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_main?: boolean
+          product_id?: string
+          sort_order?: number
+          storage_path?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_revisions: {
+        Row: {
+          admin_id: string
+          created_at: string
+          id: string
+          product_id: string
+          snapshot: Json
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          id?: string
+          product_id: string
+          snapshot: Json
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_revisions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category: string | null
+          compare_at_price: number | null
+          cost: number | null
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          id: string
+          inventory: number
+          name_ar: string
+          name_en: string | null
+          price: number
+          sku: string | null
+          status: string
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          compare_at_price?: number | null
+          cost?: number | null
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          id?: string
+          inventory?: number
+          name_ar: string
+          name_en?: string | null
+          price?: number
+          sku?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          compare_at_price?: number | null
+          cost?: number | null
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          id?: string
+          inventory?: number
+          name_ar?: string
+          name_en?: string | null
+          price?: number
+          sku?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           country_code: string | null
@@ -50,15 +315,75 @@ export type Database = {
         }
         Relationships: []
       }
+      store_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "shipped"
+        | "delivered"
+        | "cancelled"
+        | "refunded"
+      payment_method: "cod" | "bank_transfer" | "apple_pay" | "card"
+      shipping_method: "standard" | "express"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -185,6 +510,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      order_status: [
+        "pending",
+        "confirmed",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "refunded",
+      ],
+      payment_method: ["cod", "bank_transfer", "apple_pay", "card"],
+      shipping_method: ["standard", "express"],
+    },
   },
 } as const
