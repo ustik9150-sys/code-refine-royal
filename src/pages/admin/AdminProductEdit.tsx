@@ -88,6 +88,16 @@ export default function AdminProductEdit() {
   const [uploading, setUploading] = useState(false);
   const [tagInput, setTagInput] = useState("");
 
+  const addTag = () => {
+    const val = tagInput.trim();
+    if (!val) return;
+    const arr = tags.split(",").map((t) => t.trim()).filter(Boolean);
+    if (!arr.includes(val)) {
+      setTags([...arr, val].join(", "));
+    }
+    setTagInput("");
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -144,7 +154,7 @@ export default function AdminProductEdit() {
       inventory: parseInt(inventory) || 0,
       sku: sku.trim() || null,
       category: category.trim() || null,
-      tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : null,
+      tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
       status: publish ? "active" : isActive ? "active" : "draft",
     };
 
@@ -392,17 +402,19 @@ export default function AdminProductEdit() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  const val = tagInput.trim();
-                  if (val) {
-                    const arr = tags.split(",").map((t) => t.trim()).filter(Boolean);
-                    if (!arr.includes(val)) {
-                      setTags([...arr, val].join(", "));
-                    }
-                    setTagInput("");
-                  }
+                  addTag();
                 }
               }}
             />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addTag}
+              disabled={!tagInput.trim()}
+            >
+              إضافة
+            </Button>
           </div>
         </div>
 
