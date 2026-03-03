@@ -14,8 +14,7 @@ interface CheckoutModalProps {
 
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmount = 222 }) => {
   const [shippingAddress, setShippingAddress] = useState("");
-  const [shippingCompany, setShippingCompany] = useState("saqrix");
-  const [errors, setErrors] = useState<{ address?: string; company?: string }>({});
+  const [errors, setErrors] = useState<{ address?: string }>({});
   const [orderComplete, setOrderComplete] = useState(false);
 
   const firstName = localStorage.getItem("customer_first_name") || "";
@@ -42,7 +41,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
   const handleSubmit = useCallback(() => {
     const errs: typeof errors = {};
     if (!shippingAddress) errs.address = "يرجى اختيار عنوان الشحن";
-    if (!shippingCompany) errs.company = "يرجى اختيار شركة الشحن";
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -52,14 +50,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
       detail: {
         paymentMethod: "cod",
         shippingAddress,
-        shippingCompany,
+        shippingCompany: "saqrix",
         total: totalAmount,
         firstName,
         lastName,
       },
     }));
     setOrderComplete(true);
-  }, [shippingAddress, shippingCompany, totalAmount, firstName, lastName]);
+  }, [shippingAddress, totalAmount, firstName, lastName]);
 
   if (!open) return null;
 
@@ -162,30 +160,18 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
                 {errors.address && <p className="text-destructive text-xs mt-1">{errors.address}</p>}
               </div>
 
-              {/* ── Shipping Company ── */}
+              {/* ── Shipping Company – Saqrix Only ── */}
               <div className="space-y-2">
                 <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <img src={shippingIcon} alt="" className="w-5 h-5" />
                   <span>شركة الشحن</span>
                 </h3>
-                <div className="relative">
-                  <select
-                    value={shippingCompany}
-                    onChange={(e) => { setShippingCompany(e.target.value); setErrors((er) => ({ ...er, company: undefined })); }}
-                    className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
-                  >
-                    <option value="">اختر شركة الشحن</option>
-                    <option value="saqrix">Saqrix</option>
-                    <option value="aramex">أرامكس</option>
-                    <option value="smsa">SMSA</option>
-                    <option value="dhl">DHL</option>
-                  </select>
-                  <ChevronDown className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <div className="border-2 border-foreground rounded-lg px-4 py-3 flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full border-2 border-foreground flex items-center justify-center flex-shrink-0">
+                    <div className="w-2.5 h-2.5 rounded-full bg-foreground" />
+                  </div>
+                  <span className="text-sm font-medium text-foreground flex-1">Saqrix Shipping (Standard)</span>
                 </div>
-                {!shippingAddress && (
-                  <p className="text-xs text-muted-foreground">يرجى اختيار عنوان الشحن أولاً لعرض شركات الشحن المتاحة</p>
-                )}
-                {errors.company && <p className="text-destructive text-xs mt-1">{errors.company}</p>}
               </div>
 
               {/* ── Payment Method – COD Only ── */}
