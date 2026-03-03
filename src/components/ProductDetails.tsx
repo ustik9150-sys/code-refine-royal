@@ -93,7 +93,7 @@ const ProductDetails = () => {
     setAntibotError(false);
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-product-description`,
+        "https://foubanzluqitdntcnzbi.supabase.co/functions/v1/get-product-description",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
