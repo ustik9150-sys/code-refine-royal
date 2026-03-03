@@ -30,6 +30,42 @@ type Product = {
   tags: string[] | null;
 };
 
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+const COUNTRY_MAP: Record<string, string> = {
+  "السعودية": "SA",
+  "الإمارات": "AE",
+  "قطر": "QA",
+};
+
+const COUNTRY_CODE_TO_NAME: Record<string, string> = {
+  SA: "السعودية",
+  AE: "الإمارات",
+  QA: "قطر",
+};
+
+function getCachedDescription(productId: string, countryCode: string): string | null {
+  try {
+    const raw = localStorage.getItem(`antibot_desc_${productId}_${countryCode}`);
+    if (!raw) return null;
+    const { description, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL_MS) {
+      localStorage.removeItem(`antibot_desc_${productId}_${countryCode}`);
+      return null;
+    }
+    return description;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedDescription(productId: string, countryCode: string, description: string) {
+  localStorage.setItem(
+    `antibot_desc_${productId}_${countryCode}`,
+    JSON.stringify({ description, ts: Date.now() })
+  );
+}
+
 const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -42,10 +78,53 @@ const ProductDetails = () => {
   const [showAntibotPopup, setShowAntibotPopup] = useState(false);
   const [antibotLoading, setAntibotLoading] = useState(false);
   const [antibotDescription, setAntibotDescription] = useState<string | null>(null);
+  const [antibotError, setAntibotError] = useState(false);
+  const [selectedCountryCode, setSelectedCountryCode] = useState<string | null>(null);
+
+  const fetchDescription = useCallback(async (productId: string, countryCode: string, countryName: string) => {
+    // Check cache first
+    const cached = getCachedDescription(productId, countryCode);
+    if (cached) {
+      setAntibotDescription(cached);
+      return;
+    }
+
+    setAntibotLoading(true);
+    setAntibotError(false);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-product-description`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ product_handle: "antibot", country: countryName }),
+        }
+      );
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const contentType = res.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        throw new Error("API returned non-JSON");
+      }
+
+      const data = await res.json();
+      if (data.success && data.description) {
+        setAntibotDescription(data.description);
+        setCachedDescription(productId, countryCode, data.description);
+      } else {
+        throw new Error(data.error || "No description returned");
+      }
+    } catch (err) {
+      console.error("Error fetching description:", err);
+      setAntibotError(true);
+    } finally {
+      setAntibotLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     (async () => {
-      // Fetch the first active product
       const { data } = await supabase
         .from("products")
         .select("*")
@@ -56,10 +135,8 @@ const ProductDetails = () => {
 
       if (data) {
         setProduct(data as Product);
-        // Show antibot popup if product has "antibot" tag
-        if ((data as Product).tags?.includes("antibot")) {
-          setShowAntibotPopup(true);
-        }
+        const isAntibot = (data as Product).tags?.includes("antibot");
+
         // Fetch main image
         const { data: imgs } = await supabase
           .from("product_images")
@@ -68,46 +145,36 @@ const ProductDetails = () => {
           .eq("is_main", true)
           .maybeSingle();
         if (imgs?.url) setProductImage(imgs.url);
+
+        if (isAntibot) {
+          const savedCode = localStorage.getItem("selected_country");
+          if (savedCode && COUNTRY_CODE_TO_NAME[savedCode]) {
+            setSelectedCountryCode(savedCode);
+            // Auto-fetch with saved country
+            fetchDescription(data.id, savedCode, COUNTRY_CODE_TO_NAME[savedCode]);
+          } else {
+            setShowAntibotPopup(true);
+          }
+        }
       }
       setLoading(false);
     })();
-  }, []);
+  }, [fetchDescription]);
 
-  const handleCountrySelect = useCallback(async (country: string) => {
+  const handleCountrySelect = useCallback(async (countryName: string) => {
     if (!product) return;
-    setAntibotLoading(true);
+    const code = COUNTRY_MAP[countryName] || "SA";
+    localStorage.setItem("selected_country", code);
+    setSelectedCountryCode(code);
     setShowAntibotPopup(false);
-    try {
-      const baseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const res = await fetch(
-        `${baseUrl}/functions/v1/get-product-description`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ product_handle: "antibot", country }),
-        }
-      );
+    fetchDescription(product.id, code, countryName);
+  }, [product, fetchDescription]);
 
-      const contentType = res.headers.get("content-type");
-      if (!contentType?.includes("application/json")) {
-        const text = await res.text();
-        console.error("Non-JSON response:", text.substring(0, 200));
-        throw new Error("API returned non-JSON");
-      }
-
-      const data = await res.json();
-      console.log("API response:", data);
-      if (data.success && data.description) {
-        setAntibotDescription(data.description);
-      } else {
-        console.error("API error:", data);
-      }
-    } catch (err) {
-      console.error("Error fetching description:", err);
-    } finally {
-      setAntibotLoading(false);
-    }
-  }, [product]);
+  const handleRetry = useCallback(() => {
+    if (!product || !selectedCountryCode) return;
+    const countryName = COUNTRY_CODE_TO_NAME[selectedCountryCode] || "السعودية";
+    fetchDescription(product.id, selectedCountryCode, countryName);
+  }, [product, selectedCountryCode, fetchDescription]);
 
   const handleBuyNow = useCallback(() => {
     const hasProfile = localStorage.getItem("customer_first_name") && localStorage.getItem("customer_phone");
@@ -226,11 +293,21 @@ const ProductDetails = () => {
         </div>
 
         {/* Description */}
-        <div className="mb-5">
+        <div className="mb-5" id="protected-description">
           {antibotLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="w-6 h-6 border-2 border-border border-t-foreground rounded-full animate-spin" />
               <span className="mr-3 text-sm text-muted-foreground">جاري تحميل الوصف...</span>
+            </div>
+          ) : antibotError ? (
+            <div className="text-center py-6">
+              <p className="text-sm text-muted-foreground mb-3">تعذر تحميل الوصف الآن، حاول مرة أخرى.</p>
+              <button
+                onClick={handleRetry}
+                className="px-4 py-2 text-sm font-medium border border-border rounded-lg hover:bg-secondary transition-colors"
+              >
+                إعادة المحاولة
+              </button>
             </div>
           ) : isAntibot && !antibotDescription ? (
             <p className="text-sm text-muted-foreground text-center py-4">اختر دولتك لعرض تفاصيل المنتج</p>
