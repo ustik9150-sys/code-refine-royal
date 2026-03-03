@@ -1,6 +1,7 @@
 import React from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { FileText, Mail, Phone } from "lucide-react";
+import celebrationSvg from "@/assets/celebration.svg";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
 
@@ -20,33 +21,7 @@ const ThankYou: React.FC = () => {
         <section className="bg-muted/40 py-12 px-6 text-center space-y-5">
           {/* Celebration Illustration */}
           <div className="flex justify-center">
-            <svg width="160" height="140" viewBox="0 0 160 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Streamers */}
-              <path d="M80 90 C75 60, 65 40, 60 20" stroke="#222" strokeWidth="4" strokeLinecap="round" fill="none" />
-              <path d="M80 90 C85 55, 90 35, 95 15" stroke="#222" strokeWidth="4" strokeLinecap="round" fill="none" />
-              <path d="M80 90 C70 70, 55 55, 45 45" stroke="#222" strokeWidth="3" strokeLinecap="round" fill="none" />
-              <path d="M80 90 C90 65, 100 50, 115 40" stroke="#222" strokeWidth="3" strokeLinecap="round" fill="none" />
-              {/* Stars */}
-              <polygon points="60,15 63,25 73,25 65,31 68,41 60,35 52,41 55,31 47,25 57,25" fill="#F5A623" />
-              <polygon points="105,10 107,17 114,17 108,22 110,29 105,25 100,29 102,22 96,17 103,17" fill="#F5A623" />
-              <polygon points="120,35 122,40 127,40 123,44 124,49 120,46 116,49 117,44 113,40 118,40" fill="#222" />
-              {/* Dots and flowers */}
-              <circle cx="40" cy="55" r="5" fill="#E85D75" />
-              <circle cx="35" cy="70" r="3" fill="#E85D75" />
-              <circle cx="50" cy="40" r="4" fill="#F5A623" />
-              <circle cx="125" cy="55" r="4" fill="#4ECDC4" />
-              <circle cx="130" cy="70" r="3" fill="#F5A623" />
-              <circle cx="45" cy="80" r="3" fill="#4ECDC4" />
-              {/* Small flower shapes */}
-              <circle cx="30" cy="85" r="4" fill="#E85D75" />
-              <circle cx="26" cy="85" r="2.5" fill="#FFB6C1" />
-              <circle cx="34" cy="85" r="2.5" fill="#FFB6C1" />
-              <circle cx="30" cy="81" r="2.5" fill="#FFB6C1" />
-              <circle cx="30" cy="89" r="2.5" fill="#FFB6C1" />
-              <circle cx="135" cy="80" r="4" fill="#F5A623" />
-              <circle cx="50" cy="68" r="2" fill="#4ECDC4" />
-              <circle cx="110" cy="65" r="2" fill="#E85D75" />
-            </svg>
+            <img src={celebrationSvg} alt="احتفال" className="w-40 h-auto" />
           </div>
 
           <h1 className="text-xl font-bold text-foreground leading-relaxed">
