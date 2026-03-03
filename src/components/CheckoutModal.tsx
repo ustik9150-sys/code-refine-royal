@@ -41,7 +41,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
 
   const handleSubmit = useCallback(() => {
     const errs: typeof errors = {};
-    if (!shippingAddress) errs.address = "يرجى اختيار عنوان الشحن";
+    if (!shippingAddress || shippingAddress.trim().length < 2) errs.address = "يرجى كتابة اسم المدينة (حرفين على الأقل)";
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -134,30 +134,25 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
                 </button>
               </div>
 
-              {/* ── Shipping Address ── */}
+              {/* ── Shipping Address – City ── */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <img src={locationIcon} alt="" className="w-5 h-5" />
-                    <span>عنوان الشحن</span>
-                  </h3>
-                  <button className="text-sm text-teal-600 flex items-center gap-1 hover:underline">
-                    <span className="text-base leading-none">+</span>
-                    <span>عنوان جديد</span>
-                  </button>
-                </div>
-                <div className="relative">
-                  <select
-                    value={shippingAddress}
-                    onChange={(e) => { setShippingAddress(e.target.value); setErrors((er) => ({ ...er, address: undefined })); }}
-                    className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
-                  >
-                    <option value="">لا توجد لديك عناوين شحن مسجلة...</option>
-                    <option value="home">المنزل - الرياض</option>
-                    <option value="work">العمل - جدة</option>
-                  </select>
-                  <ChevronDown className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <img src={locationIcon} alt="" className="w-5 h-5" />
+                  <span>عنوان الشحن</span>
+                </h3>
+                <label className="text-sm font-medium text-foreground">المدينة</label>
+                <input
+                  type="text"
+                  value={shippingAddress}
+                  onChange={(e) => { setShippingAddress(e.target.value); setErrors((er) => ({ ...er, address: undefined })); }}
+                  placeholder="اكتب اسم المدينة"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="words"
+                  spellCheck={false}
+                  className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
+                />
+                <p className="text-xs text-muted-foreground">اكتب اسم المدينة يدويًا بدون اختيار من قائمة</p>
                 {errors.address && <p className="text-destructive text-xs mt-1">{errors.address}</p>}
               </div>
 
