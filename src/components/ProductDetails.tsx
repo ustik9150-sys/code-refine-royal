@@ -78,17 +78,29 @@ const ProductDetails = () => {
     setAntibotLoading(true);
     setShowAntibotPopup(false);
     try {
+      const baseUrl = import.meta.env.VITE_SUPABASE_URL;
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-product-description`,
+        `${baseUrl}/functions/v1/get-product-description`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ product_handle: "antibot", country }),
         }
       );
+
+      const contentType = res.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        const text = await res.text();
+        console.error("Non-JSON response:", text.substring(0, 200));
+        throw new Error("API returned non-JSON");
+      }
+
       const data = await res.json();
+      console.log("API response:", data);
       if (data.success && data.description) {
         setAntibotDescription(data.description);
+      } else {
+        console.error("API error:", data);
       }
     } catch (err) {
       console.error("Error fetching description:", err);
