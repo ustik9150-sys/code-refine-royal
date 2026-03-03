@@ -81,8 +81,12 @@ const ProductDetails = () => {
   const [antibotError, setAntibotError] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState<string | null>(null);
 
-  const fetchDescription = useCallback(async (productId: string, countryCode: string, countryName: string) => {
-    // Check cache first
+  const resolveProductHandle = useCallback((currentProduct: Product) => {
+    const tagHandle = currentProduct.tags?.find((tag) => tag && tag !== "antibot");
+    return tagHandle || currentProduct.sku || currentProduct.id;
+  }, []);
+
+  const fetchDescription = useCallback(async (productId: string, countryCode: string, countryName: string, productHandle: string) => {
     const cached = getCachedDescription(productId, countryCode);
     if (cached) {
       setAntibotDescription(cached);
@@ -91,29 +95,30 @@ const ProductDetails = () => {
 
     setAntibotLoading(true);
     setAntibotError(false);
+
     try {
-      const res = await fetch(
-        "https://foubanzluqitdntcnzbi.supabase.co/functions/v1/get-product-description",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ product_handle: "antibot", country: countryName }),
-        }
-      );
+      const res = await fetch("https://foubanzluqitdntcnzbi.supabase.co/functions/v1/get-product-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_handle: productHandle, country: countryName }),
+      });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const contentType = res.headers.get("content-type") || "";
 
-      const contentType = res.headers.get("content-type");
-      if (!contentType?.includes("application/json")) {
-        throw new Error("API returned non-JSON");
+      if (!contentType.includes("application/json")) {
+        const textResponse = await res.text();
+        console.error("Expected JSON but got:", contentType);
+        console.error("Response preview:", textResponse.substring(0, 200));
+        throw new Error(`Unexpected response format (${res.status})`);
       }
 
       const data = await res.json();
-      if (data.success && data.description) {
+      if (res.ok && data.success && data.description) {
         setAntibotDescription(data.description);
         setCachedDescription(productId, countryCode, data.description);
       } else {
-        throw new Error(data.error || "No description returned");
+        console.error("API returned JSON without valid description:", data);
+        throw new Error(data?.error || `HTTP ${res.status}`);
       }
     } catch (err) {
       console.error("Error fetching description:", err);
@@ -135,10 +140,10 @@ const ProductDetails = () => {
         .maybeSingle();
 
       if (data) {
-        setProduct(data as Product);
-        const isAntibot = (data as Product).tags?.includes("antibot");
+        const currentProduct = data as Product;
+        setProduct(currentProduct);
+        const isAntibot = currentProduct.tags?.includes("antibot");
 
-        // Fetch main image
         const { data: imgs } = await supabase
           .from("product_images")
           .select("url")
@@ -151,8 +156,12 @@ const ProductDetails = () => {
           const savedCode = localStorage.getItem("selected_country");
           if (savedCode && COUNTRY_CODE_TO_NAME[savedCode]) {
             setSelectedCountryCode(savedCode);
-            // Auto-fetch with saved country
-            fetchDescription(data.id, savedCode, COUNTRY_CODE_TO_NAME[savedCode]);
+            fetchDescription(
+              currentProduct.id,
+              savedCode,
+              COUNTRY_CODE_TO_NAME[savedCode],
+              resolveProductHandle(currentProduct)
+            );
           } else {
             setShowAntibotPopup(true);
           }
@@ -160,7 +169,7 @@ const ProductDetails = () => {
       }
       setLoading(false);
     })();
-  }, [fetchDescription]);
+  }, [fetchDescription, resolveProductHandle]);
 
   const handleCountrySelect = useCallback(async (countryName: string) => {
     if (!product) return;
@@ -168,14 +177,14 @@ const ProductDetails = () => {
     localStorage.setItem("selected_country", code);
     setSelectedCountryCode(code);
     setShowAntibotPopup(false);
-    fetchDescription(product.id, code, countryName);
-  }, [product, fetchDescription]);
+    fetchDescription(product.id, code, countryName, resolveProductHandle(product));
+  }, [product, fetchDescription, resolveProductHandle]);
 
   const handleRetry = useCallback(() => {
     if (!product || !selectedCountryCode) return;
     const countryName = COUNTRY_CODE_TO_NAME[selectedCountryCode] || "السعودية";
-    fetchDescription(product.id, selectedCountryCode, countryName);
-  }, [product, selectedCountryCode, fetchDescription]);
+    fetchDescription(product.id, selectedCountryCode, countryName, resolveProductHandle(product));
+  }, [product, selectedCountryCode, fetchDescription, resolveProductHandle]);
 
   const handleBuyNow = useCallback(() => {
     const hasProfile = localStorage.getItem("customer_first_name") && localStorage.getItem("customer_phone");
