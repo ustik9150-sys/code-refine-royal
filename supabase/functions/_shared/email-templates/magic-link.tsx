@@ -9,7 +9,6 @@ import {
   Heading,
   Html,
   Img,
-  Link,
   Preview,
   Section,
   Text,
@@ -18,6 +17,8 @@ import {
 interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
+  token: string
+  recipient: string
 }
 
 const LOGO_URL = 'https://bmgdbottgxfeqoxgslzr.supabase.co/storage/v1/object/public/email-assets/logo.png'
@@ -25,10 +26,12 @@ const LOGO_URL = 'https://bmgdbottgxfeqoxgslzr.supabase.co/storage/v1/object/pub
 export const MagicLinkEmail = ({
   siteName,
   confirmationUrl,
+  token,
+  recipient,
 }: MagicLinkEmailProps) => (
   <Html lang="ar" dir="rtl">
     <Head />
-    <Preview>رابط تسجيل الدخول لحسابك في ساكريكس</Preview>
+    <Preview>رمز التحقق الخاص بك في ساكريكس</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={logoSection}>
@@ -36,16 +39,20 @@ export const MagicLinkEmail = ({
           <Text style={tagline}>شكرًا لاختيارك ساكريكس</Text>
         </Section>
 
-        <Heading style={h1}>رابط تسجيل الدخول 🔑</Heading>
+        <Heading style={h1}>تفضل رمز التحقق 🔑</Heading>
 
         <Text style={text}>
-          اضغط على الزر أدناه لتسجيل الدخول إلى حسابك في ساكريكس. هذا الرابط صالح لمرة واحدة وستنتهي صلاحيته قريبًا.
+          هذا الرمز صالح للاستخدام لمرة واحدة لتسجيل الدخول لحسابك بأمان
         </Text>
 
-        <Section style={ctaSection}>
-          <Link href={confirmationUrl} style={button}>
-            تسجيل الدخول
-          </Link>
+        <Section style={codeBox}>
+          <Text style={codeText}>{token}</Text>
+        </Section>
+
+        <Section style={noticeBox}>
+          <Text style={noticeText}>
+            ⚠️ تنتهي صلاحية هذا الرمز خلال 10 دقائق ويمكن استخدامه لمرة واحدة فقط.
+          </Text>
         </Section>
 
         <Text style={footer}>
@@ -66,16 +73,27 @@ const logo = { display: 'block', margin: '0 auto 15px' }
 const tagline = { color: '#b38a2e', fontWeight: '600' as const, fontSize: '16px', margin: '0', textAlign: 'center' as const }
 const h1 = { fontSize: '32px', fontWeight: '800' as const, color: '#1f2328', margin: '30px 0 10px', textAlign: 'center' as const }
 const text = { fontSize: '16px', color: '#555555', lineHeight: '26px', margin: '0 0 25px', textAlign: 'center' as const }
-const ctaSection = { textAlign: 'center' as const, margin: '30px 0' }
-const button = {
-  backgroundColor: '#1f2328',
-  color: '#ffffff',
-  fontSize: '14px',
-  fontWeight: '600' as const,
-  borderRadius: '8px',
-  padding: '14px 32px',
-  textDecoration: 'none',
-  display: 'inline-block',
+const codeBox = {
+  backgroundColor: '#f1f2f4',
+  borderRadius: '14px',
+  padding: '28px',
+  textAlign: 'center' as const,
+  margin: '30px 0 20px',
 }
+const codeText = {
+  fontSize: '44px',
+  fontWeight: '900' as const,
+  letterSpacing: '8px',
+  color: '#111111',
+  margin: '0',
+}
+const noticeBox = {
+  backgroundColor: '#eaf4ff',
+  borderRadius: '14px',
+  padding: '16px',
+  textAlign: 'center' as const,
+  margin: '0 0 20px',
+}
+const noticeText = { fontSize: '14px', color: '#1f3b57', margin: '0' }
 const footer = { fontSize: '13px', color: '#777777', margin: '30px 0 0', textAlign: 'center' as const }
 const copyright = { fontSize: '12px', color: '#999999', margin: '15px 0 0', textAlign: 'center' as const }
