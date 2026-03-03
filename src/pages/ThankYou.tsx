@@ -66,15 +66,15 @@ const ThankYou: React.FC = () => {
         {/* ── Customer Service ── */}
         <section className="bg-muted/30 mx-4 mb-6 rounded-xl py-8 px-6 text-center space-y-3">
           <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto">
-            <Phone className="w-6 h-6 text-muted-foreground" />
+            <Mail className="w-6 h-6 text-muted-foreground" />
           </div>
           <p className="text-sm font-semibold text-foreground">خدمة العملاء</p>
           <a
-            href="tel:+966566994244"
-            className="text-sm text-muted-foreground font-medium flex items-center justify-center gap-1.5"
+            href="mailto:inovad19@gmail.com"
+            className="text-sm text-muted-foreground font-medium"
             dir="ltr"
           >
-            +966566994244
+            inovad19@gmail.com
           </a>
         </section>
       </main>
