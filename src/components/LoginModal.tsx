@@ -517,18 +517,63 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
   const [email, setEmail] = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const sheetRef = useRef<HTMLDivElement>(null);
 
+  // Lock body scroll & setup visual viewport tracking
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+      document.body.style.top = `-${window.scrollY}px`;
       setStep("email");
       setEmail("");
       setEmailLoading(false);
       setEmailError("");
     } else {
+      const scrollY = document.body.style.top;
       document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.top = "";
+      window.scrollTo(0, parseInt(scrollY || "0") * -1);
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.top = "";
+    };
+  }, [open]);
+
+  // Visual Viewport handler for keyboard
+  useEffect(() => {
+    if (!open) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const update = () => {
+      document.documentElement.style.setProperty("--vvh", `${vv.height}px`);
+      // Also offset the sheet to stay at the bottom of visible viewport
+      if (sheetRef.current) {
+        sheetRef.current.style.bottom = `${window.innerHeight - vv.height - vv.offsetTop}px`;
+      }
+    };
+
+    const reset = () => {
+      document.documentElement.style.setProperty("--vvh", "90dvh");
+      if (sheetRef.current) {
+        sheetRef.current.style.bottom = "0px";
+      }
+    };
+
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+      reset();
+    };
   }, [open]);
 
   useEffect(() => {
@@ -605,9 +650,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
     <div className="fixed inset-0 z-[100]" dir="rtl">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div
+        ref={sheetRef}
         role="dialog"
         aria-modal="true"
-        className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl px-6 pt-5 pb-8"
+        className="login-modal-sheet"
         style={{ animation: "login-slide-up 300ms ease-out forwards" }}
       >
         {/* Close button */}
@@ -653,6 +699,26 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
         @keyframes login-slide-up {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
+        }
+        .login-modal-sheet {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: white;
+          border-top-left-radius: 1rem;
+          border-top-right-radius: 1rem;
+          padding: 1.25rem 1.5rem 2rem;
+          max-height: var(--vvh, 90dvh);
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+          will-change: transform;
+        }
+        .login-modal-sheet input,
+        .login-modal-sheet textarea,
+        .login-modal-sheet select {
+          font-size: 16px !important;
         }
       `}</style>
     </div>

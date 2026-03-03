@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { X, ChevronDown } from "lucide-react";
@@ -28,15 +28,59 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
   const firstName = localStorage.getItem("customer_first_name") || "";
   const lastName = localStorage.getItem("customer_last_name") || "";
 
+  const sheetRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+      document.body.style.top = `-${window.scrollY}px`;
       setErrors({});
       setOrderComplete(false);
     } else {
+      const scrollY = document.body.style.top;
       document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.top = "";
+      window.scrollTo(0, parseInt(scrollY || "0") * -1);
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.top = "";
+    };
+  }, [open]);
+
+  // Visual Viewport handler for keyboard
+  useEffect(() => {
+    if (!open) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const update = () => {
+      document.documentElement.style.setProperty("--vvh", `${vv.height}px`);
+      if (sheetRef.current) {
+        sheetRef.current.style.bottom = `${window.innerHeight - vv.height - vv.offsetTop}px`;
+      }
+    };
+
+    const reset = () => {
+      document.documentElement.style.setProperty("--vvh", "90dvh");
+      if (sheetRef.current) {
+        sheetRef.current.style.bottom = "0px";
+      }
+    };
+
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+      reset();
+    };
   }, [open]);
 
   useEffect(() => {
@@ -115,9 +159,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
 
       {/* Sheet */}
       <div
+        ref={sheetRef}
         role="dialog"
         aria-modal="true"
-        className="absolute bottom-0 inset-x-0 bg-background rounded-t-2xl max-h-[90vh] flex flex-col shadow-2xl"
+        className="checkout-modal-sheet"
         style={{ animation: "checkout-slide-up 300ms ease-out forwards" }}
       >
         {/* ── Header ── */}
@@ -259,6 +304,26 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
         @keyframes checkout-slide-up {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
+        }
+        .checkout-modal-sheet {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: hsl(var(--background));
+          border-top-left-radius: 1rem;
+          border-top-right-radius: 1rem;
+          max-height: var(--vvh, 90dvh);
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+          will-change: transform;
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+        .checkout-modal-sheet input,
+        .checkout-modal-sheet textarea,
+        .checkout-modal-sheet select {
+          font-size: 16px !important;
         }
       `}</style>
     </div>
