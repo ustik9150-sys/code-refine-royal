@@ -211,14 +211,31 @@ const ProductDetails = () => {
   const skuCode = product?.sku || "7287120302040";
   const inStock = product ? product.inventory > 0 : true;
   const isAntibot = product?.tags?.includes("antibot");
-  const description = isAntibot && antibotDescription
-    ? antibotDescription
-    : (!isAntibot ? (product?.description_ar || null) : null);
 
-  // Parse description into structured content
+  // Default description image (shown before country selection for antibot products)
+  const defaultDescriptionHtml = `<p><img src="https://cdn.shopify.com/s/files/1/0732/0833/2333/files/IMG_2995_1_1.png?v=1770241826" alt="" style="max-width:100%;height:auto;" /></p>`;
+
   const renderDescription = () => {
-    if (!description) {
-      // Fallback hardcoded description
+    if (isAntibot) {
+      // For antibot products: show API description if fetched, otherwise show default image
+      if (antibotDescription) {
+        return (
+          <div
+            dangerouslySetInnerHTML={{ __html: antibotDescription }}
+            className="prose prose-sm max-w-none rtl"
+          />
+        );
+      }
+      // Default: show image placeholder
+      return (
+        <div
+          dangerouslySetInnerHTML={{ __html: defaultDescriptionHtml }}
+        />
+      );
+    }
+    // Non-antibot: show DB description or hardcoded fallback
+    const desc = product?.description_ar;
+    if (!desc) {
       return (
         <>
           <p className="font-bold mb-2">مجموعة متكاملة صُممت خصيصًا لعشّاق المسك.</p>
@@ -227,13 +244,11 @@ const ProductDetails = () => {
         </>
       );
     }
-    // Render DB description as paragraphs
-    return description.split("\n").map((line, i) => {
+    return desc.split("\n").map((line, i) => {
       if (!line.trim()) return null;
       if (line.startsWith("•")) {
         return <li key={i} className="mr-4">{line.replace("•", "").trim()}</li>;
       }
-      // Check if next lines are bullets
       return <p key={i} className={`${line.includes(":") ? "font-bold mt-3" : ""} mb-1`}>{line}</p>;
     });
   };
@@ -309,23 +324,23 @@ const ProductDetails = () => {
                 إعادة المحاولة
               </button>
             </div>
-          ) : isAntibot && !antibotDescription ? (
-            <p className="text-sm text-muted-foreground text-center py-4">اختر دولتك لعرض تفاصيل المنتج</p>
           ) : (
             <>
               <article
                 className={`relative overflow-hidden transition-all duration-300 ${
-                  showFullDescription ? "max-h-[2000px]" : "max-h-[84px]"
+                  showFullDescription ? "max-h-[2000px]" : "max-h-[200px]"
                 }`}
               >
                 {renderDescription()}
               </article>
-              <button
-                onClick={() => setShowFullDescription(!showFullDescription)}
-                className="text-primary text-sm mt-2 hover:text-accent transition-colors font-medium"
-              >
-                {showFullDescription ? "عرض أقل" : "قراءة المزيد"}
-              </button>
+              {!isAntibot && (
+                <button
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                  className="text-primary text-sm mt-2 hover:text-accent transition-colors font-medium"
+                >
+                  {showFullDescription ? "عرض أقل" : "قراءة المزيد"}
+                </button>
+              )}
             </>
           )}
         </div>
