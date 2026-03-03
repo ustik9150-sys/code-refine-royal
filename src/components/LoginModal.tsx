@@ -553,18 +553,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
     if (!vv) return;
 
     const update = () => {
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      document.documentElement.style.setProperty("--kb", `${kb}px`);
       document.documentElement.style.setProperty("--vvh", `${vv.height}px`);
-      // Also offset the sheet to stay at the bottom of visible viewport
-      if (sheetRef.current) {
-        sheetRef.current.style.bottom = `${window.innerHeight - vv.height - vv.offsetTop}px`;
-      }
     };
 
     const reset = () => {
+      document.documentElement.style.setProperty("--kb", "0px");
       document.documentElement.style.setProperty("--vvh", "90dvh");
-      if (sheetRef.current) {
-        sheetRef.current.style.bottom = "0px";
-      }
     };
 
     vv.addEventListener("resize", update);
@@ -574,6 +570,21 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
       vv.removeEventListener("scroll", update);
       reset();
     };
+  }, [open]);
+
+  // Scroll focused input into view when keyboard opens
+  useEffect(() => {
+    if (!open) return;
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target?.tagName && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) {
+        setTimeout(() => {
+          target.scrollIntoView({ block: "center", behavior: "smooth" });
+        }, 300);
+      }
+    };
+    document.addEventListener("focusin", handleFocusIn);
+    return () => document.removeEventListener("focusin", handleFocusIn);
   }, [open]);
 
   useEffect(() => {
@@ -704,16 +715,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
           position: fixed;
           left: 0;
           right: 0;
-          bottom: 0;
+          bottom: var(--kb, 0px);
           background: white;
           border-top-left-radius: 1rem;
           border-top-right-radius: 1rem;
           padding: 1.25rem 1.5rem 2rem;
-          max-height: var(--vvh, 90dvh);
+          max-height: calc(var(--vvh, 90dvh));
           overflow-y: auto;
           -webkit-overflow-scrolling: touch;
-          padding-bottom: calc(2rem + env(safe-area-inset-bottom));
-          will-change: transform;
+          padding-bottom: calc(2rem + env(safe-area-inset-bottom) + var(--kb, 0px));
+          will-change: transform, bottom;
+          transition: bottom 0.15s ease-out;
         }
         .login-modal-sheet input,
         .login-modal-sheet textarea,
