@@ -86,6 +86,7 @@ export default function AdminProductEdit() {
   const [isActive, setIsActive] = useState(false);
   const [images, setImages] = useState<ProductImage[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [tagInput, setTagInput] = useState("");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -386,16 +387,18 @@ export default function AdminProductEdit() {
           <div className="flex gap-2">
             <Input
               placeholder="أضف وسم واضغط Enter"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  const val = (e.target as HTMLInputElement).value.trim();
+                  const val = tagInput.trim();
                   if (val) {
                     const arr = tags.split(",").map((t) => t.trim()).filter(Boolean);
                     if (!arr.includes(val)) {
                       setTags([...arr, val].join(", "));
                     }
-                    (e.target as HTMLInputElement).value = "";
+                    setTagInput("");
                   }
                 }
               }}
