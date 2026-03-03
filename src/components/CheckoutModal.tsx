@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { X, ChevronDown } from "lucide-react";
 import avatarMale from "@/assets/avatar_male.png";
+import saqrixLogo from "@/assets/saqrix-logo.png";
 import codIcon from "@/assets/cod-icon.png";
 import paymentMethodIcon from "@/assets/payment-method-icon.png";
 import shippingIcon from "@/assets/shipping-icon.svg";
@@ -171,6 +172,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
                     <div className="w-2.5 h-2.5 rounded-full bg-foreground" />
                   </div>
                   <span className="text-sm font-medium text-foreground flex-1">Saqrix Shipping (Standard)</span>
+                  <img src={saqrixLogo} alt="Saqrix" className="w-7 h-7 object-contain flex-shrink-0" />
                 </div>
               </div>
 
