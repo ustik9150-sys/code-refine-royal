@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, ChevronDown } from "lucide-react";
 import avatarMale from "@/assets/avatar_male.png";
 import saqrixLogo from "@/assets/saqrix-logo.png";
@@ -14,6 +15,7 @@ interface CheckoutModalProps {
 }
 
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmount = 222 }) => {
+  const navigate = useNavigate();
   const [shippingAddress, setShippingAddress] = useState("");
   const [errors, setErrors] = useState<{ address?: string }>({});
   const [orderComplete, setOrderComplete] = useState(false);
@@ -57,8 +59,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
         lastName,
       },
     }));
-    setOrderComplete(true);
-  }, [shippingAddress, totalAmount, firstName, lastName]);
+    const orderNum = Math.floor(100000000 + Math.random() * 900000000).toString();
+    const email = localStorage.getItem("customer_email") || "";
+    onClose();
+    navigate(`/thank-you?order=${orderNum}${email ? `&email=${encodeURIComponent(email)}` : ""}`);
+  }, [shippingAddress, totalAmount, firstName, lastName, onClose, navigate]);
 
   if (!open) return null;
 
