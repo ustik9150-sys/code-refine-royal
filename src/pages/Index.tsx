@@ -5,7 +5,7 @@ import StoreFooter from "@/components/StoreFooter";
 
 const breadcrumbItems = [
   { label: "الرئيسية", href: "/" },
-  { label: "عروض يوم التأسيس", href: "#" },
+  { label: "عروض رمضان المبارك", href: "#" },
   { label: "باقة المسك" },
 ];
 
