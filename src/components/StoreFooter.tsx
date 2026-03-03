@@ -52,17 +52,6 @@ const StoreFooter = () => {
             <p className="text-sm text-footer-text leading-6 mb-6">
               ساكريكس علامة تجارية تجسد جوهر الثقة والهيبة في أبسط صورها، مستوحاة من روح الصقر
             </p>
-            <div className="flex items-center justify-center gap-6">
-              <img src={commercialRegister} alt="السجل التجاري" className="h-14" />
-              <div>
-                <p className="text-sm text-store-secondary mb-1">السجل التجاري</p>
-                <b className="text-sm text-store-primary">7007030076</b>
-              </div>
-              <div>
-                <p className="text-sm text-store-secondary mb-1">الرقم الضريبي</p>
-                <b className="text-sm text-store-primary">300213684208886</b>
-              </div>
-            </div>
           </div>
 
           {/* App Download */}
