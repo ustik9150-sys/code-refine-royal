@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback } from "react";
 const API_URL = "https://foubanzluqitdntcnzbi.supabase.co/functions/v1/get-product-description";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
+const VALID_COUNTRIES = ["السعودية", "الإمارات", "قطر"];
+
 const countries = [
   { label: "🇸🇦 السعودية", value: "السعودية" },
   { label: "🇦🇪 الإمارات", value: "الإمارات" },
@@ -87,9 +89,11 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
   // On mount: check localStorage for saved country
   useEffect(() => {
     const saved = localStorage.getItem("selected_country");
-    if (saved) {
+    if (saved && VALID_COUNTRIES.includes(saved)) {
       fetchDescription(saved);
     } else {
+      // Clear invalid/old values (e.g. "SA", "AE")
+      localStorage.removeItem("selected_country");
       setShowPopup(true);
     }
     setInitialized(true);
