@@ -77,27 +77,29 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
         style={{ animation: "checkout-slide-up 300ms ease-out forwards" }}
       >
         {/* ── Header ── */}
-        <div className="relative px-5 pt-5 pb-4 border-b border-border flex-shrink-0">
-          {/* Close – visual top-left */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 left-4 text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="إغلاق"
-          >
-            <X className="w-5 h-5" />
-          </button>
+        <div className="px-5 pt-5 pb-4 border-b border-border flex-shrink-0" dir="rtl">
+          <div className="flex items-center justify-between">
+            {/* Right side: Avatar + Name */}
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-border flex-shrink-0">
+                <img src={avatarMale} alt="الصورة الشخصية" className="w-full h-full object-cover" />
+              </div>
+              <div className="text-right">
+                <p className="text-base font-bold text-foreground leading-relaxed">
+                  مرحبًا، {customerName}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">إتمام الدفع</p>
+              </div>
+            </div>
 
-          {/* Avatar + greeting – right side */}
-          <div className="flex items-center gap-3 justify-end">
-            <div className="text-end">
-              <p className="text-base font-bold text-foreground leading-relaxed">
-                مرحبًا، {customerName}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">إتمام الدفع</p>
-            </div>
-            <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-border flex-shrink-0">
-              <img src={avatarMale} alt="الصورة الشخصية" className="w-full h-full object-cover" />
-            </div>
+            {/* Left side: Close button */}
+            <button
+              onClick={onClose}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="إغلاق"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
