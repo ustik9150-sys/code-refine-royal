@@ -45,6 +45,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [countrySelected, setCountrySelected] = useState(false);
 
   const fetchDescription = useCallback(async (country: string) => {
     // Check cache
@@ -90,7 +91,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
   useEffect(() => {
     const saved = localStorage.getItem("selected_country");
     if (saved && VALID_COUNTRIES.includes(saved)) {
-      // Country already chosen previously — fetch immediately
+      setCountrySelected(true);
       fetchDescription(saved);
     } else {
       localStorage.removeItem("selected_country");
@@ -102,7 +103,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
   const handleCountrySelect = useCallback((countryName: string) => {
     localStorage.setItem("selected_country", countryName);
     setShowPopup(false);
-    // Only fetch AFTER user selects
+    setCountrySelected(true);
     fetchDescription(countryName);
   }, [fetchDescription]);
 
@@ -140,9 +141,11 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
         </div>
       )}
 
-      {/* Description Area */}
+      {/* Description Area — hidden until country is selected */}
       <div id="protected-description">
-        {loading ? (
+        {!countrySelected ? (
+          null
+        ) : loading ? (
           <div className="flex items-center justify-center py-8">
             <div className="w-6 h-6 border-2 border-border border-t-foreground rounded-full animate-spin" />
             <span className="mr-3 text-sm text-muted-foreground">جاري تحميل الوصف...</span>
@@ -164,7 +167,6 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
             dir="rtl"
           />
         ) : (
-          // Fallback: show default description
           defaultDescription || null
         )}
       </div>
