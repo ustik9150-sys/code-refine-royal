@@ -14,7 +14,7 @@ interface CheckoutModalProps {
 
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmount = 222 }) => {
   const [shippingAddress, setShippingAddress] = useState("");
-  const [shippingCompany, setShippingCompany] = useState("");
+  const [shippingCompany, setShippingCompany] = useState("saqrix");
   const [errors, setErrors] = useState<{ address?: string; company?: string }>({});
   const [orderComplete, setOrderComplete] = useState(false);
 
@@ -175,6 +175,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
                     className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
                   >
                     <option value="">اختر شركة الشحن</option>
+                    <option value="saqrix">Saqrix</option>
                     <option value="aramex">أرامكس</option>
                     <option value="smsa">SMSA</option>
                     <option value="dhl">DHL</option>
