@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { X, ChevronDown } from "lucide-react";
 import avatarMale from "@/assets/avatar_male.png";
 import saqrixLogo from "@/assets/saqrix-logo.png";
@@ -12,12 +13,16 @@ interface CheckoutModalProps {
   open: boolean;
   onClose: () => void;
   totalAmount?: number;
+  productId?: string;
+  productName?: string;
+  quantity?: number;
 }
 
-const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmount = 222 }) => {
+const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmount = 222, productId, productName = "باقة المسك", quantity = 1 }) => {
   const navigate = useNavigate();
   const [shippingAddress, setShippingAddress] = useState("");
   const [errors, setErrors] = useState<{ address?: string }>({});
+  const [submitting, setSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
 
   const firstName = localStorage.getItem("customer_first_name") || "";
@@ -41,29 +46,63 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
     return () => window.removeEventListener("keydown", handleEsc);
   }, [open, onClose]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     const errs: typeof errors = {};
     if (!shippingAddress || shippingAddress.trim().length < 2) errs.address = "يرجى كتابة اسم المدينة (حرفين على الأقل)";
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
+    if (submitting) return;
+    setSubmitting(true);
 
-    localStorage.setItem("payment_method", "cod");
-    window.dispatchEvent(new CustomEvent("payment_method_selected", { detail: { method: "cod" } }));
-    window.dispatchEvent(new CustomEvent("order_completed", {
-      detail: {
-        paymentMethod: "cod",
-        shippingAddress,
-        shippingCompany: "saqrix",
-        total: totalAmount,
-        firstName,
-        lastName,
-      },
-    }));
-    const orderNum = Math.floor(100000000 + Math.random() * 900000000).toString();
-    const email = localStorage.getItem("customer_email") || "";
-    onClose();
-    navigate(`/thank-you?order=${orderNum}${email ? `&email=${encodeURIComponent(email)}` : ""}`);
-  }, [shippingAddress, totalAmount, firstName, lastName, onClose, navigate]);
+    try {
+      const email = localStorage.getItem("customer_email") || "";
+      const phone = localStorage.getItem("customer_phone") || "";
+      const customerName = `${firstName} ${lastName}`.trim() || "عميل";
+
+      const { data: session } = await supabase.auth.getSession();
+      const userId = session?.session?.user?.id || null;
+
+      const unitPrice = totalAmount / quantity;
+
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          customer_name: customerName,
+          customer_phone: phone,
+          customer_email: email || null,
+          city: shippingAddress.trim(),
+          address: shippingAddress.trim(),
+          payment_method: "cod" as const,
+          shipping_method: "standard" as const,
+          subtotal: totalAmount,
+          shipping_cost: 0,
+          total: totalAmount,
+          user_id: userId,
+        })
+        .select("id, order_number")
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Insert order item
+      await supabase.from("order_items").insert({
+        order_id: order.id,
+        product_id: productId || null,
+        product_name: productName,
+        quantity,
+        unit_price: unitPrice,
+        total_price: totalAmount,
+      });
+
+      onClose();
+      navigate(`/thank-you?order=${order.order_number}${email ? `&email=${encodeURIComponent(email)}` : ""}`);
+    } catch (err) {
+      console.error("Order creation failed:", err);
+      setErrors({ address: "حدث خطأ أثناء إنشاء الطلب، حاول مرة أخرى" });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [shippingAddress, totalAmount, firstName, lastName, onClose, navigate, submitting, productId, productName, quantity]);
 
   if (!open) return null;
 
@@ -207,9 +246,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
           <div className="absolute bottom-0 inset-x-0 bg-background border-t border-border px-5 py-4 flex-shrink-0">
             <button
               onClick={handleSubmit}
-              className="w-full h-12 bg-foreground text-background rounded-xl font-bold text-sm hover:opacity-90 transition-opacity"
+              disabled={submitting}
+              className="w-full h-12 bg-foreground text-background rounded-xl font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              إتمام الطلب
+              {submitting ? "جارٍ إنشاء الطلب..." : "إتمام الطلب"}
             </button>
           </div>
         )}
