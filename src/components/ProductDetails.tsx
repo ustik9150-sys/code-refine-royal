@@ -351,14 +351,6 @@ const ProductDetails = () => {
                   {showFullDescription ? "عرض أقل" : "قراءة المزيد"}
                 </button>
               )}
-              {isAntibot && (
-                <button
-                  onClick={() => setShowAntibotPopup(true)}
-                  className="text-primary text-sm mt-3 hover:text-accent transition-colors font-medium"
-                >
-                  تغيير الدولة
-                </button>
-              )}
             </>
           )}
         </div>
