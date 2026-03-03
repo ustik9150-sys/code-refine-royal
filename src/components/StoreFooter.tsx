@@ -8,6 +8,7 @@ const footerLinks = [
   { label: "البنود والقوانين", href: "/terms" },
   { label: "الاسئلة الشائعه", href: "/faq" },
   { label: "مواقعنا", href: "#" },
+  { label: "اتصل بنا", href: "/contact" },
   { label: "كن من فريقنا", href: "#" },
 ];
 
