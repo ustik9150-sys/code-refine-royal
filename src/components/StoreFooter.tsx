@@ -6,7 +6,7 @@ const footerLinks = [
   { label: "سياسة الخصوصية", href: "/privacy" },
   { label: "سياسة الاستبدال والاسترجاع و التوصيل", href: "/return-policy" },
   { label: "البنود والقوانين", href: "/terms" },
-  { label: "الاسئلة الشائعه", href: "#" },
+  { label: "الاسئلة الشائعه", href: "/faq" },
   { label: "مواقعنا", href: "#" },
   { label: "كن من فريقنا", href: "#" },
 ];
