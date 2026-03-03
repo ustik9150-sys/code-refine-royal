@@ -261,7 +261,10 @@ const ProductDetails = () => {
       <CheckoutModal
         open={showCheckout}
         onClose={() => setShowCheckout(false)}
-        totalAmount={price}
+        totalAmount={price * quantity}
+        productId={product?.id}
+        productName={product?.name_ar || "باقة المسك"}
+        quantity={quantity}
       />
     </div>
   );
