@@ -7,9 +7,7 @@ const footerLinks = [
   { label: "سياسة الاستبدال والاسترجاع و التوصيل", href: "/return-policy" },
   { label: "البنود والقوانين", href: "/terms" },
   { label: "الاسئلة الشائعه", href: "/faq" },
-  { label: "مواقعنا", href: "#" },
   { label: "اتصل بنا", href: "/contact" },
-  { label: "كن من فريقنا", href: "#" },
 ];
 
 const StoreFooter = () => {
