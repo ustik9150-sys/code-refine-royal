@@ -357,8 +357,50 @@ export default function AdminProductEdit() {
         </div>
 
         <div>
-          <Label>الوسوم (مفصولة بفاصلة)</Label>
-          <Input value={tags} onChange={(e) => setTags(e.target.value)} className="mt-1" placeholder="وسم1, وسم2" />
+          <Label>الوسوم (Tags)</Label>
+          <div className="flex flex-wrap gap-2 mt-1 mb-2">
+            {tags
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean)
+              .map((tag, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 bg-secondary text-foreground text-sm px-3 py-1 rounded-full border border-border"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const arr = tags.split(",").map((t) => t.trim()).filter(Boolean);
+                      arr.splice(i, 1);
+                      setTags(arr.join(", "));
+                    }}
+                    className="hover:text-destructive transition"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="أضف وسم واضغط Enter"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const val = (e.target as HTMLInputElement).value.trim();
+                  if (val) {
+                    const arr = tags.split(",").map((t) => t.trim()).filter(Boolean);
+                    if (!arr.includes(val)) {
+                      setTags([...arr, val].join(", "));
+                    }
+                    (e.target as HTMLInputElement).value = "";
+                  }
+                }
+              }}
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
