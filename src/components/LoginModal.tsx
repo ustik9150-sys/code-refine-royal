@@ -1,12 +1,47 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { X, ChevronDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+/* ─── Constants ─── */
+const MAX_RESENDS = 3;
+const RESEND_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const OTP_DIGITS = 6;
+
+/* ─── Resend Rate-Limiter (client-side) ─── */
+function getResendState(email: string) {
+  const key = `otp_resend_${email}`;
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return { attempts: 0, windowStart: Date.now() };
+    const state = JSON.parse(raw);
+    if (Date.now() - state.windowStart > RESEND_WINDOW_MS) {
+      return { attempts: 0, windowStart: Date.now() };
+    }
+    return state;
+  } catch {
+    return { attempts: 0, windowStart: Date.now() };
+  }
+}
+
+function recordResend(email: string) {
+  const state = getResendState(email);
+  state.attempts += 1;
+  if (state.attempts === 1) state.windowStart = Date.now();
+  sessionStorage.setItem(`otp_resend_${email}`, JSON.stringify(state));
+}
+
+function canResend(email: string): boolean {
+  return getResendState(email).attempts < MAX_RESENDS;
+}
 
 /* ─── Email Step ─── */
 interface EmailStepProps {
   onSubmit: (email: string) => void;
+  loading: boolean;
+  error: string;
 }
 
-const EmailStep: React.FC<EmailStepProps> = ({ onSubmit }) => {
+const EmailStep: React.FC<EmailStepProps> = ({ onSubmit, loading, error: externalError }) => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -14,6 +49,8 @@ const EmailStep: React.FC<EmailStepProps> = ({ onSubmit }) => {
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 350);
   }, []);
+
+  const displayError = externalError || error;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,12 +81,13 @@ const EmailStep: React.FC<EmailStepProps> = ({ onSubmit }) => {
         onChange={(e) => { setEmail(e.target.value); if (error) setError(""); }}
         className="w-full h-11 rounded-lg border border-gray-300 px-3 text-sm text-left placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-foreground/20 focus:border-foreground/40 transition bg-white"
       />
-      {error && <p className="text-red-500 text-xs text-right">{error}</p>}
+      {displayError && <p className="text-red-500 text-xs text-right">{displayError}</p>}
       <button
         type="submit"
-        className="w-full h-11 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+        disabled={loading}
+        className="w-full h-11 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        دخول
+        {loading ? "جاري الإرسال..." : "دخول"}
       </button>
     </form>
   );
@@ -63,10 +101,11 @@ interface OtpStepProps {
 }
 
 const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
-  const [otp, setOtp] = useState<string[]>(["", "", "", ""]);
+  const [otp, setOtp] = useState<string[]>(Array(OTP_DIGITS).fill(""));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [countdown, setCountdown] = useState(30);
+  const [countdown, setCountdown] = useState(60);
+  const [resendDisabled, setResendDisabled] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -83,15 +122,15 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
     if (!/^\d*$/.test(value)) return;
     const next = [...otp];
     if (value.length > 1) {
-      const digits = value.replace(/\D/g, "").slice(0, 4).split("");
-      digits.forEach((d, i) => { if (i < 4) next[i] = d; });
+      const digits = value.replace(/\D/g, "").slice(0, OTP_DIGITS).split("");
+      digits.forEach((d, i) => { if (i < OTP_DIGITS) next[i] = d; });
       setOtp(next);
-      const focusIdx = Math.min(digits.length, 3);
+      const focusIdx = Math.min(digits.length, OTP_DIGITS - 1);
       inputRefs.current[focusIdx]?.focus();
     } else {
       next[index] = value;
       setOtp(next);
-      if (value && index < 3) inputRefs.current[index + 1]?.focus();
+      if (value && index < OTP_DIGITS - 1) inputRefs.current[index + 1]?.focus();
     }
     if (error) setError("");
   };
@@ -104,12 +143,12 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 4);
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_DIGITS);
     if (pasted) {
       const next = [...otp];
-      pasted.split("").forEach((d, i) => { if (i < 4) next[i] = d; });
+      pasted.split("").forEach((d, i) => { if (i < OTP_DIGITS) next[i] = d; });
       setOtp(next);
-      inputRefs.current[Math.min(pasted.length, 3)]?.focus();
+      inputRefs.current[Math.min(pasted.length, OTP_DIGITS - 1)]?.focus();
     }
   };
 
@@ -122,20 +161,55 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
     }
     setLoading(true);
     setError("");
-    await new Promise((r) => setTimeout(r, 1200));
     const code = otp.join("");
-    if (code.length === 4) {
-      setLoading(false);
-      onVerified();
-    } else {
-      setError("رمز التحقق غير صحيح");
+
+    try {
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: "email",
+      });
+
+      if (verifyError) {
+        if (verifyError.message.includes("expired")) {
+          setError("انتهت صلاحية رمز التحقق. يرجى طلب رمز جديد.");
+        } else {
+          setError("رمز التحقق غير صحيح");
+        }
+        setOtp(Array(OTP_DIGITS).fill(""));
+        inputRefs.current[0]?.focus();
+      } else {
+        onVerified();
+      }
+    } catch {
+      setError("حدث خطأ. يرجى المحاولة مرة أخرى.");
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleResend = () => {
-    if (countdown > 0) return;
-    setCountdown(30);
+  const handleResend = async () => {
+    if (countdown > 0 || resendDisabled) return;
+
+    if (!canResend(email)) {
+      setError("لقد تجاوزت الحد الأقصى لمحاولات الإرسال. يرجى المحاولة لاحقاً.");
+      setResendDisabled(true);
+      return;
+    }
+
+    try {
+      const { error: sendError } = await supabase.auth.signInWithOtp({ email });
+      if (sendError) {
+        setError("فشل إعادة إرسال الرمز. يرجى المحاولة لاحقاً.");
+      } else {
+        recordResend(email);
+        setCountdown(60);
+        setOtp(Array(OTP_DIGITS).fill(""));
+        inputRefs.current[0]?.focus();
+      }
+    } catch {
+      setError("حدث خطأ. يرجى المحاولة لاحقاً.");
+    }
   };
 
   const formatTime = (s: number) => {
@@ -143,6 +217,9 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
     const secs = (s % 60).toString().padStart(2, "0");
     return `${mins} : ${secs}`;
   };
+
+  const resendState = getResendState(email);
+  const remainingAttempts = MAX_RESENDS - resendState.attempts;
 
   return (
     <div className="space-y-5">
@@ -159,27 +236,31 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
       <p className="text-sm text-gray-500 text-center leading-relaxed">
         رقم التحقق مطلوب لإكمال العملية
         <br />
-        لقد تم إرسال رمز التحقق في رسالة إليكم
+        لقد تم إرسال رمز التحقق إلى بريدك الإلكتروني
       </p>
       <p className="text-sm font-bold text-foreground text-center" dir="ltr">{email}</p>
 
-      <div className="flex justify-center gap-3" dir="ltr" onPaste={handlePaste}>
+      <div className="flex justify-center gap-2" dir="ltr" onPaste={handlePaste}>
         {otp.map((digit, i) => (
           <input
             key={i}
             ref={(el) => { inputRefs.current[i] = el; }}
             type="text"
             inputMode="numeric"
-            maxLength={4}
+            maxLength={OTP_DIGITS}
             value={digit}
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
-            aria-label={`رقم ${i + 1} من 4`}
-            className="w-16 h-14 text-center text-xl font-semibold border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/30 focus:border-foreground/50 transition bg-white"
+            aria-label={`رقم ${i + 1} من ${OTP_DIGITS}`}
+            className="w-12 h-14 text-center text-xl font-semibold border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/30 focus:border-foreground/50 transition bg-white"
           />
         ))}
       </div>
       {error && <p className="text-red-500 text-xs text-center">{error}</p>}
+
+      <p className="text-xs text-gray-400 text-center">
+        ⚠️ ينتهي الرمز خلال 10 دقائق ويمكن استخدامه لمرة واحدة فقط
+      </p>
 
       <button
         onClick={handleVerify}
@@ -192,9 +273,11 @@ const OtpStep: React.FC<OtpStepProps> = ({ email, onVerified, onBack }) => {
       <p className="text-sm text-gray-500 text-center">
         {countdown > 0 ? (
           <>يمكنك إعادة الإرسال بعد {formatTime(countdown)}</>
+        ) : resendDisabled ? (
+          <span className="text-red-400 text-xs">تم تجاوز الحد الأقصى للمحاولات</span>
         ) : (
           <button onClick={handleResend} className="text-foreground font-medium underline">
-            إعادة الإرسال
+            إعادة الإرسال {remainingAttempts < MAX_RESENDS && `(${remainingAttempts} محاولات متبقية)`}
           </button>
         )}
       </p>
@@ -227,6 +310,7 @@ const RegistrationStep: React.FC<RegistrationStepProps> = ({ email, onComplete }
   const [showCodes, setShowCodes] = useState(false);
   const [errors, setErrors] = useState<{ firstName?: string; lastName?: string; phone?: string }>({});
   const [touched, setTouched] = useState<{ firstName?: boolean; lastName?: boolean; phone?: boolean }>({});
+  const [saving, setSaving] = useState(false);
   const firstNameRef = useRef<HTMLInputElement>(null);
   const codeRef = useRef<HTMLDivElement>(null);
 
@@ -234,7 +318,6 @@ const RegistrationStep: React.FC<RegistrationStepProps> = ({ email, onComplete }
     setTimeout(() => firstNameRef.current?.focus(), 100);
   }, []);
 
-  // Close country code dropdown on outside click
   useEffect(() => {
     if (!showCodes) return;
     const handler = (e: MouseEvent) => {
@@ -262,14 +345,45 @@ const RegistrationStep: React.FC<RegistrationStepProps> = ({ email, onComplete }
   const currentErrors = validate();
   const isValid = Object.keys(currentErrors).length === 0;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched({ firstName: true, lastName: true, phone: true });
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
+
     const cleanPhone = phone.replace(/\D/g, "");
-    onComplete({ firstName: firstName.trim(), lastName: lastName.trim(), phone: cleanPhone, countryCode });
+    setSaving(true);
+
+    try {
+      // Save profile to Supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("profiles").update({
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          phone: cleanPhone,
+          country_code: countryCode,
+        }).eq("user_id", user.id);
+      }
+
+      // Also keep in localStorage for checkout flow
+      localStorage.setItem("customer_first_name", firstName.trim());
+      localStorage.setItem("customer_last_name", lastName.trim());
+      localStorage.setItem("customer_phone", cleanPhone);
+      localStorage.setItem("customer_country_code", countryCode);
+
+      onComplete({ firstName: firstName.trim(), lastName: lastName.trim(), phone: cleanPhone, countryCode });
+    } catch {
+      // Fallback to localStorage only
+      localStorage.setItem("customer_first_name", firstName.trim());
+      localStorage.setItem("customer_last_name", lastName.trim());
+      localStorage.setItem("customer_phone", cleanPhone);
+      localStorage.setItem("customer_country_code", countryCode);
+      onComplete({ firstName: firstName.trim(), lastName: lastName.trim(), phone: cleanPhone, countryCode });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleBlur = (field: keyof typeof touched) => {
@@ -316,7 +430,6 @@ const RegistrationStep: React.FC<RegistrationStepProps> = ({ email, onComplete }
       <div>
         <label className="block text-sm font-medium text-foreground text-right mb-1.5">رقم الجوال</label>
         <div className="flex gap-0 rounded-lg border border-gray-300 overflow-hidden bg-white">
-          {/* Phone input (takes most space) */}
           <input
             type="tel"
             dir="ltr"
@@ -331,7 +444,6 @@ const RegistrationStep: React.FC<RegistrationStepProps> = ({ email, onComplete }
             onBlur={() => handleBlur("phone")}
             className="flex-1 h-11 px-3 text-sm text-left placeholder:text-gray-400 focus:outline-none bg-transparent border-none"
           />
-          {/* Country code selector */}
           <div ref={codeRef} className="relative">
             <button
               type="button"
@@ -365,22 +477,30 @@ const RegistrationStep: React.FC<RegistrationStepProps> = ({ email, onComplete }
       {/* Submit */}
       <button
         type="submit"
-        disabled={!isValid}
+        disabled={!isValid || saving}
         className="w-full h-12 bg-foreground text-background rounded-lg font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        التسجيل
+        {saving ? "جاري الحفظ..." : "التسجيل"}
       </button>
     </form>
   );
 };
 
 /* ─── Helper ─── */
-function hasCustomerProfile(): boolean {
-  return !!(
-    localStorage.getItem("customer_first_name") &&
-    localStorage.getItem("customer_last_name") &&
-    localStorage.getItem("customer_phone")
-  );
+async function hasProfile(): Promise<boolean> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    const { data } = await supabase.from("profiles").select("first_name, last_name, phone").eq("user_id", user.id).single();
+    return !!(data?.first_name && data?.last_name && data?.phone);
+  } catch {
+    // Fallback to localStorage
+    return !!(
+      localStorage.getItem("customer_first_name") &&
+      localStorage.getItem("customer_last_name") &&
+      localStorage.getItem("customer_phone")
+    );
+  }
 }
 
 /* ─── Login Modal Shell ─── */
@@ -395,12 +515,16 @@ type Step = "email" | "otp" | "register";
 const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => {
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
       setStep("email");
       setEmail("");
+      setEmailLoading(false);
+      setEmailError("");
     } else {
       document.body.style.overflow = "";
     }
@@ -414,31 +538,59 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
     return () => window.removeEventListener("keydown", handleEsc);
   }, [open, onClose]);
 
-  const handleEmailSubmit = useCallback((submittedEmail: string) => {
-    setEmail(submittedEmail);
-    localStorage.setItem("customer_email", submittedEmail);
-    window.dispatchEvent(new CustomEvent("email_login_success", { detail: { email: submittedEmail } }));
-    setStep("otp");
+  const handleEmailSubmit = useCallback(async (submittedEmail: string) => {
+    setEmailLoading(true);
+    setEmailError("");
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: submittedEmail,
+      });
+
+      if (error) {
+        if (error.message.includes("rate") || error.message.includes("limit")) {
+          setEmailError("تم تجاوز عدد المحاولات. يرجى الانتظار قليلاً.");
+        } else {
+          setEmailError("حدث خطأ في إرسال رمز التحقق. يرجى المحاولة لاحقاً.");
+        }
+        return;
+      }
+
+      setEmail(submittedEmail);
+      localStorage.setItem("customer_email", submittedEmail);
+      recordResend(submittedEmail);
+      setStep("otp");
+    } catch {
+      setEmailError("حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.");
+    } finally {
+      setEmailLoading(false);
+    }
   }, []);
 
-  const handleOtpVerified = useCallback(() => {
-    window.dispatchEvent(new CustomEvent("otp_verified", { detail: { email } }));
-    // If profile already exists, skip registration
-    if (hasCustomerProfile()) {
+  const handleOtpVerified = useCallback(async () => {
+    // Check if profile exists in DB
+    const profileExists = await hasProfile();
+    if (profileExists) {
+      // Load profile data to localStorage for checkout
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+          if (data?.first_name) {
+            localStorage.setItem("customer_first_name", data.first_name);
+            localStorage.setItem("customer_last_name", data.last_name || "");
+            localStorage.setItem("customer_phone", data.phone || "");
+            localStorage.setItem("customer_country_code", data.country_code || "+966");
+          }
+        }
+      } catch { /* continue */ }
       onSuccess(email);
     } else {
       setStep("register");
     }
   }, [email, onSuccess]);
 
-  const handleRegistrationComplete = useCallback((data: { firstName: string; lastName: string; phone: string; countryCode: string }) => {
-    localStorage.setItem("customer_first_name", data.firstName);
-    localStorage.setItem("customer_last_name", data.lastName);
-    localStorage.setItem("customer_phone", data.phone);
-    localStorage.setItem("customer_country_code", data.countryCode);
-    window.dispatchEvent(new CustomEvent("customer_profile_completed", {
-      detail: { email, firstName: data.firstName, lastName: data.lastName, phone: data.phone, countryCode: data.countryCode },
-    }));
+  const handleRegistrationComplete = useCallback((_data: { firstName: string; lastName: string; phone: string; countryCode: string }) => {
     onSuccess(email);
   }, [email, onSuccess]);
 
@@ -492,7 +644,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
         {/* Title */}
         <h2 className="text-center text-lg font-bold text-foreground mb-5">تسجيل الدخول</h2>
 
-        {step === "email" && <EmailStep onSubmit={handleEmailSubmit} />}
+        {step === "email" && <EmailStep onSubmit={handleEmailSubmit} loading={emailLoading} error={emailError} />}
         {step === "otp" && <OtpStep email={email} onVerified={handleOtpVerified} onBack={handleBack} />}
         {step === "register" && <RegistrationStep email={email} onComplete={handleRegistrationComplete} />}
       </div>
