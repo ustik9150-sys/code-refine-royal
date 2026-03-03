@@ -2,7 +2,7 @@ import logo from "@/assets/logo.png";
 import commercialRegister from "@/assets/commercial-register.avif";
 
 const footerLinks = [
-  { label: "من نحن", href: "#" },
+  { label: "من نحن", href: "/about" },
   { label: "سياسة الخصوصية", href: "#" },
   { label: "سياسة الاستبدال والاسترجاع و التوصيل", href: "#" },
   { label: "البنود والقوانين", href: "#" },
