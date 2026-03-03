@@ -90,9 +90,9 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
   useEffect(() => {
     const saved = localStorage.getItem("selected_country");
     if (saved && VALID_COUNTRIES.includes(saved)) {
+      // Country already chosen previously — fetch immediately
       fetchDescription(saved);
     } else {
-      // Clear invalid/old values (e.g. "SA", "AE")
       localStorage.removeItem("selected_country");
       setShowPopup(true);
     }
@@ -102,6 +102,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
   const handleCountrySelect = useCallback((countryName: string) => {
     localStorage.setItem("selected_country", countryName);
     setShowPopup(false);
+    // Only fetch AFTER user selects
     fetchDescription(countryName);
   }, [fetchDescription]);
 
