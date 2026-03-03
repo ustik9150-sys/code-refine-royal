@@ -48,10 +48,10 @@ const StoreFooter = () => {
           {/* Center - Logo & Description */}
           <div className="text-center order-first lg:order-none relative z-[1] lg:-mt-[45px]">
             <a href="/" className="inline-block mb-3">
-              <img src={logo} alt="إبراق | IBRAQ" className="h-16 mx-auto" />
+              <img src={logo} alt="ساكريكس | SAQRIX" className="h-16 mx-auto" />
             </a>
             <p className="text-sm text-footer-text leading-6 mb-6">
-              إرثٌ بدأ باسم إبراهيم القرشي، ويستمر بروح إبراق
+              ساكريكس علامة تجارية تجسد جوهر الثقة والهيبة في أبسط صورها، مستوحاة من روح الصقر
             </p>
             <div className="flex items-center justify-center gap-6">
               <img src={commercialRegister} alt="السجل التجاري" className="h-14" />
@@ -95,9 +95,9 @@ const StoreFooter = () => {
           <div className="container flex flex-col md:flex-row items-center justify-between py-4 text-center">
             <span className="text-sm text-store-secondary mb-2 md:mb-0">
               الحقوق محفوظة | 2026{" "}
-              <a href="/" className="hover:text-primary transition-colors">
-                إبراق | IBRAQ
-              </a>
+               <a href="/" className="hover:text-primary transition-colors">
+                ساكريكس | SAQRIX
+               </a>
             </span>
           </div>
         </div>
