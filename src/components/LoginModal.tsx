@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 /* ─── Constants ─── */
 const MAX_RESENDS = 3;
 const RESEND_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const OTP_DIGITS = 6;
+const OTP_DIGITS = 8;
 
 /* ─── Resend Rate-Limiter (client-side) ─── */
 function getResendState(email: string) {
