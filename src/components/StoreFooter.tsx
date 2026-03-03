@@ -4,7 +4,7 @@ import commercialRegister from "@/assets/commercial-register.avif";
 const footerLinks = [
   { label: "من نحن", href: "/about" },
   { label: "سياسة الخصوصية", href: "/privacy" },
-  { label: "سياسة الاستبدال والاسترجاع و التوصيل", href: "#" },
+  { label: "سياسة الاستبدال والاسترجاع و التوصيل", href: "/return-policy" },
   { label: "البنود والقوانين", href: "#" },
   { label: "الاسئلة الشائعه", href: "#" },
   { label: "مواقعنا", href: "#" },
