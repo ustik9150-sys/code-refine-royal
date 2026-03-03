@@ -27,6 +27,7 @@ type Product = {
   inventory: number;
   sku: string | null;
   status: string;
+  tags: string[] | null;
 };
 
 const ProductDetails = () => {
@@ -38,6 +39,9 @@ const ProductDetails = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [productImage, setProductImage] = useState<string>(fallbackImage);
   const [loading, setLoading] = useState(true);
+  const [showAntibotPopup, setShowAntibotPopup] = useState(false);
+  const [antibotLoading, setAntibotLoading] = useState(false);
+  const [antibotDescription, setAntibotDescription] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -52,6 +56,10 @@ const ProductDetails = () => {
 
       if (data) {
         setProduct(data as Product);
+        // Show antibot popup if product has "antibot" tag
+        if ((data as Product).tags?.includes("antibot")) {
+          setShowAntibotPopup(true);
+        }
         // Fetch main image
         const { data: imgs } = await supabase
           .from("product_images")
@@ -64,6 +72,30 @@ const ProductDetails = () => {
       setLoading(false);
     })();
   }, []);
+
+  const handleCountrySelect = useCallback(async (country: string) => {
+    if (!product) return;
+    setAntibotLoading(true);
+    setShowAntibotPopup(false);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-product-description`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ product_handle: "antibot", country }),
+        }
+      );
+      const data = await res.json();
+      if (data.success && data.description) {
+        setAntibotDescription(data.description);
+      }
+    } catch (err) {
+      console.error("Error fetching description:", err);
+    } finally {
+      setAntibotLoading(false);
+    }
+  }, [product]);
 
   const handleBuyNow = useCallback(() => {
     const hasProfile = localStorage.getItem("customer_first_name") && localStorage.getItem("customer_phone");
@@ -99,7 +131,10 @@ const ProductDetails = () => {
   const savings = compareAtPrice > price ? compareAtPrice - price : 0;
   const skuCode = product?.sku || "7287120302040";
   const inStock = product ? product.inventory > 0 : true;
-  const description = product?.description_ar || null;
+  const isAntibot = product?.tags?.includes("antibot");
+  const description = isAntibot && antibotDescription
+    ? antibotDescription
+    : (!isAntibot ? (product?.description_ar || null) : null);
 
   // Parse description into structured content
   const renderDescription = () => {
@@ -180,19 +215,30 @@ const ProductDetails = () => {
 
         {/* Description */}
         <div className="mb-5">
-          <article
-            className={`relative overflow-hidden transition-all duration-300 ${
-              showFullDescription ? "max-h-[2000px]" : "max-h-[84px]"
-            }`}
-          >
-            {renderDescription()}
-          </article>
-          <button
-            onClick={() => setShowFullDescription(!showFullDescription)}
-            className="text-primary text-sm mt-2 hover:text-accent transition-colors font-medium"
-          >
-            {showFullDescription ? "عرض أقل" : "قراءة المزيد"}
-          </button>
+          {antibotLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-6 h-6 border-2 border-border border-t-foreground rounded-full animate-spin" />
+              <span className="mr-3 text-sm text-muted-foreground">جاري تحميل الوصف...</span>
+            </div>
+          ) : isAntibot && !antibotDescription ? (
+            <p className="text-sm text-muted-foreground text-center py-4">اختر دولتك لعرض تفاصيل المنتج</p>
+          ) : (
+            <>
+              <article
+                className={`relative overflow-hidden transition-all duration-300 ${
+                  showFullDescription ? "max-h-[2000px]" : "max-h-[84px]"
+                }`}
+              >
+                {renderDescription()}
+              </article>
+              <button
+                onClick={() => setShowFullDescription(!showFullDescription)}
+                className="text-primary text-sm mt-2 hover:text-accent transition-colors font-medium"
+              >
+                {showFullDescription ? "عرض أقل" : "قراءة المزيد"}
+              </button>
+            </>
+          )}
         </div>
 
         {/* Model number */}
@@ -251,6 +297,31 @@ const ProductDetails = () => {
       </div>
 
       <div className="h-24 lg:hidden" />
+
+      {/* Antibot Country Popup */}
+      {showAntibotPopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm" dir="rtl">
+          <div className="bg-background rounded-2xl p-8 max-w-sm w-[90%] text-center shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+            <h3 className="text-xl font-bold text-foreground mb-2">اختر دولتك</h3>
+            <p className="text-sm text-muted-foreground mb-6">يرجى اختيار دولتك للمتابعة</p>
+            <div className="space-y-3">
+              {[
+                { label: "🇸🇦 السعودية", value: "السعودية" },
+                { label: "🇦🇪 الإمارات", value: "الإمارات" },
+                { label: "🇶🇦 قطر", value: "قطر" },
+              ].map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => handleCountrySelect(c.value)}
+                  className="w-full py-3 px-4 text-base font-medium border border-border rounded-xl bg-background hover:border-foreground/40 hover:bg-secondary transition-all"
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <LoginModal
         open={showLoginSheet}
