@@ -211,7 +211,7 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
                 <Plus className="w-4 h-4 text-foreground" />
               </button>
               <div className="flex-1 text-left">
-                <span className="text-lg font-bold text-foreground">{totalPrice} ر.س</span>
+                <span className="text-lg font-bold text-foreground">{totalPrice} {cs}</span>
               </div>
             </div>
           </div>
