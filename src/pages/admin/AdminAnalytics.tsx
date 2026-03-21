@@ -167,88 +167,81 @@ function OrderRow({ name, city, time, index }: { name: string; city: string; tim
   );
 }
 
-// --- Mock Data ---
-const mockDailyOrders = [
-  { day: "السبت", orders: 12, revenue: 2400 },
-  { day: "الأحد", orders: 19, revenue: 3800 },
-  { day: "الاثنين", orders: 8, revenue: 1600 },
-  { day: "الثلاثاء", orders: 25, revenue: 5000 },
-  { day: "الأربعاء", orders: 15, revenue: 3000 },
-  { day: "الخميس", orders: 30, revenue: 6000 },
-  { day: "الجمعة", orders: 22, revenue: 4400 },
-];
+// --- Day names helper ---
+const dayNames = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
-const mockRecentOrders = [
-  { name: "أحمد محمد", city: "الرياض", time: "منذ ٢ د" },
-  { name: "سارة العلي", city: "جدة", time: "منذ ٥ د" },
-  { name: "خالد السعيد", city: "الدمام", time: "منذ ١٢ د" },
-  { name: "نورة الشمري", city: "مكة", time: "منذ ١٨ د" },
-  { name: "فيصل الحربي", city: "المدينة", time: "منذ ٢٥ د" },
-];
+function getLast7Days(): string[] {
+  const days: string[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().split("T")[0]);
+  }
+  return days;
+}
 
 // --- Main Component ---
 export default function AdminAnalytics() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, totalOrders: 0, conversionRate: 0 });
-  const [recentOrders, setRecentOrders] = useState(mockRecentOrders);
+  const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, totalOrders: 0, totalRevenue: 0 });
+  const [recentOrders, setRecentOrders] = useState<{ name: string; city: string; time: string }[]>([]);
+  const [dailyData, setDailyData] = useState<{ day: string; orders: number; revenue: number }[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchAll() {
       try {
         const today = new Date().toISOString().split("T")[0];
+        const last7 = getLast7Days();
+        const weekStart = last7[0];
 
-        const { count: totalOrders } = await supabase
-          .from("orders")
-          .select("*", { count: "exact", head: true });
+        // Fetch all orders from last 7 days + total count in parallel
+        const [countRes, todayRes, weekRes, recentRes] = await Promise.all([
+          supabase.from("orders").select("*", { count: "exact", head: true }),
+          supabase.from("orders").select("total").gte("created_at", today),
+          supabase.from("orders").select("total, created_at").gte("created_at", weekStart),
+          supabase.from("orders").select("customer_name, city, created_at").order("created_at", { ascending: false }).limit(5),
+        ]);
 
-        const { data: todayData } = await supabase
-          .from("orders")
-          .select("total")
-          .gte("created_at", today);
+        const totalOrders = countRes.count || 0;
+        const todayOrders = todayRes.data?.length || 0;
+        const todayRevenue = todayRes.data?.reduce((s, o) => s + (o.total || 0), 0) || 0;
+        const totalRevenue = weekRes.data?.reduce((s, o) => s + (o.total || 0), 0) || 0;
 
-        const todayOrders = todayData?.length || 0;
-        const todayRevenue = todayData?.reduce((s, o) => s + (o.total || 0), 0) || 0;
+        setStats({ todayOrders, todayRevenue, totalOrders, totalRevenue });
 
-        setStats({
-          todayOrders,
-          todayRevenue,
-          totalOrders: totalOrders || 0,
-          conversionRate: totalOrders ? Math.min(Math.round((todayOrders / Math.max(totalOrders, 1)) * 100), 100) : 0,
+        // Build daily chart data from real orders
+        const dayMap: Record<string, { orders: number; revenue: number }> = {};
+        last7.forEach(d => { dayMap[d] = { orders: 0, revenue: 0 }; });
+        weekRes.data?.forEach(o => {
+          const dateKey = o.created_at.split("T")[0];
+          if (dayMap[dateKey]) {
+            dayMap[dateKey].orders++;
+            dayMap[dateKey].revenue += o.total || 0;
+          }
         });
+        setDailyData(last7.map(d => ({
+          day: dayNames[new Date(d).getDay()],
+          orders: dayMap[d].orders,
+          revenue: dayMap[d].revenue,
+        })));
 
-        // Fetch recent real orders
-        const { data: recent } = await supabase
-          .from("orders")
-          .select("customer_name, city, created_at")
-          .order("created_at", { ascending: false })
-          .limit(5);
-
-        if (recent && recent.length > 0) {
-          setRecentOrders(recent.map(o => ({
+        // Recent orders
+        if (recentRes.data && recentRes.data.length > 0) {
+          setRecentOrders(recentRes.data.map(o => ({
             name: o.customer_name,
             city: o.city || "غير محدد",
             time: getTimeAgo(o.created_at),
           })));
         }
       } catch {
-        // fallback to mock
+        // keep empty state
       } finally {
         setLoading(false);
       }
     }
 
-    fetchStats();
-
-    // Simulate new order notification every 30s
-    const iv = setInterval(() => {
-      toast({
-        title: "🛒 طلب جديد!",
-        description: `طلب جديد من ${mockRecentOrders[Math.floor(Math.random() * mockRecentOrders.length)].name}`,
-      });
-    }, 45000);
-
-    return () => clearInterval(iv);
+    fetchAll();
   }, []);
 
   if (loading) return <AnalyticsSkeleton />;
