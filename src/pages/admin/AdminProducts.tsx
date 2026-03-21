@@ -12,8 +12,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus, Search, Edit, Package, Trash2, Eye, Copy,
-  ShoppingCart, AlertTriangle, DollarSign, TrendingUp,
+  Plus, Search, Edit, Package, Trash2, Eye, Copy, Link2,
+  ShoppingCart, AlertTriangle, DollarSign, TrendingUp, ExternalLink,
 } from "lucide-react";
 
 type Product = {
@@ -56,11 +56,13 @@ function StatCard({ icon: Icon, label, value, suffix, gradient, delay }: {
 }
 
 // --- Product Card ---
-function ProductCard({ product, index, onEdit, onDelete, onDuplicate }: {
+function ProductCard({ product, index, onEdit, onDelete, onDuplicate, onView, onCopyLink }: {
   product: Product; index: number;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onDuplicate: (p: Product) => void;
+  onView: (id: string) => void;
+  onCopyLink: (id: string, name: string) => void;
 }) {
   const { currency } = useCurrency();
   const cs = currency.symbol;
@@ -107,16 +109,29 @@ function ProductCard({ product, index, onEdit, onDelete, onDuplicate }: {
         )}
 
         {/* Hover actions overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 flex-wrap px-4">
           <Button size="icon" className="h-9 w-9 rounded-xl bg-white/90 text-foreground hover:bg-white shadow-lg"
+            title="تعديل"
             onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}>
             <Edit className="w-4 h-4" />
           </Button>
           <Button size="icon" className="h-9 w-9 rounded-xl bg-white/90 text-foreground hover:bg-white shadow-lg"
+            title="عرض المنتج"
+            onClick={(e) => { e.stopPropagation(); onView(product.id); }}>
+            <ExternalLink className="w-4 h-4" />
+          </Button>
+          <Button size="icon" className="h-9 w-9 rounded-xl bg-white/90 text-foreground hover:bg-white shadow-lg"
+            title="نسخ الرابط"
+            onClick={(e) => { e.stopPropagation(); onCopyLink(product.id, product.name_ar); }}>
+            <Link2 className="w-4 h-4" />
+          </Button>
+          <Button size="icon" className="h-9 w-9 rounded-xl bg-white/90 text-foreground hover:bg-white shadow-lg"
+            title="نسخ المنتج"
             onClick={(e) => { e.stopPropagation(); onDuplicate(product); }}>
             <Copy className="w-4 h-4" />
           </Button>
           <Button size="icon" className="h-9 w-9 rounded-xl bg-red-500/90 text-white hover:bg-red-600 shadow-lg"
+            title="حذف"
             onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}>
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -380,6 +395,15 @@ export default function AdminProducts() {
                 onEdit={(id) => navigate(`/admin/products/${id}`)}
                 onDelete={handleDelete}
                 onDuplicate={handleDuplicate}
+                onView={(id) => {
+                  window.open(`/?product=${id}`, "_blank");
+                }}
+                onCopyLink={(id, name) => {
+                  const url = `${window.location.origin}/?product=${id}`;
+                  navigator.clipboard.writeText(url).then(() => {
+                    toast({ title: "تم نسخ الرابط ✅", description: name });
+                  });
+                }}
               />
             ))}
           </AnimatePresence>
