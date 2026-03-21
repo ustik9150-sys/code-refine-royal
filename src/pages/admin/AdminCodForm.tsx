@@ -404,9 +404,6 @@ export default function AdminCodForm() {
         supabase.from("products").select("id, name_ar").order("created_at", { ascending: false }),
       ]);
       if (productsRes.data) setProducts(productsRes.data);
-      const data = settingsRes.data;
-        .select("*")
-        .in("key", ["cod_form", "tracking"]);
       if (data) {
         for (const row of data) {
           const v = row.value as any;
