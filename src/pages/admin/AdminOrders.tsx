@@ -177,7 +177,7 @@ export default function AdminOrders() {
       o.total,
       STATUS_MAP[o.status]?.label || o.status,
       PAYMENT_MAP[o.payment_method] || o.payment_method,
-      new Date(o.created_at).toLocaleDateString("ar-SA"),
+      new Date(o.created_at).toLocaleDateString("en-US"),
     ]);
     const csv = "\uFEFF" + [headers, ...rows].map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
