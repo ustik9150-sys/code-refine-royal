@@ -180,8 +180,8 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
                     onClick={() => setSelectedOfferId(offer.id)}
                     className={`w-full relative rounded-xl border-2 p-3.5 text-right transition-all duration-200 ${
                       isSelected
-                        ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
-                        : "border-border hover:border-primary/30"
+                        ? "border-destructive bg-destructive/5 shadow-lg shadow-destructive/10"
+                        : "border-border hover:border-destructive/30"
                     }`}
                   >
                     {/* Badge */}
