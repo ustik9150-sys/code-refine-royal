@@ -33,7 +33,7 @@ type Product = {
   tags: string[] | null;
 };
 
-const ProductDetails = () => {
+const ProductDetails = ({ productId }: { productId?: string }) => {
   const { currency } = useCurrency();
   const currencySymbol = currency.symbol;
   const [quantity, setQuantity] = useState(1);
