@@ -1,4 +1,4 @@
-
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface SaveBadgeProps {
   amount: number;
