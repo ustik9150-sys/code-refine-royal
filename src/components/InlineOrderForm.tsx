@@ -126,7 +126,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
     setSubmitting(true);
 
     try {
-      const { error: orderError } = await supabase
+      const { data: orderData, error: orderError } = await supabase
         .from("orders")
         .insert({
           customer_name: fullName.trim(),
@@ -137,9 +137,19 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
           subtotal: finalPrice,
           shipping_cost: 0,
           total: finalPrice,
-        });
+        })
+        .select("id")
+        .single();
 
       if (orderError) throw orderError;
+
+      // Fire-and-forget: geolocate IP for this order
+      if (orderData?.id) {
+        supabase.functions.invoke("geolocate-ip", {
+          body: { order_id: orderData.id },
+        }).catch(() => {});
+      }
+
       navigate(`/thank-you`);
     } catch (err) {
       console.error("Order creation failed:", err);

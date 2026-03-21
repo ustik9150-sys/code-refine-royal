@@ -37,6 +37,9 @@ type Order = {
   customer_email: string | null;
   notes: string | null;
   created_at: string;
+  ip_address: string | null;
+  ip_country: string | null;
+  ip_city: string | null;
 };
 
 type OrderItem = {
