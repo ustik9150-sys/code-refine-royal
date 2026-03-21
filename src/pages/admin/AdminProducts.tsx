@@ -109,16 +109,29 @@ function ProductCard({ product, index, onEdit, onDelete, onDuplicate }: {
         )}
 
         {/* Hover actions overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 flex-wrap px-4">
           <Button size="icon" className="h-9 w-9 rounded-xl bg-white/90 text-foreground hover:bg-white shadow-lg"
+            title="تعديل"
             onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}>
             <Edit className="w-4 h-4" />
           </Button>
           <Button size="icon" className="h-9 w-9 rounded-xl bg-white/90 text-foreground hover:bg-white shadow-lg"
+            title="عرض المنتج"
+            onClick={(e) => { e.stopPropagation(); onView(product.id); }}>
+            <ExternalLink className="w-4 h-4" />
+          </Button>
+          <Button size="icon" className="h-9 w-9 rounded-xl bg-white/90 text-foreground hover:bg-white shadow-lg"
+            title="نسخ الرابط"
+            onClick={(e) => { e.stopPropagation(); onCopyLink(product.id, product.name_ar); }}>
+            <Link2 className="w-4 h-4" />
+          </Button>
+          <Button size="icon" className="h-9 w-9 rounded-xl bg-white/90 text-foreground hover:bg-white shadow-lg"
+            title="نسخ المنتج"
             onClick={(e) => { e.stopPropagation(); onDuplicate(product); }}>
             <Copy className="w-4 h-4" />
           </Button>
           <Button size="icon" className="h-9 w-9 rounded-xl bg-red-500/90 text-white hover:bg-red-600 shadow-lg"
+            title="حذف"
             onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}>
             <Trash2 className="w-4 h-4" />
           </Button>
