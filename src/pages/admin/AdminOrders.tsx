@@ -300,6 +300,8 @@ function EmptyState() {
 
 // === MAIN ===
 export default function AdminOrders() {
+  const { currency } = useCurrency();
+  const cs = currency.symbol;
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
