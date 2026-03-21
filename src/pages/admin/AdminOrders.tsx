@@ -206,7 +206,7 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">المجموع</p>
-                  <p className="font-bold">{order.total.toLocaleString("en-US")} ر.س</p>
+                  <p className="font-bold">{order.total.toLocaleString("en-US")} {cs}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">المدينة</p>
