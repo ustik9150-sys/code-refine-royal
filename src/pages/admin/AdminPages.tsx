@@ -222,7 +222,7 @@ export default function AdminPages() {
                 />
 
                 <button
-                  onClick={() => removeLink(link.id)}
+                  onClick={() => setDeleteLinkTarget(link.id)}
                   className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 className="w-4 h-4" />
