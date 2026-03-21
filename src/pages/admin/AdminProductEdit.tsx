@@ -206,6 +206,7 @@ export default function AdminProductEdit() {
       setInventory(String(product.inventory));
       setCategory(product.category || "");
       setIsActive(product.status === "active");
+      setTags(product.tags || []);
 
       const { data: imgs } = await supabase
         .from("product_images")
