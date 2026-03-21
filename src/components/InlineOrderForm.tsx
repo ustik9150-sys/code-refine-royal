@@ -13,6 +13,7 @@ interface OfferItem {
   old_price: number | null;
   label: string;
   is_best: boolean;
+  product_id?: string | null;
 }
 
 interface InlineOrderFormProps {
