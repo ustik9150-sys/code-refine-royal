@@ -229,8 +229,7 @@ function ProductCard({ product, index, currencySymbol }: { product: Product; ind
   );
 }
 
-// --- Testimonials ---
-const testimonials = [
+export default Index;
   {
     name: "علي الخرمي",
     text: "منتجات رائعة وجودة عالية، التوصيل كان سريع جداً والتغليف ممتاز. أنصح الجميع بالتجربة!",
