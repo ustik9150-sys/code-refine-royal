@@ -20,6 +20,7 @@ export const CURRENCIES: CurrencyConfig[] = [
   { code: "GBP", symbol: "£", name_ar: "جنيه إسترليني" },
   { code: "MAD", symbol: "د.م", name_ar: "درهم مغربي" },
   { code: "TRY", symbol: "₺", name_ar: "ليرة تركية" },
+  { code: "MRU", symbol: "أ.م", name_ar: "أوقية موريتانية" },
 ];
 
 const DEFAULT_CURRENCY: CurrencyConfig = CURRENCIES[0]; // SAR
