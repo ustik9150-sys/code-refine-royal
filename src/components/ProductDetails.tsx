@@ -34,6 +34,8 @@ type Product = {
 };
 
 const ProductDetails = () => {
+  const { currency } = useCurrency();
+  const currencySymbol = currency.symbol;
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showLoginSheet, setShowLoginSheet] = useState(false);
