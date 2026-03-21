@@ -23,7 +23,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
     const errs: Record<string, string> = {};
     if (!fullName.trim() || fullName.trim().length < 2) errs.fullName = "يرجى إدخال الاسم";
     if (!phone.trim()) errs.phone = "يرجى إدخال رقم الهاتف";
-    else if (!/^(05|5|9|6|7|\+)[0-9]{7,14}$/.test(phone.trim().replace(/\s/g, ""))) errs.phone = "رقم الهاتف غير صالح";
+    else if (!/^[\+]?[0-9\s\-]{7,15}$/.test(phone.trim())) errs.phone = "رقم الهاتف غير صالح";
     return errs;
   }, [fullName, phone]);
 
