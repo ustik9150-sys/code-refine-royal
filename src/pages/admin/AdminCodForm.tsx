@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Save, Eye, FileText, Sparkles, Shield, Type, Palette, BarChart3, Facebook,
   User, Phone, MapPin, GripVertical, Rocket, Zap, Smartphone, Monitor,
   Loader2, CheckCircle, Settings2, Wand2, Crown, Flame, Star,
-  Plus, Trash2, Tag,
+  Plus, Trash2, Tag, Package,
 } from "lucide-react";
 
 // ─── Types ───
@@ -23,6 +24,12 @@ export interface OfferItem {
   old_price: number | null;
   label: string;
   is_best: boolean;
+  product_id?: string | null;
+}
+
+interface ProductOption {
+  id: string;
+  name_ar: string;
 }
 
 interface CodFormSettings {
@@ -69,9 +76,9 @@ const defaultPixels: PixelConfig = {
 };
 
 const DEFAULT_OFFERS: OfferItem[] = [
-  { id: "1", title: "عرض 1", quantity: 1, price: 99, old_price: null, label: "", is_best: false },
-  { id: "2", title: "عرض 2", quantity: 2, price: 180, old_price: 198, label: "الأكثر طلباً 🔥", is_best: true },
-  { id: "3", title: "عرض 3", quantity: 3, price: 250, old_price: 297, label: "وفّر أكثر 💰", is_best: false },
+  { id: "1", title: "عرض 1", quantity: 1, price: 99, old_price: null, label: "", is_best: false, product_id: null },
+  { id: "2", title: "عرض 2", quantity: 2, price: 180, old_price: 198, label: "الأكثر طلباً 🔥", is_best: true, product_id: null },
+  { id: "3", title: "عرض 3", quantity: 3, price: 250, old_price: 297, label: "وفّر أكثر 💰", is_best: false, product_id: null },
 ];
 
 const DEFAULT_SETTINGS: CodFormSettings = {
@@ -141,10 +148,11 @@ function FieldCard({ icon: Icon, name, desc, required, enabled, onToggle, requir
 }
 
 // ─── Offer Card (Builder) ───
-function OfferBuilderCard({ offer, onChange, onDelete }: {
+function OfferBuilderCard({ offer, onChange, onDelete, products }: {
   offer: OfferItem;
   onChange: (updated: OfferItem) => void;
   onDelete: () => void;
+  products: ProductOption[];
 }) {
   return (
     <motion.div
@@ -186,6 +194,28 @@ function OfferBuilderCard({ offer, onChange, onDelete }: {
           <Label className="text-[11px] text-muted-foreground">السعر القديم</Label>
           <Input type="number" min={0} value={offer.old_price || ""} onChange={(e) => onChange({ ...offer, old_price: parseFloat(e.target.value) || null })} className="mt-0.5 rounded-lg h-9 text-sm" placeholder="اختياري" />
         </div>
+      </div>
+
+      {/* Product selector */}
+      <div>
+        <Label className="text-[11px] text-muted-foreground flex items-center gap-1">
+          <Package className="w-3 h-3" />
+          المنتج المستهدف
+        </Label>
+        <Select
+          value={offer.product_id || "all"}
+          onValueChange={(v) => onChange({ ...offer, product_id: v === "all" ? null : v })}
+        >
+          <SelectTrigger className="mt-0.5 rounded-lg h-9 text-sm">
+            <SelectValue placeholder="جميع المنتجات" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">جميع المنتجات</SelectItem>
+            {products.map((p) => (
+              <SelectItem key={p.id} value={p.id}>{p.name_ar}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-2 gap-2 items-end">
@@ -365,15 +395,17 @@ export default function AdminCodForm() {
   const [pixels, setPixels] = useState<PixelConfig>(defaultPixels);
   const [activePanel, setActivePanel] = useState<ActivePanel>("fields");
   const [mobilePreview, setMobilePreview] = useState(false);
+  const [products, setProducts] = useState<ProductOption[]>([]);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("store_settings")
-        .select("*")
-        .in("key", ["cod_form", "tracking"]);
-      if (data) {
-        for (const row of data) {
+      const [settingsRes, productsRes] = await Promise.all([
+        supabase.from("store_settings").select("*").in("key", ["cod_form", "tracking"]),
+        supabase.from("products").select("id, name_ar").order("created_at", { ascending: false }),
+      ]);
+      if (productsRes.data) setProducts(productsRes.data);
+      if (settingsRes.data) {
+        for (const row of settingsRes.data) {
           const v = row.value as any;
           if (row.key === "cod_form") {
             setSettings({ ...DEFAULT_SETTINGS, ...v, offers: v.offers || DEFAULT_OFFERS });
@@ -601,6 +633,7 @@ export default function AdminCodForm() {
                               offer={offer}
                               onChange={(updated) => updateOffer(offer.id, updated)}
                               onDelete={() => deleteOffer(offer.id)}
+                              products={products}
                             />
                           ))}
                         </AnimatePresence>

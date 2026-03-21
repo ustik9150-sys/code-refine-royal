@@ -13,6 +13,7 @@ interface OfferItem {
   old_price: number | null;
   label: string;
   is_best: boolean;
+  product_id?: string | null;
 }
 
 interface InlineOrderFormProps {
@@ -75,7 +76,12 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
   const [settings, setSettings] = useState<CodFormSettings>(DEFAULT_SETTINGS);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
 
-  const selectedOffer = settings.offers?.find((o) => o.id === selectedOfferId);
+  // Filter offers for this product
+  const filteredOffers = settings.offers?.filter(
+    (o) => !o.product_id || o.product_id === productId
+  ) || [];
+
+  const selectedOffer = filteredOffers.find((o) => o.id === selectedOfferId);
   const finalQuantity = selectedOffer ? selectedOffer.quantity : quantity;
   const finalPrice = selectedOffer ? selectedOffer.price : unitPrice * quantity;
 
@@ -89,10 +95,13 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
       if (data?.value) {
         const s = { ...DEFAULT_SETTINGS, ...(data.value as any) };
         setSettings(s);
-        // Auto-select best offer
-        if (s.show_offers && s.offers?.length > 0) {
-          const best = s.offers.find((o: OfferItem) => o.is_best);
-          setSelectedOfferId(best?.id || s.offers[0].id);
+        // Auto-select best offer from filtered offers
+        const filtered = s.offers?.filter(
+          (o: OfferItem) => !o.product_id || o.product_id === productId
+        ) || [];
+        if (s.show_offers && filtered.length > 0) {
+          const best = filtered.find((o: OfferItem) => o.is_best);
+          setSelectedOfferId(best?.id || filtered[0].id);
         }
       }
     })();
@@ -163,10 +172,10 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
         {/* Form */}
         <div className="px-5 pb-5 space-y-4">
           {/* Offers */}
-          {settings.show_offers && settings.offers?.length > 0 && (
+          {settings.show_offers && filteredOffers.length > 0 && (
             <div className="space-y-2.5">
               <p className="text-sm font-bold text-foreground text-center">🔥 اختر العرض المناسب</p>
-              {settings.offers.map((offer) => {
+              {filteredOffers.map((offer) => {
                 const isSelected = selectedOfferId === offer.id;
                 const discount = offer.old_price && offer.old_price > offer.price
                   ? Math.round(((offer.old_price - offer.price) / offer.old_price) * 100)
