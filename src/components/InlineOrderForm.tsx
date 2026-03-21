@@ -95,10 +95,13 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
       if (data?.value) {
         const s = { ...DEFAULT_SETTINGS, ...(data.value as any) };
         setSettings(s);
-        // Auto-select best offer
-        if (s.show_offers && s.offers?.length > 0) {
-          const best = s.offers.find((o: OfferItem) => o.is_best);
-          setSelectedOfferId(best?.id || s.offers[0].id);
+        // Auto-select best offer from filtered offers
+        const filtered = s.offers?.filter(
+          (o: OfferItem) => !o.product_id || o.product_id === productId
+        ) || [];
+        if (s.show_offers && filtered.length > 0) {
+          const best = filtered.find((o: OfferItem) => o.is_best);
+          setSelectedOfferId(best?.id || filtered[0].id);
         }
       }
     })();
