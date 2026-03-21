@@ -446,6 +446,52 @@ export default function AdminCodForm() {
           </div>
         </div>
       )}
+
+      {/* Pixels Tab */}
+      {activeTab === "pixels" && (
+        <div className="space-y-6">
+          <div className="bg-card rounded-xl border border-border p-6 space-y-6">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-foreground">أكواد التتبع (Pixels)</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">أضف معرفات البيكسل لتتبع التحويلات والأحداث على متجرك</p>
+
+            <div className="space-y-5">
+              {pixelSections.map((section) => (
+                <div key={section.idKey} className="border border-border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {section.icon}
+                      <span className="font-medium text-sm text-foreground">{section.title}</span>
+                    </div>
+                    <Switch
+                      checked={pixels[section.enabledKey] as boolean}
+                      onCheckedChange={(v) => updatePixel(section.enabledKey, v)}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">معرف البيكسل</Label>
+                    <Input
+                      value={pixels[section.idKey] as string}
+                      onChange={(e) => updatePixel(section.idKey, e.target.value)}
+                      placeholder={section.placeholder}
+                      dir="ltr"
+                      className="mt-1 font-mono text-sm"
+                    />
+                  </div>
+                  {pixels[section.idKey] && pixels[section.enabledKey] && (
+                    <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 dark:bg-green-950/30 rounded-lg p-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      مفعل
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
