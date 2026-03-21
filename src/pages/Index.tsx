@@ -28,7 +28,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [storeName, setStoreName] = useState("");
   const [heroTitle, setHeroTitle] = useState("عروض ما تتفوت");
-  const [announcementText, setAnnouncementText] = useState("توصيل مجاني للطلبات فوق 200 ريال");
+  const [announcementText, setAnnouncementText] = useState("توصيل مجاني في جميع أنحاء المملكة");
 
   useEffect(() => {
     const fetchData = async () => {
