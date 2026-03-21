@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
-import { Save, Store, Truck, CreditCard, Loader2 } from "lucide-react";
+import { Save, Store, Truck, CreditCard, Loader2, ImageIcon, Upload, X, FileText, Mail, Phone, Type } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -21,12 +22,27 @@ export default function AdminSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Store info
   const [storeName, setStoreName] = useState("");
+  const [storeDescription, setStoreDescription] = useState("");
   const [supportEmail, setSupportEmail] = useState("");
   const [supportPhone, setSupportPhone] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Shipping
   const [fixedRate, setFixedRate] = useState("30");
   const [freeThreshold, setFreeThreshold] = useState("200");
+
+  // Payment
   const [codEnabled, setCodEnabled] = useState(true);
+
+  // Pages
+  const [aboutText, setAboutText] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [faqText, setFaqText] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -36,13 +52,20 @@ export default function AdminSettings() {
           const v = row.value as any;
           if (row.key === "store_info") {
             setStoreName(v.name || "");
+            setStoreDescription(v.description || "");
             setSupportEmail(v.support_email || "");
             setSupportPhone(v.support_phone || "");
+            setLogoUrl(v.logo_url || "");
           } else if (row.key === "shipping") {
             setFixedRate(String(v.fixed_rate ?? 30));
             setFreeThreshold(String(v.free_shipping_threshold ?? 200));
           } else if (row.key === "payment") {
             setCodEnabled(v.cod_enabled ?? true);
+          } else if (row.key === "pages") {
+            setAboutText(v.about || "");
+            setContactEmail(v.contact_email || "");
+            setContactPhone(v.contact_phone || "");
+            setFaqText(v.faq || "");
           }
         }
       }
@@ -50,20 +73,73 @@ export default function AdminSettings() {
     })();
   }, []);
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `store/logo-${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(path, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(path);
+
+      setLogoUrl(urlData.publicUrl);
+      toast({ title: "✅ تم رفع الشعار بنجاح" });
+    } catch {
+      toast({ title: "خطأ", description: "فشل رفع الشعار", variant: "destructive" });
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      await supabase.from("store_settings").update({
-        value: { name: storeName, support_email: supportEmail, support_phone: supportPhone },
-      }).eq("key", "store_info");
+      // Store info (upsert)
+      await supabase.from("store_settings").upsert({
+        key: "store_info",
+        value: {
+          name: storeName,
+          description: storeDescription,
+          support_email: supportEmail,
+          support_phone: supportPhone,
+          logo_url: logoUrl,
+        } as any,
+      }, { onConflict: "key" });
 
-      await supabase.from("store_settings").update({
-        value: { fixed_rate: parseFloat(fixedRate) || 0, free_shipping_threshold: parseFloat(freeThreshold) || 0 },
-      }).eq("key", "shipping");
+      // Shipping
+      await supabase.from("store_settings").upsert({
+        key: "shipping",
+        value: {
+          fixed_rate: parseFloat(fixedRate) || 0,
+          free_shipping_threshold: parseFloat(freeThreshold) || 0,
+        } as any,
+      }, { onConflict: "key" });
 
-      await supabase.from("store_settings").update({
-        value: { cod_enabled: codEnabled },
-      }).eq("key", "payment");
+      // Payment
+      await supabase.from("store_settings").upsert({
+        key: "payment",
+        value: { cod_enabled: codEnabled } as any,
+      }, { onConflict: "key" });
+
+      // Pages
+      await supabase.from("store_settings").upsert({
+        key: "pages",
+        value: {
+          about: aboutText,
+          contact_email: contactEmail,
+          contact_phone: contactPhone,
+          faq: faqText,
+        } as any,
+      }, { onConflict: "key" });
 
       toast({ title: "✅ تم حفظ الإعدادات بنجاح" });
     } catch {
@@ -93,7 +169,7 @@ export default function AdminSettings() {
         <p className="text-sm text-muted-foreground mt-1">إدارة إعدادات متجرك وتخصيصه</p>
       </motion.div>
 
-      {/* Store Info Card */}
+      {/* ═══ Store Branding Card ═══ */}
       <motion.div
         className="admin-card"
         variants={fadeUp}
@@ -103,57 +179,198 @@ export default function AdminSettings() {
       >
         <div className="flex items-start gap-4 mb-6">
           <div className="admin-icon-box">
-            <Store className="w-5 h-5" />
+            <ImageIcon className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">معلومات المتجر</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">اسم المتجر وبيانات الدعم</p>
+            <h3 className="font-semibold text-foreground">هوية المتجر</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">الشعار والوصف والاسم</p>
           </div>
         </div>
-        <div className="space-y-4">
+
+        <div className="space-y-5">
+          {/* Logo Upload */}
+          <div>
+            <Label className="text-xs font-medium text-muted-foreground mb-2 block">شعار المتجر</Label>
+            <div className="flex items-center gap-4">
+              {logoUrl ? (
+                <div className="relative group">
+                  <div className="w-20 h-20 rounded-xl border-2 border-border overflow-hidden bg-muted/30 flex items-center justify-center">
+                    <img src={logoUrl} alt="شعار المتجر" className="w-full h-full object-contain p-1" />
+                  </div>
+                  <button
+                    onClick={() => setLogoUrl("")}
+                    className="absolute -top-2 -left-2 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onClick={() => logoInputRef.current?.click()}
+                  className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 flex flex-col items-center justify-center cursor-pointer transition-colors"
+                >
+                  {uploadingLogo ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    <>
+                      <Upload className="w-5 h-5 text-muted-foreground mb-1" />
+                      <span className="text-[10px] text-muted-foreground">رفع شعار</span>
+                    </>
+                  )}
+                </div>
+              )}
+              {logoUrl && (
+                <button
+                  onClick={() => logoInputRef.current?.click()}
+                  className="text-xs text-primary hover:underline"
+                >
+                  {uploadingLogo ? "جاري الرفع..." : "تغيير الشعار"}
+                </button>
+              )}
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleLogoUpload}
+              />
+            </div>
+          </div>
+
+          {/* Store Name */}
           <div>
             <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">اسم المتجر</Label>
             <div className="relative">
-              <Store className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+              <Type className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
               <Input
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
                 className="admin-input pr-10"
+                placeholder="اسم متجرك"
               />
             </div>
           </div>
+
+          {/* Store Description */}
+          <div>
+            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">وصف المتجر</Label>
+            <Textarea
+              value={storeDescription}
+              onChange={(e) => setStoreDescription(e.target.value)}
+              className="admin-input min-h-[80px] resize-none"
+              placeholder="وصف قصير يظهر في الفوتر وصفحة من نحن"
+            />
+          </div>
+
+          {/* Contact Info */}
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">بريد الدعم</Label>
-              <Input
-                value={supportEmail}
-                onChange={(e) => setSupportEmail(e.target.value)}
-                dir="ltr"
-                className="admin-input text-left"
-                placeholder="support@store.com"
-              />
+              <div className="relative">
+                <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                <Input
+                  value={supportEmail}
+                  onChange={(e) => setSupportEmail(e.target.value)}
+                  dir="ltr"
+                  className="admin-input text-left pr-10"
+                  placeholder="support@store.com"
+                />
+              </div>
             </div>
             <div>
               <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">هاتف الدعم</Label>
-              <Input
-                value={supportPhone}
-                onChange={(e) => setSupportPhone(e.target.value)}
-                dir="ltr"
-                className="admin-input text-left"
-                placeholder="+966 5XX XXX XXXX"
-              />
+              <div className="relative">
+                <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                <Input
+                  value={supportPhone}
+                  onChange={(e) => setSupportPhone(e.target.value)}
+                  dir="ltr"
+                  className="admin-input text-left pr-10"
+                  placeholder="+966 5XX XXX XXXX"
+                />
+              </div>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Shipping Card */}
+      {/* ═══ Pages Content Card ═══ */}
       <motion.div
         className="admin-card"
         variants={fadeUp}
         initial="hidden"
         animate="visible"
         custom={1}
+      >
+        <div className="flex items-start gap-4 mb-6">
+          <div className="admin-icon-box">
+            <FileText className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">محتوى الصفحات</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">تعديل نصوص صفحات المتجر</p>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          {/* About Us */}
+          <div>
+            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">صفحة "من نحن"</Label>
+            <Textarea
+              value={aboutText}
+              onChange={(e) => setAboutText(e.target.value)}
+              className="admin-input min-h-[100px] resize-none"
+              placeholder="نبذة عن متجرك وقصته..."
+            />
+          </div>
+
+          {/* Contact Page */}
+          <div className="p-4 rounded-xl bg-muted/30 border border-border/50 space-y-3">
+            <p className="text-sm font-medium text-foreground">صفحة التواصل</p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">إيميل التواصل</Label>
+                <Input
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  dir="ltr"
+                  className="admin-input text-left"
+                  placeholder="contact@store.com"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">هاتف التواصل</Label>
+                <Input
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  dir="ltr"
+                  className="admin-input text-left"
+                  placeholder="+966 5XX XXX XXXX"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* FAQ */}
+          <div>
+            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">الأسئلة الشائعة</Label>
+            <Textarea
+              value={faqText}
+              onChange={(e) => setFaqText(e.target.value)}
+              className="admin-input min-h-[100px] resize-none"
+              placeholder="اكتب الأسئلة الشائعة وإجاباتها..."
+            />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ═══ Shipping Card ═══ */}
+      <motion.div
+        className="admin-card"
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+        custom={2}
       >
         <div className="flex items-start gap-4 mb-6">
           <div className="admin-icon-box">
@@ -191,13 +408,13 @@ export default function AdminSettings() {
         </div>
       </motion.div>
 
-      {/* Payment Card */}
+      {/* ═══ Payment Card ═══ */}
       <motion.div
         className="admin-card"
         variants={fadeUp}
         initial="hidden"
         animate="visible"
-        custom={2}
+        custom={3}
       >
         <div className="flex items-start gap-4 mb-6">
           <div className="admin-icon-box">
