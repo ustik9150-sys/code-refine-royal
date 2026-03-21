@@ -244,8 +244,8 @@ function LivePreview({ settings, mobileView }: { settings: CodFormSettings; mobi
                   onClick={() => setSelectedOffer(offer.id)}
                   className={`relative rounded-xl border-2 p-3 cursor-pointer transition-all duration-200 ${
                     selectedOffer === offer.id
-                      ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
-                      : "border-border/50 hover:border-primary/30"
+                      ? "border-destructive bg-destructive/5 shadow-md shadow-destructive/10"
+                      : "border-border/50 hover:border-destructive/30"
                   }`}
                 >
                   {offer.label && (
