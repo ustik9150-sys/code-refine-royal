@@ -61,6 +61,8 @@ function ProductCard({ product, index, onEdit, onDelete, onDuplicate }: {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onDuplicate: (p: Product) => void;
+  onView: (id: string) => void;
+  onCopyLink: (id: string, name: string) => void;
 }) {
   const { currency } = useCurrency();
   const cs = currency.symbol;
