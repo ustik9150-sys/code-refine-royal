@@ -419,12 +419,16 @@ export default function AdminOrders() {
     }
   };
 
-  const deleteOrder = async (orderId: string) => {
-    const { error } = await supabase.from("orders").delete().eq("id", orderId);
+  const [deleteOrderTarget, setDeleteOrderTarget] = useState<string | null>(null);
+
+  const confirmDeleteOrder = async () => {
+    if (!deleteOrderTarget) return;
+    const { error } = await supabase.from("orders").delete().eq("id", deleteOrderTarget);
     if (!error) {
       toast({ title: "تم حذف الطلب" });
       fetchOrders();
     }
+    setDeleteOrderTarget(null);
   };
 
   const saveNotes = async () => {

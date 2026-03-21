@@ -414,6 +414,14 @@ export default function AdminProducts() {
           </AnimatePresence>
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="حذف المنتج"
+        description="هل أنت متأكد أنك تريد حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء."
+      />
     </div>
   );
 }
