@@ -265,14 +265,18 @@ export default function AdminProducts() {
     return { total, outOfStock, totalRevenue, topProduct };
   }, [products]);
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("products").delete().eq("id", id);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("products").delete().eq("id", deleteTarget);
     if (!error) {
       toast({ title: "تم حذف المنتج" });
-      setProducts(prev => prev.filter(p => p.id !== id));
+      setProducts(prev => prev.filter(p => p.id !== deleteTarget));
     } else {
       toast({ title: "خطأ", description: "فشل حذف المنتج", variant: "destructive" });
     }
+    setDeleteTarget(null);
   };
 
   const handleDuplicate = async (product: Product) => {
