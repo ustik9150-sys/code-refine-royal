@@ -133,6 +133,9 @@ const Index = () => {
             </div>
           )}
         </section>
+
+        {/* Testimonials */}
+        <TestimonialsSection />
       </main>
 
       <StoreFooter />
