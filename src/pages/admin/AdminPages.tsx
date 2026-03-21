@@ -110,8 +110,11 @@ export default function AdminPages() {
     ]);
   };
 
+  const [deleteLinkTarget, setDeleteLinkTarget] = useState<string | null>(null);
+
   const removeLink = (id: string) => {
     setFooterLinks((prev) => prev.filter((l) => l.id !== id));
+    setDeleteLinkTarget(null);
   };
 
   const updateLink = (id: string, field: keyof FooterLink, value: any) => {
