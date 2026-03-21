@@ -12,6 +12,7 @@ import FAQ from "./pages/FAQ";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import ThankYou from "./pages/ThankYou";
+import OrderLanding from "./pages/OrderLanding";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/thank-you" element={<ThankYou />} />
+          <Route path="/order" element={<OrderLanding />} />
 
           {/* Admin Dashboard */}
           <Route path="/admin" element={<AdminLayout />}>
