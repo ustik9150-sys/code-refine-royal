@@ -199,17 +199,17 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
                       <div className="flex items-center gap-2.5">
                         {/* Radio circle */}
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                          isSelected ? "border-primary" : "border-muted-foreground/30"
+                          isSelected ? "border-destructive" : "border-muted-foreground/30"
                         }`}>
                           {isSelected && (
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="w-2.5 h-2.5 rounded-full bg-primary"
+                              className="w-2.5 h-2.5 rounded-full bg-destructive"
                             />
                           )}
                         </div>
-                        <span className="text-sm font-bold text-foreground">{offer.quantity} قطعة</span>
+                        <span className="text-sm font-bold text-foreground">{offer.title || `${offer.quantity} قطعة`}</span>
                       </div>
 
                       <div className="flex items-baseline gap-2">
