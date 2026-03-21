@@ -152,7 +152,24 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
         {/* Customer */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground truncate">{order.customer_name}</p>
-          <p className="text-xs text-muted-foreground">{order.city || "—"} · {formatDate(order.created_at)}</p>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            {order.ip_city && order.ip_country && order.ip_city !== "غير معروف" ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center gap-1 text-muted-foreground">
+                      <MapPin className="w-3 h-3" />
+                      {order.ip_city}، {order.ip_country}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom"><p>موقع العميل حسب IP</p></TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <span>{order.city || "—"}</span>
+            )}
+            <span>· {formatDate(order.created_at)}</span>
+          </p>
         </div>
 
         {/* Total */}
