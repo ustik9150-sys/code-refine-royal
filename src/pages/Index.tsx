@@ -229,9 +229,6 @@ function ProductCard({ product, index, currencySymbol }: { product: Product; ind
   );
 }
 
-export default Index;
-  {
-    name: "علي الخرمي",
     text: "منتجات رائعة وجودة عالية، التوصيل كان سريع جداً والتغليف ممتاز. أنصح الجميع بالتجربة!",
     rating: 5,
     avatar: avatar1,
