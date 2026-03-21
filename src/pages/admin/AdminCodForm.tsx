@@ -73,17 +73,33 @@ export default function AdminCodForm() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<CodFormSettings>(DEFAULT_SETTINGS);
-  const [activeTab, setActiveTab] = useState<"builder" | "design" | "messages">("builder");
+  const [pixels, setPixels] = useState<PixelConfig>(defaultPixels);
+  const [activeTab, setActiveTab] = useState<"builder" | "design" | "messages" | "pixels">("builder");
 
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("store_settings")
         .select("*")
-        .eq("key", "cod_form")
-        .maybeSingle();
-      if (data?.value) {
-        setSettings({ ...DEFAULT_SETTINGS, ...(data.value as any) });
+        .in("key", ["cod_form", "tracking"]);
+      if (data) {
+        for (const row of data) {
+          const v = row.value as any;
+          if (row.key === "cod_form") {
+            setSettings({ ...DEFAULT_SETTINGS, ...v });
+          } else if (row.key === "tracking") {
+            setPixels({
+              facebook_pixel_id: v.facebook_pixel_id || "",
+              facebook_enabled: v.facebook_enabled ?? v.pixel_enabled ?? false,
+              snapchat_pixel_id: v.snapchat_pixel_id || "",
+              snapchat_enabled: v.snapchat_enabled ?? false,
+              tiktok_pixel_id: v.tiktok_pixel_id || "",
+              tiktok_enabled: v.tiktok_enabled ?? false,
+              google_ads_id: v.google_ads_id || "",
+              google_ads_enabled: v.google_ads_enabled ?? false,
+            });
+          }
+        }
       }
       setLoading(false);
     })();
