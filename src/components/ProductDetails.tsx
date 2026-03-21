@@ -213,6 +213,16 @@ const ProductDetails = () => {
           )}
         </div>
 
+        {/* Inline Order Form */}
+        <div className="mb-5">
+          <InlineOrderForm
+            productName={product?.name_ar || "منتج"}
+            productId={product?.id}
+            unitPrice={price}
+            quantity={quantity}
+          />
+        </div>
+
         {/* Model number */}
         <section className="bg-background p-4 rounded-md mb-5 border border-border">
           <div className="flex items-center justify-between">
