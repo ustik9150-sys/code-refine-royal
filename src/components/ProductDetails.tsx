@@ -33,7 +33,7 @@ type Product = {
   tags: string[] | null;
 };
 
-const ProductDetails = () => {
+const ProductDetails = ({ productId }: { productId?: string }) => {
   const { currency } = useCurrency();
   const currencySymbol = currency.symbol;
   const [quantity, setQuantity] = useState(1);
@@ -47,13 +47,15 @@ const ProductDetails = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("*")
-        .eq("status", "active")
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
+      let query = supabase.from("products").select("*");
+      
+      if (productId) {
+        query = query.eq("id", productId);
+      } else {
+        query = query.eq("status", "active").order("created_at", { ascending: true }).limit(1);
+      }
+      
+      const { data } = await query.maybeSingle();
 
       if (data) {
         setProduct(data as Product);
@@ -67,7 +69,7 @@ const ProductDetails = () => {
       }
       setLoading(false);
     })();
-  }, []);
+  }, [productId]);
 
   const handleBuyNow = useCallback(() => {
     const hasProfile = localStorage.getItem("customer_first_name") && localStorage.getItem("customer_phone");
