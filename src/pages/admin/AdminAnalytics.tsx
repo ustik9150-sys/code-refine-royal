@@ -45,7 +45,7 @@ function AnimatedCounter({ target, duration = 1500, prefix = "", suffix = "" }: 
     return () => { if (ref.current) cancelAnimationFrame(ref.current); };
   }, [target, duration]);
 
-  return <span>{prefix}{count.toLocaleString("ar-SA")}{suffix}</span>;
+  return <span>{prefix}{count.toLocaleString("en-US")}{suffix}</span>;
 }
 
 // --- Stat Card ---
