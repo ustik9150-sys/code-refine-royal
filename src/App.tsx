@@ -20,6 +20,7 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminProductEdit from "./pages/admin/AdminProductEdit";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminCodForm from "./pages/admin/AdminCodForm";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 
 const queryClient = new QueryClient();
 
