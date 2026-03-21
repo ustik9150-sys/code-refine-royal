@@ -1,19 +1,15 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Eye, Plus, Package, Star, Quote } from "lucide-react";
+import { Heart, Eye, Plus, Package } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/useCurrency";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
+import TestimonialsSection from "@/components/TestimonialsSection";
 import TrackingPixels from "@/components/TrackingPixels";
 import { useTrackVisit } from "@/hooks/useTrackVisit";
 import { Skeleton } from "@/components/ui/skeleton";
-import avatar1 from "@/assets/testimonial-1.jpg";
-import avatar2 from "@/assets/testimonial-2.jpg";
-import avatar3 from "@/assets/testimonial-3.jpg";
-import avatar4 from "@/assets/testimonial-4.jpg";
-import avatar5 from "@/assets/testimonial-5.jpg";
 
 type Product = {
   id: string;
