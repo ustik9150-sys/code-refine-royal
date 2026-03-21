@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { Save, Truck, CreditCard, Loader2, ImageIcon, Upload, X, Mail, Phone, Type } from "lucide-react";
+import { Save, Truck, CreditCard, Loader2, ImageIcon, Upload, X, Mail, Phone, Type, Coins } from "lucide-react";
+import { CURRENCIES, invalidateCurrencyCache } from "@/hooks/useCurrency";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -30,6 +32,8 @@ export default function AdminSettings() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
+  const [currency, setCurrency] = useState("SAR");
+
   const [fixedRate, setFixedRate] = useState("30");
   const [freeThreshold, setFreeThreshold] = useState("200");
   const [codEnabled, setCodEnabled] = useState(true);
@@ -46,6 +50,7 @@ export default function AdminSettings() {
             setSupportEmail(v.support_email || "");
             setSupportPhone(v.support_phone || "");
             setLogoUrl(v.logo_url || "");
+            setCurrency(v.currency || "SAR");
           } else if (row.key === "shipping") {
             setFixedRate(String(v.fixed_rate ?? 30));
             setFreeThreshold(String(v.free_shipping_threshold ?? 200));
@@ -84,8 +89,10 @@ export default function AdminSettings() {
     try {
       await supabase.from("store_settings").upsert({
         key: "store_info",
-        value: { name: storeName, description: storeDescription, support_email: supportEmail, support_phone: supportPhone, logo_url: logoUrl } as any,
+        value: { name: storeName, description: storeDescription, support_email: supportEmail, support_phone: supportPhone, logo_url: logoUrl, currency } as any,
       }, { onConflict: "key" });
+
+      invalidateCurrencyCache();
 
       await supabase.from("store_settings").upsert({
         key: "shipping",
@@ -194,8 +201,41 @@ export default function AdminSettings() {
         </div>
       </motion.div>
 
-      {/* Shipping */}
+      {/* Currency */}
       <motion.div className="admin-card" variants={fadeUp} initial="hidden" animate="visible" custom={1}>
+        <div className="flex items-start gap-4 mb-6">
+          <div className="admin-icon-box"><Coins className="w-5 h-5" /></div>
+          <div>
+            <h3 className="font-semibold text-foreground">عملة المتجر</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">العملة المستخدمة في عرض الأسعار</p>
+          </div>
+        </div>
+        <div>
+          <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">اختر العملة</Label>
+          <Select value={currency} onValueChange={setCurrency}>
+            <SelectTrigger className="admin-input">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CURRENCIES.map((c) => (
+                <SelectItem key={c.code} value={c.code}>
+                  <span className="flex items-center gap-2">
+                    <span className="font-bold">{c.symbol}</span>
+                    <span>{c.name_ar}</span>
+                    <span className="text-muted-foreground text-xs">({c.code})</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="mt-3 p-3 rounded-xl bg-muted/50 text-xs text-muted-foreground">
+            💡 العملة الحالية: <span className="font-bold text-foreground">{CURRENCIES.find(c => c.code === currency)?.name_ar} ({CURRENCIES.find(c => c.code === currency)?.symbol})</span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Shipping */}
+      <motion.div className="admin-card" variants={fadeUp} initial="hidden" animate="visible" custom={2}>
         <div className="flex items-start gap-4 mb-6">
           <div className="admin-icon-box"><Truck className="w-5 h-5" /></div>
           <div>
@@ -205,16 +245,16 @@ export default function AdminSettings() {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">سعر الشحن الثابت (ر.س)</Label>
+            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">سعر الشحن الثابت ({CURRENCIES.find(c => c.code === currency)?.symbol})</Label>
             <Input type="number" value={fixedRate} onChange={(e) => setFixedRate(e.target.value)} dir="ltr" className="admin-input text-left" />
           </div>
           <div>
-            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">حد الشحن المجاني (ر.س)</Label>
+            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">حد الشحن المجاني ({CURRENCIES.find(c => c.code === currency)?.symbol})</Label>
             <Input type="number" value={freeThreshold} onChange={(e) => setFreeThreshold(e.target.value)} dir="ltr" className="admin-input text-left" />
           </div>
         </div>
         <div className="mt-4 p-3 rounded-xl bg-muted/50 text-xs text-muted-foreground">
-          💡 الطلبات فوق <span className="font-bold text-foreground">{freeThreshold} ر.س</span> ستحصل على شحن مجاني
+          💡 الطلبات فوق <span className="font-bold text-foreground">{freeThreshold} {CURRENCIES.find(c => c.code === currency)?.symbol}</span> ستحصل على شحن مجاني
         </div>
       </motion.div>
 

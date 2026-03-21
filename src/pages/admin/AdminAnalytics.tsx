@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/hooks/useCurrency";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ShoppingCart,
@@ -194,6 +195,8 @@ function getLast7Days(): string[] {
 
 // --- Main Component ---
 export default function AdminAnalytics() {
+  const { currency } = useCurrency();
+  const cs = ` ${currency.symbol}`;
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, totalOrders: 0, totalRevenue: 0 });
   const [recentOrders, setRecentOrders] = useState<{ name: string; city: string; time: string }[]>([]);
@@ -274,11 +277,11 @@ export default function AdminAnalytics() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={ShoppingCart} label="طلبات اليوم" value={stats.todayOrders}
           gradient="hsl(250 80% 65%), hsl(280 70% 55%)" delay={0.1} />
-        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} suffix=" ر.س"
+        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} suffix={cs}
           gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.15} />
         <StatCard icon={TrendingUp} label="إجمالي الطلبات" value={stats.totalOrders}
           gradient="hsl(340 75% 55%), hsl(20 80% 55%)" delay={0.2} />
-        <StatCard icon={BarChart3} label="إجمالي الإيرادات" value={stats.totalRevenue} suffix=" ر.س"
+        <StatCard icon={BarChart3} label="إجمالي الإيرادات" value={stats.totalRevenue} suffix={cs}
           gradient="hsl(200 80% 55%), hsl(220 70% 60%)" delay={0.25} />
       </div>
 

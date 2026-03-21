@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { User, Phone, MapPin, Minus, Plus, ShieldCheck, Truck, Package, Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface CodOrderFormProps {
   productName: string;
@@ -11,6 +12,8 @@ interface CodOrderFormProps {
 }
 
 const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, productImage }: CodOrderFormProps) => {
+  const { currency } = useCurrency();
+  const cs = currency.symbol;
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
@@ -97,7 +100,7 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">الإجمالي</span>
-              <span className="font-bold text-foreground">{totalPrice} ر.س</span>
+              <span className="font-bold text-foreground">{totalPrice} {cs}</span>
             </div>
           </div>
           <p className="text-xs text-muted-foreground">طريقة الدفع: الدفع عند الاستلام</p>
@@ -126,9 +129,9 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-foreground truncate">{productName}</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-base font-bold text-foreground">{unitPrice} ر.س</span>
+                <span className="text-base font-bold text-foreground">{unitPrice} {cs}</span>
                 {compareAtPrice && compareAtPrice > unitPrice && (
-                  <span className="text-xs text-muted-foreground line-through">{compareAtPrice} ر.س</span>
+                  <span className="text-xs text-muted-foreground line-through">{compareAtPrice} {cs}</span>
                 )}
               </div>
             </div>
@@ -208,7 +211,7 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
                 <Plus className="w-4 h-4 text-foreground" />
               </button>
               <div className="flex-1 text-left">
-                <span className="text-lg font-bold text-foreground">{totalPrice} ر.س</span>
+                <span className="text-lg font-bold text-foreground">{totalPrice} {cs}</span>
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface SaveBadgeProps {
   amount: number;
@@ -11,11 +11,12 @@ const SarIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
 );
 
 const SaveBadge = ({ amount }: SaveBadgeProps) => {
+  const { currency } = useCurrency();
   return (
     <div dir="ltr" className="inline-flex items-center rounded-none border border-red-800 bg-background overflow-hidden h-7">
       {/* Text section - left side */}
       <span dir="rtl" className="flex items-center gap-1 px-2 text-sale font-bold text-xs whitespace-nowrap">
-        وفر {amount.toFixed(2)} ر.س
+        وفر {amount.toFixed(2)} {currency.symbol}
       </span>
 
       {/* Dotted divider */}

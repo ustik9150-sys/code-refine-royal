@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/hooks/useCurrency";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -107,6 +108,8 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
   onDelete: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const { currency } = useCurrency();
+  const cs = currency.symbol;
   const status = STATUS_MAP[order.status] || STATUS_MAP.pending;
   const orderIsNew = isNew(order.created_at);
 
@@ -147,7 +150,7 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
 
         {/* Total */}
         <div className="text-left min-w-[80px] hidden sm:block">
-          <p className="text-sm font-bold text-foreground">{order.total.toLocaleString("en-US")} ر.س</p>
+          <p className="text-sm font-bold text-foreground">{order.total.toLocaleString("en-US")} {cs}</p>
           <p className="text-[10px] text-muted-foreground">{PAYMENT_MAP[order.payment_method] || order.payment_method}</p>
         </div>
 
@@ -205,7 +208,7 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">المجموع</p>
-                  <p className="font-bold">{order.total.toLocaleString("en-US")} ر.س</p>
+                  <p className="font-bold">{order.total.toLocaleString("en-US")} {cs}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">المدينة</p>
@@ -299,6 +302,8 @@ function EmptyState() {
 
 // === MAIN ===
 export default function AdminOrders() {
+  const { currency } = useCurrency();
+  const cs = currency.symbol;
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -466,7 +471,7 @@ export default function AdminOrders() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={ShoppingCart} label="طلبات اليوم" value={stats.todayCount}
           gradient="hsl(250 80% 65%), hsl(280 70% 55%)" delay={0.05} />
-        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} suffix=" ر.س"
+        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} suffix={` ${cs}`}
           gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.1} />
         <StatCard icon={Clock} label="قيد الانتظار" value={stats.pending}
           gradient="hsl(40 85% 55%), hsl(30 80% 50%)" delay={0.15} />
@@ -581,7 +586,7 @@ export default function AdminOrders() {
                             <TableRow key={item.id}>
                               <TableCell className="text-sm">{item.product_name}</TableCell>
                               <TableCell className="text-sm">{item.quantity}</TableCell>
-                              <TableCell className="text-sm">{item.total_price} ر.س</TableCell>
+                              <TableCell className="text-sm">{item.total_price} {cs}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>

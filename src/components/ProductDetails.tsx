@@ -8,6 +8,7 @@ import InlineOrderForm from "@/components/InlineOrderForm";
 import fallbackImage from "@/assets/product-main.jpg";
 import SaveBadge from "@/components/SaveBadge";
 import barcodeIcon from "@/assets/barcode-icon.png";
+import { useCurrency } from "@/hooks/useCurrency";
 import applePayIcon from "@/assets/apple_pay_mini.avif";
 import bankIcon from "@/assets/bank_mini.avif";
 import codIcon from "@/assets/cod_mini.avif";
@@ -33,6 +34,8 @@ type Product = {
 };
 
 const ProductDetails = () => {
+  const { currency } = useCurrency();
+  const currencySymbol = currency.symbol;
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showLoginSheet, setShowLoginSheet] = useState(false);
@@ -169,9 +172,9 @@ const ProductDetails = () => {
 
         {/* Price */}
         <div className="flex items-center gap-4 my-2 flex-wrap">
-          <span className="font-bold text-xl text-sale flex items-center gap-1">{price} ر.س</span>
+          <span className="font-bold text-xl text-sale flex items-center gap-1">{price} {currencySymbol}</span>
           {compareAtPrice > price && (
-            <span className="text-store-secondary line-through flex items-center gap-1">{compareAtPrice.toLocaleString()} ر.س</span>
+            <span className="text-store-secondary line-through flex items-center gap-1">{compareAtPrice.toLocaleString()} {currencySymbol}</span>
           )}
           {savings > 0 && <SaveBadge amount={savings} />}
         </div>

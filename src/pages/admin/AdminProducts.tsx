@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,8 @@ function ProductCard({ product, index, onEdit, onDelete, onDuplicate }: {
   onDelete: (id: string) => void;
   onDuplicate: (p: Product) => void;
 }) {
+  const { currency } = useCurrency();
+  const cs = currency.symbol;
   const thumb = product.images.find(i => i.is_main)?.url || product.images[0]?.url || null;
   const inStock = product.inventory > 0;
 
@@ -130,9 +133,9 @@ function ProductCard({ product, index, onEdit, onDelete, onDuplicate }: {
 
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-baseline gap-2">
-            <span className="text-base font-bold text-foreground">{product.price.toLocaleString("en-US")} ر.س</span>
+            <span className="text-base font-bold text-foreground">{product.price.toLocaleString("en-US")} {cs}</span>
             {product.compare_at_price && product.compare_at_price > product.price && (
-              <span className="text-xs text-muted-foreground line-through">{product.compare_at_price.toLocaleString("en-US")} ر.س</span>
+              <span className="text-xs text-muted-foreground line-through">{product.compare_at_price.toLocaleString("en-US")} {cs}</span>
             )}
           </div>
           <div className="flex items-center gap-1">
@@ -186,6 +189,8 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
 
 // === MAIN ===
 export default function AdminProducts() {
+  const { currency } = useCurrency();
+  const cs = currency.symbol;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -297,7 +302,7 @@ export default function AdminProducts() {
             gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.1} />
           <StatCard icon={AlertTriangle} label="نفذ المخزون" value={stats.outOfStock}
             gradient="hsl(0 70% 55%), hsl(20 80% 50%)" delay={0.15} />
-          <StatCard icon={DollarSign} label="إجمالي القيمة" value={products.reduce((s, p) => s + p.price * p.inventory, 0).toLocaleString("en-US")} suffix=" ر.س"
+          <StatCard icon={DollarSign} label="إجمالي القيمة" value={products.reduce((s, p) => s + p.price * p.inventory, 0).toLocaleString("en-US")} suffix={` ${cs}`}
             gradient="hsl(200 80% 55%), hsl(220 70% 60%)" delay={0.2} />
         </div>
       )}
