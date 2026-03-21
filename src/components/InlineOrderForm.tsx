@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { User, Phone, Loader2, ShoppingBag } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { User, Phone, MapPin, Loader2, ShoppingBag, CheckCircle, Shield, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
@@ -10,22 +10,78 @@ interface InlineOrderFormProps {
   quantity: number;
 }
 
+interface CodFormSettings {
+  form_title: string;
+  form_subtitle: string;
+  button_text: string;
+  button_color: string;
+  show_city_field: boolean;
+  city_field_required: boolean;
+  show_urgency_text: boolean;
+  urgency_text: string;
+  show_trust_badges: boolean;
+  trust_badge_1: string;
+  trust_badge_2: string;
+  trust_badge_3: string;
+  success_message: string;
+  name_placeholder: string;
+  phone_placeholder: string;
+  city_placeholder: string;
+}
+
+const DEFAULT_SETTINGS: CodFormSettings = {
+  form_title: "للطلب ادخل معلوماتك في الخانات اسفله",
+  form_subtitle: "",
+  button_text: "اضغط لتأكيد الطلب",
+  button_color: "destructive",
+  show_city_field: false,
+  city_field_required: false,
+  show_urgency_text: false,
+  urgency_text: "⚡ بقيت كميات محدودة!",
+  show_trust_badges: false,
+  trust_badge_1: "الدفع عند الاستلام",
+  trust_badge_2: "توصيل سريع",
+  trust_badge_3: "ضمان الجودة",
+  success_message: "تم تأكيد طلبك بنجاح!",
+  name_placeholder: "ادخل اسمك هنا",
+  phone_placeholder: "ادخل رقم هاتفك هنا",
+  city_placeholder: "المدينة / العنوان",
+};
+
 const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: InlineOrderFormProps) => {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [settings, setSettings] = useState<CodFormSettings>(DEFAULT_SETTINGS);
 
   const totalPrice = unitPrice * quantity;
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "cod_form")
+        .maybeSingle();
+      if (data?.value) {
+        setSettings((prev) => ({ ...prev, ...(data.value as any) }));
+      }
+    })();
+  }, []);
 
   const validate = useCallback(() => {
     const errs: Record<string, string> = {};
     if (!fullName.trim() || fullName.trim().length < 2) errs.fullName = "يرجى إدخال الاسم";
     if (!phone.trim()) errs.phone = "يرجى إدخال رقم الهاتف";
     else if (!/^[\+]?[0-9\s\-]{7,15}$/.test(phone.trim())) errs.phone = "رقم الهاتف غير صالح";
+    if (settings.show_city_field && settings.city_field_required && !city.trim()) {
+      errs.city = "يرجى إدخال المدينة";
+    }
     return errs;
-  }, [fullName, phone]);
+  }, [fullName, phone, city, settings]);
 
   const handleSubmit = useCallback(async () => {
     const errs = validate();
@@ -40,6 +96,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
         .insert({
           customer_name: fullName.trim(),
           customer_phone: phone.trim(),
+          address: city.trim() || null,
           payment_method: "cod" as const,
           shipping_method: "standard" as const,
           subtotal: totalPrice,
@@ -48,7 +105,6 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
         });
 
       if (orderError) throw orderError;
-
       navigate(`/thank-you`);
     } catch (err) {
       console.error("Order creation failed:", err);
@@ -56,7 +112,14 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
     } finally {
       setSubmitting(false);
     }
-  }, [validate, submitting, fullName, phone, totalPrice, productId, productName, quantity, unitPrice, navigate]);
+  }, [validate, submitting, fullName, phone, city, totalPrice, navigate]);
+
+  const btnColorClass =
+    settings.button_color === "primary"
+      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+      : settings.button_color === "green"
+      ? "bg-emerald-600 text-white hover:bg-emerald-700"
+      : "bg-destructive text-destructive-foreground hover:bg-destructive/90";
 
   return (
     <div className="w-full animate-fade-in" dir="rtl">
@@ -64,8 +127,11 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
         {/* Header */}
         <div className="px-5 py-4 text-center">
           <h3 className="text-lg md:text-xl font-bold text-foreground leading-relaxed">
-            للطلب ادخل معلوماتك في الخانات اسفله
+            {settings.form_title}
           </h3>
+          {settings.form_subtitle && (
+            <p className="text-xs text-muted-foreground mt-1">{settings.form_subtitle}</p>
+          )}
         </div>
 
         {/* Form */}
@@ -81,7 +147,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
                 type="text"
                 value={fullName}
                 onChange={(e) => { setFullName(e.target.value); setErrors((er) => ({ ...er, fullName: "" })); }}
-                placeholder="ادخل اسمك هنا"
+                placeholder={settings.name_placeholder}
                 className="w-full h-12 rounded-xl border border-input bg-background pr-14 pl-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40 transition-all"
                 style={{ fontSize: "16px" }}
               />
@@ -100,7 +166,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
                 type="tel"
                 value={phone}
                 onChange={(e) => { setPhone(e.target.value); setErrors((er) => ({ ...er, phone: "" })); }}
-                placeholder="ادخل رقم هاتفك هنا"
+                placeholder={settings.phone_placeholder}
                 dir="ltr"
                 className="w-full h-12 rounded-xl border border-input bg-background pr-14 pl-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40 transition-all text-right"
                 style={{ fontSize: "16px" }}
@@ -109,11 +175,40 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
             {errors.phone && <p className="text-destructive text-xs font-medium animate-fade-in">{errors.phone}</p>}
           </div>
 
+          {/* City (conditional) */}
+          {settings.show_city_field && (
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-foreground text-right block">
+                المدينة / العنوان
+                {settings.city_field_required && <span className="text-destructive">*</span>}
+              </label>
+              <div className="relative">
+                <div className="absolute right-0 top-0 h-12 w-12 rounded-r-xl bg-muted flex items-center justify-center border border-input border-r-0">
+                  <MapPin className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => { setCity(e.target.value); setErrors((er) => ({ ...er, city: "" })); }}
+                  placeholder={settings.city_placeholder}
+                  className="w-full h-12 rounded-xl border border-input bg-background pr-14 pl-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40 transition-all"
+                  style={{ fontSize: "16px" }}
+                />
+              </div>
+              {errors.city && <p className="text-destructive text-xs font-medium animate-fade-in">{errors.city}</p>}
+            </div>
+          )}
+
+          {/* Urgency text */}
+          {settings.show_urgency_text && (
+            <p className="text-center text-sm font-bold text-destructive animate-pulse">{settings.urgency_text}</p>
+          )}
+
           {/* CTA Button */}
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full h-14 rounded-xl font-bold text-base text-destructive-foreground bg-destructive hover:bg-destructive/90 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100 flex items-center justify-center gap-2.5 animate-[pulse-scale_1.5s_ease-in-out_infinite]"
+            className={`w-full h-14 rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100 flex items-center justify-center gap-2.5 animate-[pulse-scale_1.5s_ease-in-out_infinite] ${btnColorClass}`}
           >
             {submitting ? (
               <>
@@ -123,10 +218,22 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
             ) : (
               <>
                 <ShoppingBag className="w-5 h-5" />
-                <span>اضغط لتأكيد الطلب</span>
+                <span>{settings.button_text}</span>
               </>
             )}
           </button>
+
+          {/* Trust Badges */}
+          {settings.show_trust_badges && (
+            <div className="flex justify-center gap-4 pt-1">
+              {[settings.trust_badge_1, settings.trust_badge_2, settings.trust_badge_3].filter(Boolean).map((badge, i) => (
+                <span key={i} className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <CheckCircle className="w-3 h-3 text-emerald-500" />
+                  {badge}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

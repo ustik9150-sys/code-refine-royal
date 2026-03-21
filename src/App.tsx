@@ -18,6 +18,7 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminProductEdit from "./pages/admin/AdminProductEdit";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminCodForm from "./pages/admin/AdminCodForm";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="orders" element={<AdminOrders />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="products/:id" element={<AdminProductEdit />} />
+            <Route path="cod-form" element={<AdminCodForm />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
 
