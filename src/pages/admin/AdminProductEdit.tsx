@@ -242,7 +242,7 @@ export default function AdminProductEdit() {
       inventory: parseInt(inventory) || 0,
       sku: null,
       category: category.trim() || null,
-      tags: [],
+      tags: tags,
       status: publish ? "active" : isActive ? "active" : "draft",
     };
 
