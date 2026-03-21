@@ -84,6 +84,8 @@ function StatCard({ icon: Icon, label, value, prefix, suffix, gradient, delay }:
 // --- Live Visitors ---
 function LiveVisitorsCard({ delay }: { delay: number }) {
   const [visitors, setVisitors] = useState(23);
+  const { currency } = useCurrency();
+  const cs = ` ${currency.symbol}`;
 
   useEffect(() => {
     async function fetchVisitors() {
