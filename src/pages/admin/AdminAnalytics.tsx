@@ -117,7 +117,7 @@ function LiveVisitorsCard({ delay }: { delay: number }) {
           exit={{ opacity: 0, y: 8 }}
           className="text-3xl font-bold text-foreground"
         >
-          {visitors.toLocaleString("ar-SA")}
+          {visitors.toLocaleString("en-US")}
         </motion.p>
       </AnimatePresence>
       <p className="text-xs text-muted-foreground mt-2">يتم التحديث مباشرة</p>
