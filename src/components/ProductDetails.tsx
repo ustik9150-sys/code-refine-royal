@@ -244,6 +244,7 @@ const ProductDetails = () => {
         </section>
 
         <div className="h-4" />
+      </div>
 
       <LoginModal
         open={showLoginSheet}
