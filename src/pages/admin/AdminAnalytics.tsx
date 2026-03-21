@@ -85,9 +85,21 @@ function LiveVisitorsCard({ delay }: { delay: number }) {
   const [visitors, setVisitors] = useState(23);
 
   useEffect(() => {
-    const iv = setInterval(() => {
-      setVisitors(v => Math.max(1, v + Math.floor(Math.random() * 7) - 3));
-    }, 3000);
+    async function fetchVisitors() {
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from("page_visits")
+        .select("visitor_id")
+        .gte("created_at", fiveMinAgo);
+
+      if (data) {
+        const unique = new Set(data.map(v => v.visitor_id));
+        setVisitors(unique.size);
+      }
+    }
+
+    fetchVisitors();
+    const iv = setInterval(fetchVisitors, 15000);
     return () => clearInterval(iv);
   }, []);
 

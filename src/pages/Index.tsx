@@ -3,6 +3,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import ProductDetails from "@/components/ProductDetails";
 import StoreFooter from "@/components/StoreFooter";
 import TrackingPixels from "@/components/TrackingPixels";
+import { useTrackVisit } from "@/hooks/useTrackVisit";
 
 const breadcrumbItems = [
   { label: "الرئيسية", href: "/" },
@@ -11,6 +12,8 @@ const breadcrumbItems = [
 ];
 
 const Index = () => {
+  useTrackVisit("/");
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <TrackingPixels />

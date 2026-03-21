@@ -155,6 +155,27 @@ export type Database = {
         }
         Relationships: []
       }
+      page_visits: {
+        Row: {
+          created_at: string
+          id: string
+          page_path: string
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_path?: string
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_path?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           created_at: string
@@ -365,6 +386,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_visits: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
