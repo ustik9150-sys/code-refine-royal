@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import LoginModal from "@/components/LoginModal";
 import CheckoutModal from "@/components/CheckoutModal";
 import AntibotDescription from "@/components/AntibotDescription";
+import InlineOrderForm from "@/components/InlineOrderForm";
 import fallbackImage from "@/assets/product-main.jpg";
 import SaveBadge from "@/components/SaveBadge";
 import barcodeIcon from "@/assets/barcode-icon.png";
@@ -210,6 +211,16 @@ const ProductDetails = () => {
               </button>
             </>
           )}
+        </div>
+
+        {/* Inline Order Form */}
+        <div className="mb-5">
+          <InlineOrderForm
+            productName={product?.name_ar || "منتج"}
+            productId={product?.id}
+            unitPrice={price}
+            quantity={quantity}
+          />
         </div>
 
         {/* Model number */}
