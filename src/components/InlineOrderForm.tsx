@@ -2,6 +2,18 @@ import { useState, useCallback, useEffect } from "react";
 import { User, Phone, MapPin, Loader2, ShoppingBag, CheckCircle, Shield, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useCurrency } from "@/hooks/useCurrency";
+import { motion } from "framer-motion";
+
+interface OfferItem {
+  id: string;
+  title: string;
+  quantity: number;
+  price: number;
+  old_price: number | null;
+  label: string;
+  is_best: boolean;
+}
 
 interface InlineOrderFormProps {
   productName: string;
@@ -27,6 +39,8 @@ interface CodFormSettings {
   name_placeholder: string;
   phone_placeholder: string;
   city_placeholder: string;
+  show_offers: boolean;
+  offers: OfferItem[];
 }
 
 const DEFAULT_SETTINGS: CodFormSettings = {
@@ -46,18 +60,24 @@ const DEFAULT_SETTINGS: CodFormSettings = {
   name_placeholder: "ادخل اسمك هنا",
   phone_placeholder: "ادخل رقم هاتفك هنا",
   city_placeholder: "المدينة / العنوان",
+  show_offers: false,
+  offers: [],
 };
 
 const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: InlineOrderFormProps) => {
   const navigate = useNavigate();
+  const { currency } = useCurrency();
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [settings, setSettings] = useState<CodFormSettings>(DEFAULT_SETTINGS);
+  const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
 
-  const totalPrice = unitPrice * quantity;
+  const selectedOffer = settings.offers?.find((o) => o.id === selectedOfferId);
+  const finalQuantity = selectedOffer ? selectedOffer.quantity : quantity;
+  const finalPrice = selectedOffer ? selectedOffer.price : unitPrice * quantity;
 
   useEffect(() => {
     (async () => {
@@ -67,7 +87,13 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
         .eq("key", "cod_form")
         .maybeSingle();
       if (data?.value) {
-        setSettings((prev) => ({ ...prev, ...(data.value as any) }));
+        const s = { ...DEFAULT_SETTINGS, ...(data.value as any) };
+        setSettings(s);
+        // Auto-select best offer
+        if (s.show_offers && s.offers?.length > 0) {
+          const best = s.offers.find((o: OfferItem) => o.is_best);
+          setSelectedOfferId(best?.id || s.offers[0].id);
+        }
       }
     })();
   }, []);
@@ -99,9 +125,9 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
           address: city.trim() || null,
           payment_method: "cod" as const,
           shipping_method: "standard" as const,
-          subtotal: totalPrice,
+          subtotal: finalPrice,
           shipping_cost: 0,
-          total: totalPrice,
+          total: finalPrice,
         });
 
       if (orderError) throw orderError;
@@ -112,7 +138,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
     } finally {
       setSubmitting(false);
     }
-  }, [validate, submitting, fullName, phone, city, totalPrice, navigate]);
+  }, [validate, submitting, fullName, phone, city, finalPrice, navigate]);
 
   const btnColorClass =
     settings.button_color === "primary"
@@ -136,6 +162,82 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
 
         {/* Form */}
         <div className="px-5 pb-5 space-y-4">
+          {/* Offers */}
+          {settings.show_offers && settings.offers?.length > 0 && (
+            <div className="space-y-2.5">
+              <p className="text-sm font-bold text-foreground text-center">🔥 اختر العرض المناسب</p>
+              {settings.offers.map((offer) => {
+                const isSelected = selectedOfferId === offer.id;
+                const discount = offer.old_price && offer.old_price > offer.price
+                  ? Math.round(((offer.old_price - offer.price) / offer.old_price) * 100)
+                  : null;
+
+                return (
+                  <motion.button
+                    key={offer.id}
+                    type="button"
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setSelectedOfferId(offer.id)}
+                    className={`w-full relative rounded-xl border-2 p-3.5 text-right transition-all duration-200 ${
+                      isSelected
+                        ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
+                        : "border-border hover:border-primary/30"
+                    }`}
+                  >
+                    {/* Badge */}
+                    {offer.label && (
+                      <span className={`absolute -top-2.5 right-3 text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                        offer.is_best
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-muted text-muted-foreground"
+                      }`}>
+                        {offer.label}
+                      </span>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        {/* Radio circle */}
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                          isSelected ? "border-primary" : "border-muted-foreground/30"
+                        }`}>
+                          {isSelected && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="w-2.5 h-2.5 rounded-full bg-primary"
+                            />
+                          )}
+                        </div>
+                        <span className="text-sm font-bold text-foreground">{offer.quantity} قطعة</span>
+                      </div>
+
+                      <div className="flex items-baseline gap-2">
+                        {offer.old_price && offer.old_price > offer.price && (
+                          <span className="text-xs text-muted-foreground line-through">{offer.old_price} {currency.symbol}</span>
+                        )}
+                        <span className={`text-base font-black ${isSelected ? "text-primary" : "text-foreground"}`}>
+                          {offer.price} {currency.symbol}
+                        </span>
+                        {discount && (
+                          <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-bold">
+                            وفّر {discount}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {offer.is_best && isSelected && (
+                      <div className="mt-1.5 text-[11px] text-primary font-medium text-center">
+                        🔥 العرض الأكثر اختياراً
+                      </div>
+                    )}
+                  </motion.button>
+                );
+              })}
+            </div>
+          )}
+
           {/* Full Name */}
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-foreground text-right block">الاسم<span className="text-destructive">*</span></label>
@@ -175,7 +277,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
             {errors.phone && <p className="text-destructive text-xs font-medium animate-fade-in">{errors.phone}</p>}
           </div>
 
-          {/* City (conditional) */}
+          {/* City */}
           {settings.show_city_field && (
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-foreground text-right block">
