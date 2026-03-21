@@ -35,7 +35,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
     setSubmitting(true);
 
     try {
-      const { data: order, error: orderError } = await supabase
+      const { error: orderError } = await supabase
         .from("orders")
         .insert({
           customer_name: fullName.trim(),
@@ -45,22 +45,11 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
           subtotal: totalPrice,
           shipping_cost: 0,
           total: totalPrice,
-        })
-        .select("id, order_number")
-        .single();
+        });
 
       if (orderError) throw orderError;
 
-      await supabase.from("order_items").insert({
-        order_id: order.id,
-        product_id: productId || null,
-        product_name: productName,
-        quantity,
-        unit_price: unitPrice,
-        total_price: totalPrice,
-      });
-
-      navigate(`/thank-you?order=${order.order_number}`);
+      navigate(`/thank-you`);
     } catch (err) {
       console.error("Order creation failed:", err);
       setErrors({ fullName: "حدث خطأ، حاول مرة أخرى" });
