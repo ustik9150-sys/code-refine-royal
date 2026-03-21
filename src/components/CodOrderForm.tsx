@@ -129,9 +129,9 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-foreground truncate">{productName}</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-base font-bold text-foreground">{unitPrice} ر.س</span>
+                <span className="text-base font-bold text-foreground">{unitPrice} {cs}</span>
                 {compareAtPrice && compareAtPrice > unitPrice && (
-                  <span className="text-xs text-muted-foreground line-through">{compareAtPrice} ر.س</span>
+                  <span className="text-xs text-muted-foreground line-through">{compareAtPrice} {cs}</span>
                 )}
               </div>
             </div>
