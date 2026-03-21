@@ -108,6 +108,8 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
   onDelete: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const { currency } = useCurrency();
+  const cs = currency.symbol;
   const status = STATUS_MAP[order.status] || STATUS_MAP.pending;
   const orderIsNew = isNew(order.created_at);
 
