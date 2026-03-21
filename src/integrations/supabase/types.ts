@@ -104,6 +104,9 @@ export type Database = {
           customer_name: string
           customer_phone: string
           id: string
+          ip_address: string | null
+          ip_city: string | null
+          ip_country: string | null
           notes: string | null
           order_number: number
           payment_method: Database["public"]["Enums"]["payment_method"]
@@ -123,6 +126,9 @@ export type Database = {
           customer_name: string
           customer_phone: string
           id?: string
+          ip_address?: string | null
+          ip_city?: string | null
+          ip_country?: string | null
           notes?: string | null
           order_number?: number
           payment_method?: Database["public"]["Enums"]["payment_method"]
@@ -142,6 +148,9 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           id?: string
+          ip_address?: string | null
+          ip_city?: string | null
+          ip_country?: string | null
           notes?: string | null
           order_number?: number
           payment_method?: Database["public"]["Enums"]["payment_method"]

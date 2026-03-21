@@ -20,8 +20,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Download, Search, Eye, Phone, MessageCircle, CheckCircle, XCircle,
   ShoppingCart, Clock, TrendingUp, DollarSign, ChevronDown, ChevronUp,
-  Package, Trash2,
+  Package, Trash2, MapPin,
 } from "lucide-react";
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Order = {
   id: string;
@@ -37,6 +40,9 @@ type Order = {
   customer_email: string | null;
   notes: string | null;
   created_at: string;
+  ip_address: string | null;
+  ip_country: string | null;
+  ip_city: string | null;
 };
 
 type OrderItem = {
@@ -146,7 +152,24 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
         {/* Customer */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground truncate">{order.customer_name}</p>
-          <p className="text-xs text-muted-foreground">{order.city || "—"} · {formatDate(order.created_at)}</p>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            {order.ip_city && order.ip_country && order.ip_city !== "غير معروف" ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center gap-1 text-muted-foreground">
+                      <MapPin className="w-3 h-3" />
+                      {order.ip_city}، {order.ip_country}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom"><p>موقع العميل حسب IP</p></TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <span>{order.city || "—"}</span>
+            )}
+            <span>· {formatDate(order.created_at)}</span>
+          </p>
         </div>
 
         {/* Total */}
@@ -212,8 +235,13 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
                   <p className="font-bold">{order.total.toLocaleString("en-US")} {cs}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground mb-0.5">المدينة</p>
-                  <p className="font-medium">{order.city || "غير محدد"}</p>
+                  <p className="text-[10px] text-muted-foreground mb-0.5">الموقع (IP)</p>
+                  <p className="font-medium flex items-center gap-1 text-muted-foreground">
+                    <MapPin className="w-3 h-3" />
+                    {order.ip_city && order.ip_country && order.ip_city !== "غير معروف"
+                      ? `${order.ip_city}، ${order.ip_country}`
+                      : order.city || "غير معروف"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">العنوان</p>
@@ -438,9 +466,11 @@ export default function AdminOrders() {
   };
 
   const exportCSV = () => {
-    const headers = ["رقم الطلب", "العميل", "الجوال", "المدينة", "المجموع", "الحالة", "الدفع", "التاريخ"];
+    const headers = ["رقم الطلب", "العميل", "الجوال", "الموقع", "IP", "المجموع", "الحالة", "الدفع", "التاريخ"];
     const rows = filtered.map((o) => [
-      o.order_number, o.customer_name, o.customer_phone, o.city || "",
+      o.order_number, o.customer_name, o.customer_phone,
+      o.ip_city && o.ip_country ? `${o.ip_city} - ${o.ip_country}` : (o.city || ""),
+      o.ip_address || "",
       o.total, STATUS_MAP[o.status]?.label || o.status,
       PAYMENT_MAP[o.payment_method] || o.payment_method,
       new Date(o.created_at).toLocaleDateString("en-US"),
@@ -558,8 +588,17 @@ export default function AdminOrders() {
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div><span className="text-xs text-muted-foreground">الاسم</span><p className="font-medium">{selectedOrder.customer_name}</p></div>
                     <div><span className="text-xs text-muted-foreground">الجوال</span><p className="font-medium" dir="ltr">{selectedOrder.customer_phone}</p></div>
-                    {selectedOrder.city && <div><span className="text-xs text-muted-foreground">المدينة</span><p className="font-medium">{selectedOrder.city}</p></div>}
+                    <div>
+                      <span className="text-xs text-muted-foreground">الموقع (IP)</span>
+                      <p className="font-medium flex items-center gap-1 text-muted-foreground">
+                        <MapPin className="w-3 h-3" />
+                        {selectedOrder.ip_city && selectedOrder.ip_country && selectedOrder.ip_city !== "غير معروف"
+                          ? `${selectedOrder.ip_city}، ${selectedOrder.ip_country}`
+                          : "غير معروف"}
+                      </p>
+                    </div>
                     {selectedOrder.address && <div><span className="text-xs text-muted-foreground">العنوان</span><p className="font-medium">{selectedOrder.address}</p></div>}
+                    {selectedOrder.ip_address && <div><span className="text-xs text-muted-foreground">IP</span><p className="font-medium text-muted-foreground text-xs" dir="ltr">{selectedOrder.ip_address}</p></div>}
                   </div>
                   <div className="flex gap-2 pt-2">
                     <a href={`tel:${selectedOrder.customer_phone}`}>
