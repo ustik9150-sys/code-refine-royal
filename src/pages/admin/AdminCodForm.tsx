@@ -109,6 +109,10 @@ export default function AdminCodForm() {
     setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
+  const updatePixel = (key: keyof PixelConfig, value: string | boolean) => {
+    setPixels((prev) => ({ ...prev, [key]: value }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
