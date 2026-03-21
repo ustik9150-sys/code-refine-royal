@@ -8,6 +8,7 @@ import InlineOrderForm from "@/components/InlineOrderForm";
 import fallbackImage from "@/assets/product-main.jpg";
 import SaveBadge from "@/components/SaveBadge";
 import barcodeIcon from "@/assets/barcode-icon.png";
+import { useCurrency } from "@/hooks/useCurrency";
 import applePayIcon from "@/assets/apple_pay_mini.avif";
 import bankIcon from "@/assets/bank_mini.avif";
 import codIcon from "@/assets/cod_mini.avif";
