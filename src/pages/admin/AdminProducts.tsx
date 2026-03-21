@@ -395,6 +395,15 @@ export default function AdminProducts() {
                 onEdit={(id) => navigate(`/admin/products/${id}`)}
                 onDelete={handleDelete}
                 onDuplicate={handleDuplicate}
+                onView={(id) => {
+                  window.open(`/?product=${id}`, "_blank");
+                }}
+                onCopyLink={(id, name) => {
+                  const url = `${window.location.origin}/?product=${id}`;
+                  navigator.clipboard.writeText(url).then(() => {
+                    toast({ title: "تم نسخ الرابط ✅", description: name });
+                  });
+                }}
               />
             ))}
           </AnimatePresence>
