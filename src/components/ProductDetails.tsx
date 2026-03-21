@@ -188,7 +188,7 @@ const ProductDetails = () => {
         </div>
 
         {/* Inline Order Form */}
-        <div className="mb-5">
+        <div className="mb-5" id="order-form-section">
           <InlineOrderForm
             productName={product?.name_ar || "منتج"}
             productId={product?.id}
