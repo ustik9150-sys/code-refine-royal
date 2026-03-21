@@ -235,8 +235,13 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
                   <p className="font-bold">{order.total.toLocaleString("en-US")} {cs}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground mb-0.5">المدينة</p>
-                  <p className="font-medium">{order.city || "غير محدد"}</p>
+                  <p className="text-[10px] text-muted-foreground mb-0.5">الموقع (IP)</p>
+                  <p className="font-medium flex items-center gap-1 text-muted-foreground">
+                    <MapPin className="w-3 h-3" />
+                    {order.ip_city && order.ip_country && order.ip_city !== "غير معروف"
+                      ? `${order.ip_city}، ${order.ip_country}`
+                      : order.city || "غير معروف"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">العنوان</p>
