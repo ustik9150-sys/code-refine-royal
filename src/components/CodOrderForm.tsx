@@ -100,7 +100,7 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">الإجمالي</span>
-              <span className="font-bold text-foreground">{totalPrice} ر.س</span>
+              <span className="font-bold text-foreground">{totalPrice} {cs}</span>
             </div>
           </div>
           <p className="text-xs text-muted-foreground">طريقة الدفع: الدفع عند الاستلام</p>
