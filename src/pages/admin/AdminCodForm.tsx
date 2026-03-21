@@ -148,10 +148,11 @@ function FieldCard({ icon: Icon, name, desc, required, enabled, onToggle, requir
 }
 
 // ─── Offer Card (Builder) ───
-function OfferBuilderCard({ offer, onChange, onDelete }: {
+function OfferBuilderCard({ offer, onChange, onDelete, products }: {
   offer: OfferItem;
   onChange: (updated: OfferItem) => void;
   onDelete: () => void;
+  products: ProductOption[];
 }) {
   return (
     <motion.div
