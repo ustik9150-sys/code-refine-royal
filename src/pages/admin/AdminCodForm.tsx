@@ -395,6 +395,7 @@ export default function AdminCodForm() {
   const [pixels, setPixels] = useState<PixelConfig>(defaultPixels);
   const [activePanel, setActivePanel] = useState<ActivePanel>("fields");
   const [mobilePreview, setMobilePreview] = useState(false);
+  const [products, setProducts] = useState<ProductOption[]>([]);
 
   useEffect(() => {
     (async () => {
