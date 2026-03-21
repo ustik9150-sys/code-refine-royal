@@ -101,3 +101,61 @@
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.04); }
 }
+
+/* Admin dashboard premium styles */
+@layer components {
+  .admin-card {
+    @apply relative overflow-hidden rounded-2xl border border-border bg-card p-6;
+    background: linear-gradient(135deg, hsl(var(--admin-card-bg)) 0%, hsl(220 20% 98%) 100%);
+    box-shadow: 0 1px 3px hsl(var(--admin-glow) / 0.04), 0 8px 24px hsl(220 20% 50% / 0.06);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .admin-card:hover {
+    box-shadow: 0 2px 8px hsl(var(--admin-glow) / 0.08), 0 12px 32px hsl(220 20% 50% / 0.1);
+    transform: translateY(-1px);
+  }
+  .admin-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, hsl(var(--admin-gradient-start)), hsl(var(--admin-gradient-end)));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .admin-card:hover::before {
+    opacity: 1;
+  }
+  .admin-input {
+    @apply rounded-xl border-border bg-background px-4 py-3 text-sm transition-all duration-200;
+    box-shadow: 0 1px 2px hsl(220 20% 50% / 0.04);
+  }
+  .admin-input:focus {
+    box-shadow: 0 0 0 3px hsl(var(--admin-glow) / 0.12), 0 1px 2px hsl(220 20% 50% / 0.06);
+  }
+  .admin-gradient-btn {
+    background: linear-gradient(135deg, hsl(var(--admin-gradient-start)), hsl(var(--admin-gradient-end)));
+    @apply text-white font-semibold rounded-xl px-8 py-3 transition-all duration-300;
+    box-shadow: 0 4px 14px hsl(var(--admin-gradient-start) / 0.35);
+  }
+  .admin-gradient-btn:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 6px 20px hsl(var(--admin-gradient-start) / 0.45);
+  }
+  .admin-gradient-btn:active {
+    transform: translateY(0) scale(0.99);
+  }
+  .admin-icon-box {
+    @apply w-10 h-10 rounded-xl flex items-center justify-center;
+    background: linear-gradient(135deg, hsl(var(--admin-gradient-start) / 0.12), hsl(var(--admin-gradient-end) / 0.08));
+    color: hsl(var(--admin-gradient-start));
+  }
+  .admin-glass-nav {
+    background: hsl(var(--admin-card-bg) / 0.8);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid hsl(var(--admin-card-border));
+  }
+}
