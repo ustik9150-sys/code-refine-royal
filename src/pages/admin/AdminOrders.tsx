@@ -528,7 +528,7 @@ export default function AdminOrders() {
                 index={i}
                 onStatusChange={updateStatus}
                 onOpen={openOrder}
-                onDelete={deleteOrder}
+                onDelete={(id) => setDeleteOrderTarget(id)}
               />
             ))}
           </AnimatePresence>
