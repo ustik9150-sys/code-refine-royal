@@ -170,9 +170,9 @@ const ProductDetails = () => {
 
         {/* Price */}
         <div className="flex items-center gap-4 my-2 flex-wrap">
-          <span className="font-bold text-xl text-sale flex items-center gap-1">{price} ر.س</span>
+          <span className="font-bold text-xl text-sale flex items-center gap-1">{price} {currencySymbol}</span>
           {compareAtPrice > price && (
-            <span className="text-store-secondary line-through flex items-center gap-1">{compareAtPrice.toLocaleString()} ر.س</span>
+            <span className="text-store-secondary line-through flex items-center gap-1">{compareAtPrice.toLocaleString()} {currencySymbol}</span>
           )}
           {savings > 0 && <SaveBadge amount={savings} />}
         </div>
