@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Save } from "lucide-react";
+import { Save, Facebook } from "lucide-react";
 
 export default function AdminSettings() {
   const { toast } = useToast();
@@ -26,6 +26,7 @@ export default function AdminSettings() {
 
   // Pixel
   const [pixelId, setPixelId] = useState("");
+  const [pixelEnabled, setPixelEnabled] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -44,6 +45,7 @@ export default function AdminSettings() {
             setCodEnabled(v.cod_enabled ?? true);
           } else if (row.key === "tracking") {
             setPixelId(v.facebook_pixel_id || "");
+            setPixelEnabled(v.pixel_enabled ?? false);
           }
         }
       }
@@ -65,6 +67,11 @@ export default function AdminSettings() {
       await supabase.from("store_settings").update({
         value: { cod_enabled: codEnabled },
       }).eq("key", "payment");
+
+      await supabase.from("store_settings").upsert({
+        key: "tracking",
+        value: { facebook_pixel_id: pixelId.trim(), pixel_enabled: pixelEnabled },
+      }, { onConflict: "key" });
 
       toast({ title: "تم حفظ الإعدادات" });
     } catch {
@@ -121,6 +128,35 @@ export default function AdminSettings() {
           <Switch checked={codEnabled} onCheckedChange={setCodEnabled} />
           <Label>الدفع عند الاستلام</Label>
         </div>
+      </div>
+
+      {/* Facebook Pixel */}
+      <div className="bg-card rounded-xl border border-border p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Facebook className="w-5 h-5 text-blue-600" />
+          <h3 className="font-semibold text-foreground">فيسبوك بيكسل</h3>
+        </div>
+        <p className="text-sm text-muted-foreground">أضف معرف البيكسل لتتبع التحويلات والأحداث على متجرك</p>
+        <div className="flex items-center gap-3">
+          <Switch checked={pixelEnabled} onCheckedChange={setPixelEnabled} />
+          <Label>تفعيل البيكسل</Label>
+        </div>
+        <div>
+          <Label>معرف البيكسل (Pixel ID)</Label>
+          <Input
+            value={pixelId}
+            onChange={(e) => setPixelId(e.target.value)}
+            placeholder="مثال: 123456789012345"
+            dir="ltr"
+            className="mt-1 font-mono"
+          />
+        </div>
+        {pixelId && pixelEnabled && (
+          <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 rounded-lg p-3">
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            البيكسل مفعل — المعرف: {pixelId}
+          </div>
+        )}
       </div>
 
       <Button onClick={handleSave} disabled={saving}>
