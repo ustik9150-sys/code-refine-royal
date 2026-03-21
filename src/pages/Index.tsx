@@ -13,6 +13,7 @@ const breadcrumbItems = [
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <FacebookPixel />
       <StoreHeader />
       
       <main className="flex-1">
