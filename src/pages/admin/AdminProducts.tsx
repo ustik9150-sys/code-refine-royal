@@ -62,6 +62,8 @@ function ProductCard({ product, index, onEdit, onDelete, onDuplicate }: {
   onDelete: (id: string) => void;
   onDuplicate: (p: Product) => void;
 }) {
+  const { currency } = useCurrency();
+  const cs = currency.symbol;
   const thumb = product.images.find(i => i.is_main)?.url || product.images[0]?.url || null;
   const inStock = product.inventory > 0;
 
