@@ -2,6 +2,7 @@ import StoreHeader from "@/components/StoreHeader";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ProductDetails from "@/components/ProductDetails";
 import StoreFooter from "@/components/StoreFooter";
+import FacebookPixel from "@/components/FacebookPixel";
 
 const breadcrumbItems = [
   { label: "الرئيسية", href: "/" },
@@ -12,6 +13,7 @@ const breadcrumbItems = [
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <FacebookPixel />
       <StoreHeader />
       
       <main className="flex-1">
