@@ -50,6 +50,7 @@ export default function AdminSettings() {
             setSupportEmail(v.support_email || "");
             setSupportPhone(v.support_phone || "");
             setLogoUrl(v.logo_url || "");
+            setCurrency(v.currency || "SAR");
           } else if (row.key === "shipping") {
             setFixedRate(String(v.fixed_rate ?? 30));
             setFreeThreshold(String(v.free_shipping_threshold ?? 200));
