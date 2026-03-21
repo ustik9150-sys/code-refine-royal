@@ -10,6 +10,11 @@ import {
   Save, Loader2, FileText, Link2, Plus, Trash2, GripVertical,
   Info, Shield, RotateCcw, BookOpen, HelpCircle, Phone as PhoneIcon, ChevronDown
 } from "lucide-react";
+import {
+  DEFAULT_ABOUT, DEFAULT_PRIVACY, DEFAULT_RETURN_POLICY,
+  DEFAULT_TERMS, DEFAULT_FAQ, DEFAULT_CONTACT_EMAIL,
+  DEFAULT_CONTACT_PHONE, DEFAULT_CONTACT_TEXT,
+} from "@/lib/default-pages";
 
 interface FooterLink {
   id: string;
