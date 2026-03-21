@@ -9,6 +9,11 @@ import StoreFooter from "@/components/StoreFooter";
 import TrackingPixels from "@/components/TrackingPixels";
 import { useTrackVisit } from "@/hooks/useTrackVisit";
 import { Skeleton } from "@/components/ui/skeleton";
+import avatar1 from "@/assets/testimonial-1.jpg";
+import avatar2 from "@/assets/testimonial-2.jpg";
+import avatar3 from "@/assets/testimonial-3.jpg";
+import avatar4 from "@/assets/testimonial-4.jpg";
+import avatar5 from "@/assets/testimonial-5.jpg";
 
 type Product = {
   id: string;
@@ -234,31 +239,31 @@ const testimonials = [
     name: "علي الخرمي",
     text: "منتجات رائعة وجودة عالية، التوصيل كان سريع جداً والتغليف ممتاز. أنصح الجميع بالتجربة!",
     rating: 5,
-    avatar: "https://i.pravatar.cc/100?img=11",
+    avatar: avatar1,
   },
   {
     name: "سارة المالكي",
     text: "تجربة شراء مميزة من البداية للنهاية. المنتج طابق الوصف تماماً وخدمة العملاء ممتازة.",
     rating: 5,
-    avatar: "https://i.pravatar.cc/100?img=5",
+    avatar: avatar2,
   },
   {
     name: "محمد العتيبي",
     text: "أفضل متجر تعاملت معه، الأسعار مناسبة والمنتجات أصلية. راح أكرر الطلب بإذن الله.",
     rating: 4,
-    avatar: "https://i.pravatar.cc/100?img=12",
+    avatar: avatar3,
   },
   {
     name: "نورة الشمري",
     text: "طلبت كهدية وكانت التجربة رائعة، التغليف فاخر والمنتج وصل بحالة ممتازة.",
     rating: 5,
-    avatar: "https://i.pravatar.cc/100?img=9",
+    avatar: avatar4,
   },
   {
     name: "خالد الدوسري",
     text: "سرعة في التوصيل وجودة ممتازة. المنتج فاق توقعاتي بصراحة!",
     rating: 5,
-    avatar: "https://i.pravatar.cc/100?img=15",
+    avatar: avatar5,
   },
 ];
 
