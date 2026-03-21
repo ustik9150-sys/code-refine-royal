@@ -466,9 +466,11 @@ export default function AdminOrders() {
   };
 
   const exportCSV = () => {
-    const headers = ["رقم الطلب", "العميل", "الجوال", "المدينة", "المجموع", "الحالة", "الدفع", "التاريخ"];
+    const headers = ["رقم الطلب", "العميل", "الجوال", "الموقع", "IP", "المجموع", "الحالة", "الدفع", "التاريخ"];
     const rows = filtered.map((o) => [
-      o.order_number, o.customer_name, o.customer_phone, o.city || "",
+      o.order_number, o.customer_name, o.customer_phone,
+      o.ip_city && o.ip_country ? `${o.ip_city} - ${o.ip_country}` : (o.city || ""),
+      o.ip_address || "",
       o.total, STATUS_MAP[o.status]?.label || o.status,
       PAYMENT_MAP[o.payment_method] || o.payment_method,
       new Date(o.created_at).toLocaleDateString("en-US"),
