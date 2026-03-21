@@ -469,7 +469,7 @@ export default function AdminOrders() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={ShoppingCart} label="طلبات اليوم" value={stats.todayCount}
           gradient="hsl(250 80% 65%), hsl(280 70% 55%)" delay={0.05} />
-        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} suffix=" ر.س"
+        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} suffix={` ${cs}`}
           gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.1} />
         <StatCard icon={Clock} label="قيد الانتظار" value={stats.pending}
           gradient="hsl(40 85% 55%), hsl(30 80% 50%)" delay={0.15} />
