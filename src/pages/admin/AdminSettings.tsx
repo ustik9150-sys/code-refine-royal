@@ -42,6 +42,8 @@ export default function AdminSettings() {
             setFreeThreshold(String(v.free_shipping_threshold ?? 200));
           } else if (row.key === "payment") {
             setCodEnabled(v.cod_enabled ?? true);
+          } else if (row.key === "tracking") {
+            setPixelId(v.facebook_pixel_id || "");
           }
         }
       }
