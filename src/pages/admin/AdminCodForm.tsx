@@ -133,6 +133,11 @@ export default function AdminCodForm() {
           .insert({ key: "cod_form", value: settings as any });
       }
 
+      await supabase.from("store_settings").upsert({
+        key: "tracking",
+        value: pixels as any,
+      }, { onConflict: "key" });
+
       toast({ title: "تم حفظ إعدادات الفورم" });
     } catch {
       toast({ title: "خطأ", description: "فشل حفظ الإعدادات", variant: "destructive" });
