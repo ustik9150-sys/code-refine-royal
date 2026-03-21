@@ -189,7 +189,7 @@ export default function AdminOrders() {
     URL.revokeObjectURL(url);
   };
 
-  const formatDate = (d: string) => new Date(d).toLocaleDateString("ar-SA", {
+  const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", {
     year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
   });
 
