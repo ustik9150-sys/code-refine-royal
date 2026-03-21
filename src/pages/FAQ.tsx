@@ -1,32 +1,38 @@
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
+import { usePageContent } from "@/hooks/usePageContent";
+import { DEFAULT_FAQ } from "@/lib/default-pages";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
-
-const faqs = [
-  { q: "ما هي Saqrix؟", a: "Saqrix علامة تجارية تعكس الثقة والحضور القوي، ونسعى لتقديم تجربة مميزة لعملائنا من حيث الجودة والخدمة." },
-  { q: "كم تستغرق مدة التوصيل؟", a: "داخل المملكة العربية السعودية: من 1 إلى 3 أيام عمل. قد تختلف المدة حسب المدينة وشركة الشحن." },
-  { q: "هل يمكنني تتبع طلبي؟", a: "نعم، سيتم تزويدك برقم تتبع فور شحن الطلب لمتابعة حالته مباشرة." },
-  { q: "هل يمكن الاستبدال أو الاسترجاع؟", a: "نعم، يمكنك طلب الاستبدال أو الاسترجاع خلال 7 أيام من استلام الطلب، وفقًا لسياسة الاستبدال والاسترجاع المنشورة في الموقع." },
-  { q: "هل بياناتي آمنة؟", a: "نعم، نلتزم بحماية بيانات العملاء وفق سياسة الخصوصية، ولا يتم مشاركة معلوماتك مع أي طرف ثالث إلا لأغراض تنفيذ الطلب." },
-  { q: "ما هي طرق الدفع المتاحة؟", a: "نوفر وسائل دفع آمنة تشمل الدفع الإلكتروني، كما قد تتوفر خدمة الدفع عند الاستلام حسب المنطقة." },
-  { q: "هل الأسعار تشمل الضريبة؟", a: "جميع الأسعار المعروضة تشمل ضريبة القيمة المضافة (إن وجدت) وفق أنظمة المملكة العربية السعودية." },
-  { q: "كيف يمكنني التواصل مع خدمة العملاء؟", a: "يمكنك التواصل معنا عبر البريد الإلكتروني أو رقم خدمة العملاء الموضح في صفحة \"اتصل بنا\"." },
-  { q: "ماذا أفعل إذا استلمت منتجًا غير مطابق؟", a: "يرجى التواصل معنا خلال 48 ساعة من الاستلام، وسيتم معالجة الطلب فورًا." },
-  { q: "هل يمكن تعديل أو إلغاء الطلب بعد تأكيده؟", a: "يمكن طلب التعديل أو الإلغاء قبل شحن الطلب فقط، وبعد الشحن يخضع الأمر لسياسة الاسترجاع." },
-];
+import { ChevronDown, Loader2 } from "lucide-react";
 
 const FAQ = () => {
+  const { content, loading } = usePageContent();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  let faqs: { q: string; a: string }[] = [];
+  try {
+    const raw = content?.faq || DEFAULT_FAQ;
+    faqs = JSON.parse(raw);
+  } catch {
+    faqs = [];
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <StoreHeader />
+        <div className="flex-1 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+        <StoreFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <StoreHeader />
-
       <main className="flex-1">
         <div className="container max-w-3xl py-12 px-4">
           <h1 className="text-2xl md:text-3xl font-bold text-store-primary mb-8 text-center">الأسئلة الشائعة</h1>
-
           <div className="space-y-3">
             {faqs.map((faq, i) => (
               <div key={i} className="border border-border rounded-lg overflow-hidden">
@@ -47,7 +53,6 @@ const FAQ = () => {
           </div>
         </div>
       </main>
-
       <StoreFooter />
     </div>
   );
