@@ -586,8 +586,17 @@ export default function AdminOrders() {
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div><span className="text-xs text-muted-foreground">الاسم</span><p className="font-medium">{selectedOrder.customer_name}</p></div>
                     <div><span className="text-xs text-muted-foreground">الجوال</span><p className="font-medium" dir="ltr">{selectedOrder.customer_phone}</p></div>
-                    {selectedOrder.city && <div><span className="text-xs text-muted-foreground">المدينة</span><p className="font-medium">{selectedOrder.city}</p></div>}
+                    <div>
+                      <span className="text-xs text-muted-foreground">الموقع (IP)</span>
+                      <p className="font-medium flex items-center gap-1 text-muted-foreground">
+                        <MapPin className="w-3 h-3" />
+                        {selectedOrder.ip_city && selectedOrder.ip_country && selectedOrder.ip_city !== "غير معروف"
+                          ? `${selectedOrder.ip_city}، ${selectedOrder.ip_country}`
+                          : "غير معروف"}
+                      </p>
+                    </div>
                     {selectedOrder.address && <div><span className="text-xs text-muted-foreground">العنوان</span><p className="font-medium">{selectedOrder.address}</p></div>}
+                    {selectedOrder.ip_address && <div><span className="text-xs text-muted-foreground">IP</span><p className="font-medium text-muted-foreground text-xs" dir="ltr">{selectedOrder.ip_address}</p></div>}
                   </div>
                   <div className="flex gap-2 pt-2">
                     <a href={`tel:${selectedOrder.customer_phone}`}>
