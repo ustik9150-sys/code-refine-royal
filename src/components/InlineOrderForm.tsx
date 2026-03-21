@@ -172,10 +172,10 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
         {/* Form */}
         <div className="px-5 pb-5 space-y-4">
           {/* Offers */}
-          {settings.show_offers && settings.offers?.length > 0 && (
+          {settings.show_offers && filteredOffers.length > 0 && (
             <div className="space-y-2.5">
               <p className="text-sm font-bold text-foreground text-center">🔥 اختر العرض المناسب</p>
-              {settings.offers.map((offer) => {
+              {filteredOffers.map((offer) => {
                 const isSelected = selectedOfferId === offer.id;
                 const discount = offer.old_price && offer.old_price > offer.price
                   ? Math.round(((offer.old_price - offer.price) / offer.old_price) * 100)
