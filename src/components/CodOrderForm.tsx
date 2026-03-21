@@ -235,7 +235,7 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full h-14 rounded-xl font-bold text-base text-primary-foreground bg-gradient-to-l from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100 flex items-center justify-center gap-2"
+            className="w-full h-14 rounded-xl font-bold text-base text-destructive-foreground bg-destructive hover:bg-destructive/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100 flex items-center justify-center gap-2"
           >
             {submitting ? (
               <>
