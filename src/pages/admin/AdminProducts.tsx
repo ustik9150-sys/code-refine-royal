@@ -300,7 +300,7 @@ export default function AdminProducts() {
             gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.1} />
           <StatCard icon={AlertTriangle} label="نفذ المخزون" value={stats.outOfStock}
             gradient="hsl(0 70% 55%), hsl(20 80% 50%)" delay={0.15} />
-          <StatCard icon={DollarSign} label="إجمالي القيمة" value={products.reduce((s, p) => s + p.price * p.inventory, 0).toLocaleString("en-US")} suffix=" ر.س"
+          <StatCard icon={DollarSign} label="إجمالي القيمة" value={products.reduce((s, p) => s + p.price * p.inventory, 0).toLocaleString("en-US")} suffix={` ${cs}`}
             gradient="hsl(200 80% 55%), hsl(220 70% 60%)" delay={0.2} />
         </div>
       )}
