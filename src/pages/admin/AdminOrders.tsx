@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +10,16 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { Download, Search, Eye } from "lucide-react";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Download, Search, Eye, Phone, MessageCircle, CheckCircle, XCircle,
+  ShoppingCart, Clock, TrendingUp, DollarSign, ChevronDown, ChevronUp,
+  Package, Trash2,
+} from "lucide-react";
 
 type Order = {
   id: string;
@@ -46,13 +52,13 @@ type AuditLog = {
   after_snapshot: any;
 };
 
-const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  pending: { label: "قيد الانتظار", color: "bg-yellow-100 text-yellow-800" },
-  confirmed: { label: "مؤكد", color: "bg-blue-100 text-blue-800" },
-  shipped: { label: "تم الشحن", color: "bg-purple-100 text-purple-800" },
-  delivered: { label: "تم التسليم", color: "bg-green-100 text-green-800" },
-  cancelled: { label: "ملغي", color: "bg-red-100 text-red-800" },
-  refunded: { label: "مسترجع", color: "bg-gray-100 text-gray-800" },
+const STATUS_MAP: Record<string, { label: string; dot: string; bg: string; glow: string }> = {
+  pending: { label: "قيد الانتظار", dot: "bg-amber-400", bg: "bg-amber-50 text-amber-700 border-amber-200", glow: "" },
+  confirmed: { label: "مؤكد", dot: "bg-emerald-400", bg: "bg-emerald-50 text-emerald-700 border-emerald-200", glow: "shadow-emerald-200/50" },
+  shipped: { label: "تم الشحن", dot: "bg-blue-400", bg: "bg-blue-50 text-blue-700 border-blue-200", glow: "shadow-blue-200/50" },
+  delivered: { label: "تم التسليم", dot: "bg-green-500", bg: "bg-green-50 text-green-700 border-green-200", glow: "" },
+  cancelled: { label: "ملغي", dot: "bg-red-400", bg: "bg-red-50 text-red-700 border-red-200", glow: "" },
+  refunded: { label: "مسترجع", dot: "bg-gray-400", bg: "bg-gray-50 text-gray-600 border-gray-200", glow: "" },
 };
 
 const PAYMENT_MAP: Record<string, string> = {
@@ -62,6 +68,236 @@ const PAYMENT_MAP: Record<string, string> = {
   card: "بطاقة",
 };
 
+const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", {
+  year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+});
+
+const isNew = (d: string) => Date.now() - new Date(d).getTime() < 30 * 60 * 1000;
+
+// --- Stat Card ---
+function StatCard({ icon: Icon, label, value, suffix, gradient, delay }: {
+  icon: React.ElementType; label: string; value: number; suffix?: string; gradient: string; delay: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay }}
+      className="group relative rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-4 transition-all hover:shadow-lg hover:-translate-y-0.5"
+    >
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: `linear-gradient(135deg, ${gradient})` }}>
+          <Icon className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="text-xl font-bold text-foreground">{value.toLocaleString("en-US")}{suffix}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// --- Order Card (expandable) ---
+function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
+  order: Order; index: number;
+  onStatusChange: (id: string, status: string) => void;
+  onOpen: (o: Order) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const status = STATUS_MAP[order.status] || STATUS_MAP.pending;
+  const orderIsNew = isNew(order.created_at);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.4) }}
+      layout
+      className={`group rounded-2xl border bg-card/90 backdrop-blur-sm transition-all duration-300 hover:shadow-lg ${
+        orderIsNew ? "border-blue-300/60 shadow-blue-100/30 shadow-md" : "border-border/50"
+      }`}
+    >
+      {/* Main Row */}
+      <div
+        className="flex items-center gap-3 p-4 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {/* Order # + NEW badge */}
+        <div className="flex flex-col items-center gap-1 min-w-[48px]">
+          <span className="text-xs font-mono font-bold text-foreground">#{order.order_number}</span>
+          {orderIsNew && (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="text-[10px] font-bold bg-blue-500 text-white px-1.5 py-0.5 rounded-full"
+            >
+              جديد
+            </motion.span>
+          )}
+        </div>
+
+        {/* Customer */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground truncate">{order.customer_name}</p>
+          <p className="text-xs text-muted-foreground">{order.city || "—"} · {formatDate(order.created_at)}</p>
+        </div>
+
+        {/* Total */}
+        <div className="text-left min-w-[80px] hidden sm:block">
+          <p className="text-sm font-bold text-foreground">{order.total.toLocaleString("en-US")} ر.س</p>
+          <p className="text-[10px] text-muted-foreground">{PAYMENT_MAP[order.payment_method] || order.payment_method}</p>
+        </div>
+
+        {/* Status Badge */}
+        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium ${status.bg} ${status.glow}`}>
+          <span className={`w-2 h-2 rounded-full ${status.dot} ${order.status === "pending" ? "animate-pulse" : ""}`} />
+          {status.label}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="hidden md:flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          {order.status === "pending" && (
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+              onClick={() => onStatusChange(order.id, "confirmed")} title="تأكيد">
+              <CheckCircle className="w-4 h-4" />
+            </Button>
+          )}
+          <a href={`tel:${order.customer_phone}`}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50" title="اتصال">
+              <Phone className="w-4 h-4" />
+            </Button>
+          </a>
+          <a href={`https://wa.me/${order.customer_phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600 hover:bg-green-50" title="واتساب">
+              <MessageCircle className="w-4 h-4" />
+            </Button>
+          </a>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => onOpen(order)} title="تفاصيل">
+            <Eye className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Expand chevron */}
+        <div className="text-muted-foreground">
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </div>
+      </div>
+
+      {/* Expanded Details */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 border-t border-border/30 pt-3 space-y-3">
+              {/* Info grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-0.5">الجوال</p>
+                  <p className="font-medium" dir="ltr">{order.customer_phone}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-0.5">المجموع</p>
+                  <p className="font-bold">{order.total.toLocaleString("en-US")} ر.س</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-0.5">المدينة</p>
+                  <p className="font-medium">{order.city || "غير محدد"}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-0.5">العنوان</p>
+                  <p className="font-medium">{order.address || "غير محدد"}</p>
+                </div>
+              </div>
+
+              {order.notes && (
+                <div className="bg-muted/60 rounded-xl p-3 text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">ملاحظات:</span> {order.notes}
+                </div>
+              )}
+
+              {/* Mobile quick actions */}
+              <div className="flex md:hidden items-center gap-2 flex-wrap">
+                {order.status === "pending" && (
+                  <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs gap-1"
+                    onClick={() => onStatusChange(order.id, "confirmed")}>
+                    <CheckCircle className="w-3.5 h-3.5" /> تأكيد
+                  </Button>
+                )}
+                <a href={`tel:${order.customer_phone}`}>
+                  <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1">
+                    <Phone className="w-3.5 h-3.5" /> اتصال
+                  </Button>
+                </a>
+                <a href={`https://wa.me/${order.customer_phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer">
+                  <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1 text-green-600">
+                    <MessageCircle className="w-3.5 h-3.5" /> واتساب
+                  </Button>
+                </a>
+                <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1"
+                  onClick={() => onOpen(order)}>
+                  <Eye className="w-3.5 h-3.5" /> تفاصيل
+                </Button>
+              </div>
+
+              {/* Status change */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">تغيير الحالة:</span>
+                <Select value={order.status} onValueChange={(v) => onStatusChange(order.id, v)}>
+                  <SelectTrigger className="h-8 text-xs w-36 rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(STATUS_MAP).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+// --- Loading Skeleton ---
+function OrdersSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} className="h-20 rounded-2xl" />
+      ))}
+    </div>
+  );
+}
+
+// --- Empty State ---
+function EmptyState() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center justify-center py-20 text-center"
+    >
+      <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center mb-4">
+        <Package className="w-10 h-10 text-muted-foreground" />
+      </div>
+      <h3 className="text-lg font-semibold text-foreground mb-1">لا توجد طلبات</h3>
+      <p className="text-sm text-muted-foreground">ستظهر الطلبات هنا عند استلامها</p>
+    </motion.div>
+  );
+}
+
+// === MAIN ===
 export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,7 +328,11 @@ export default function AdminOrders() {
 
     const channel = supabase
       .channel("admin-orders")
-      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, (payload) => {
+        toast({ title: "🛒 طلب جديد!", description: `طلب جديد من ${(payload.new as any).customer_name}` });
+        fetchOrders();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, () => {
         fetchOrders();
       })
       .subscribe();
@@ -115,6 +355,18 @@ export default function AdminOrders() {
       return true;
     });
   }, [orders, search, statusFilter]);
+
+  // Stats
+  const stats = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const todayOrders = orders.filter(o => o.created_at.startsWith(today));
+    return {
+      todayCount: todayOrders.length,
+      todayRevenue: todayOrders.reduce((s, o) => s + o.total, 0),
+      pending: orders.filter(o => o.status === "pending").length,
+      confirmed: orders.filter(o => o.status === "confirmed").length,
+    };
+  }, [orders]);
 
   const openOrder = async (order: Order) => {
     setSelectedOrder(order);
@@ -161,6 +413,14 @@ export default function AdminOrders() {
     }
   };
 
+  const deleteOrder = async (orderId: string) => {
+    const { error } = await supabase.from("orders").delete().eq("id", orderId);
+    if (!error) {
+      toast({ title: "تم حذف الطلب" });
+      fetchOrders();
+    }
+  };
+
   const saveNotes = async () => {
     if (!selectedOrder) return;
     await supabase.from("orders").update({ notes: internalNotes }).eq("id", selectedOrder.id);
@@ -170,12 +430,8 @@ export default function AdminOrders() {
   const exportCSV = () => {
     const headers = ["رقم الطلب", "العميل", "الجوال", "المدينة", "المجموع", "الحالة", "الدفع", "التاريخ"];
     const rows = filtered.map((o) => [
-      o.order_number,
-      o.customer_name,
-      o.customer_phone,
-      o.city || "",
-      o.total,
-      STATUS_MAP[o.status]?.label || o.status,
+      o.order_number, o.customer_name, o.customer_phone, o.city || "",
+      o.total, STATUS_MAP[o.status]?.label || o.status,
       PAYMENT_MAP[o.payment_method] || o.payment_method,
       new Date(o.created_at).toLocaleDateString("en-US"),
     ]);
@@ -189,32 +445,53 @@ export default function AdminOrders() {
     URL.revokeObjectURL(url);
   };
 
-  const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", {
-    year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-  });
-
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-foreground">الطلبات</h2>
-        <Button variant="outline" size="sm" onClick={exportCSV}>
-          <Download className="w-4 h-4 ml-2" /> تصدير CSV
+    <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-wrap items-center justify-between gap-4"
+      >
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">🛒 الطلبات</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{orders.length} طلب</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={exportCSV} className="rounded-xl gap-2">
+          <Download className="w-4 h-4" /> تصدير CSV
         </Button>
+      </motion.div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard icon={ShoppingCart} label="طلبات اليوم" value={stats.todayCount}
+          gradient="hsl(250 80% 65%), hsl(280 70% 55%)" delay={0.05} />
+        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} suffix=" ر.س"
+          gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.1} />
+        <StatCard icon={Clock} label="قيد الانتظار" value={stats.pending}
+          gradient="hsl(40 85% 55%), hsl(30 80% 50%)" delay={0.15} />
+        <StatCard icon={TrendingUp} label="مؤكدة" value={stats.confirmed}
+          gradient="hsl(150 65% 45%), hsl(170 55% 40%)" delay={0.2} />
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.25 }}
+        className="flex flex-wrap gap-3 sticky top-16 z-20 bg-background/80 backdrop-blur-sm py-3 -mx-1 px-1 rounded-xl"
+      >
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="بحث برقم الطلب، الاسم، الجوال..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pr-10"
+            className="pr-10 rounded-xl admin-input"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-40 rounded-xl">
             <SelectValue placeholder="الحالة" />
           </SelectTrigger>
           <SelectContent>
@@ -224,70 +501,27 @@ export default function AdminOrders() {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </motion.div>
 
-      {/* Table */}
+      {/* Orders List */}
       {loading ? (
-        <div className="text-center py-12 text-muted-foreground">جاري التحميل...</div>
+        <OrdersSkeleton />
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">لا توجد طلبات</div>
+        <EmptyState />
       ) : (
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>#</TableHead>
-                <TableHead>العميل</TableHead>
-                <TableHead className="hidden md:table-cell">المدينة</TableHead>
-                <TableHead>المجموع</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="hidden lg:table-cell">الدفع</TableHead>
-                <TableHead className="hidden lg:table-cell">التاريخ</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-mono text-xs">{order.order_number}</TableCell>
-                  <TableCell>
-                    <div className="text-sm font-medium">{order.customer_name}</div>
-                    <div className="text-xs text-muted-foreground" dir="ltr">{order.customer_phone}</div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">{order.city || "—"}</TableCell>
-                  <TableCell className="font-semibold text-sm">{order.total} ر.س</TableCell>
-                  <TableCell>
-                    <Select
-                      value={order.status}
-                      onValueChange={(v) => updateStatus(order.id, v)}
-                    >
-                      <SelectTrigger className="h-7 text-xs w-28 border-0 p-0">
-                        <Badge className={`${STATUS_MAP[order.status]?.color} text-xs`}>
-                          {STATUS_MAP[order.status]?.label}
-                        </Badge>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(STATUS_MAP).map(([k, v]) => (
-                          <SelectItem key={k} value={k}>{v.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
-                    {PAYMENT_MAP[order.payment_method] || order.payment_method}
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
-                    {formatDate(order.created_at)}
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" onClick={() => openOrder(order)}>
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="space-y-3">
+          <AnimatePresence>
+            {filtered.map((order, i) => (
+              <OrderCard
+                key={order.id}
+                order={order}
+                index={i}
+                onStatusChange={updateStatus}
+                onOpen={openOrder}
+                onDelete={deleteOrder}
+              />
+            ))}
+          </AnimatePresence>
         </div>
       )}
 
@@ -297,21 +531,37 @@ export default function AdminOrders() {
           {selectedOrder && (
             <>
               <SheetHeader>
-                <SheetTitle className="text-right">
+                <SheetTitle className="text-right flex items-center gap-2">
+                  <div className="admin-icon-box w-8 h-8">
+                    <ShoppingCart className="w-4 h-4" />
+                  </div>
                   طلب #{selectedOrder.order_number}
                 </SheetTitle>
               </SheetHeader>
 
-              <div className="mt-6 space-y-6">
-                {/* Customer info */}
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-sm text-foreground">معلومات العميل</h4>
-                  <div className="bg-muted rounded-lg p-3 text-sm space-y-1">
-                    <p>الاسم: {selectedOrder.customer_name}</p>
-                    <p dir="ltr" className="text-left">الجوال: {selectedOrder.customer_phone}</p>
-                    {selectedOrder.customer_email && <p>البريد: {selectedOrder.customer_email}</p>}
-                    {selectedOrder.city && <p>المدينة: {selectedOrder.city}</p>}
-                    {selectedOrder.address && <p>العنوان: {selectedOrder.address}</p>}
+              <div className="mt-6 space-y-5">
+                {/* Customer */}
+                <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 space-y-2">
+                  <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
+                    معلومات العميل
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div><span className="text-xs text-muted-foreground">الاسم</span><p className="font-medium">{selectedOrder.customer_name}</p></div>
+                    <div><span className="text-xs text-muted-foreground">الجوال</span><p className="font-medium" dir="ltr">{selectedOrder.customer_phone}</p></div>
+                    {selectedOrder.city && <div><span className="text-xs text-muted-foreground">المدينة</span><p className="font-medium">{selectedOrder.city}</p></div>}
+                    {selectedOrder.address && <div><span className="text-xs text-muted-foreground">العنوان</span><p className="font-medium">{selectedOrder.address}</p></div>}
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <a href={`tel:${selectedOrder.customer_phone}`}>
+                      <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1">
+                        <Phone className="w-3.5 h-3.5" /> اتصال
+                      </Button>
+                    </a>
+                    <a href={`https://wa.me/${selectedOrder.customer_phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer">
+                      <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1 text-green-600">
+                        <MessageCircle className="w-3.5 h-3.5" /> واتساب
+                      </Button>
+                    </a>
                   </div>
                 </div>
 
@@ -321,14 +571,10 @@ export default function AdminOrders() {
                   {orderItems.length === 0 ? (
                     <p className="text-xs text-muted-foreground">لا توجد منتجات</p>
                   ) : (
-                    <div className="border border-border rounded-lg overflow-hidden">
+                    <div className="border border-border/50 rounded-xl overflow-hidden">
                       <Table>
                         <TableHeader>
-                          <TableRow>
-                            <TableHead className="text-xs">المنتج</TableHead>
-                            <TableHead className="text-xs">الكمية</TableHead>
-                            <TableHead className="text-xs">السعر</TableHead>
-                          </TableRow>
+                          <TableRow><TableHead className="text-xs">المنتج</TableHead><TableHead className="text-xs">الكمية</TableHead><TableHead className="text-xs">السعر</TableHead></TableRow>
                         </TableHeader>
                         <TableBody>
                           {orderItems.map((item) => (
@@ -344,16 +590,11 @@ export default function AdminOrders() {
                   )}
                 </div>
 
-                {/* Status change */}
+                {/* Status */}
                 <div className="space-y-2">
                   <h4 className="font-semibold text-sm text-foreground">تغيير الحالة</h4>
-                  <Select
-                    value={selectedOrder.status}
-                    onValueChange={(v) => updateStatus(selectedOrder.id, v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Select value={selectedOrder.status} onValueChange={(v) => updateStatus(selectedOrder.id, v)}>
+                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {Object.entries(STATUS_MAP).map(([k, v]) => (
                         <SelectItem key={k} value={k}>{v.label}</SelectItem>
@@ -362,33 +603,31 @@ export default function AdminOrders() {
                   </Select>
                 </div>
 
-                {/* Internal notes */}
+                {/* Notes */}
                 <div className="space-y-2">
                   <h4 className="font-semibold text-sm text-foreground">ملاحظات داخلية</h4>
                   <textarea
                     value={internalNotes}
                     onChange={(e) => setInternalNotes(e.target.value)}
-                    className="w-full border border-border rounded-lg p-3 text-sm min-h-[80px] bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="w-full border border-border rounded-xl p-3 text-sm min-h-[80px] bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="أضف ملاحظة..."
                   />
-                  <Button size="sm" onClick={saveNotes}>حفظ الملاحظات</Button>
+                  <Button size="sm" onClick={saveNotes} className="rounded-xl">حفظ الملاحظات</Button>
                 </div>
 
-                {/* Audit timeline */}
+                {/* Audit */}
                 {auditLogs.length > 0 && (
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm text-foreground">سجل التغييرات</h4>
                     <div className="space-y-2">
                       {auditLogs.map((log) => (
-                        <div key={log.id} className="bg-muted rounded-lg p-2 text-xs">
+                        <div key={log.id} className="bg-muted/50 rounded-xl p-3 text-xs flex items-center gap-2">
                           <span className="text-muted-foreground">{formatDate(log.created_at)}</span>
-                          {" — "}
                           {log.action_type === "status_change" && (
-                            <span>
-                              تغيير الحالة إلى{" "}
-                              <Badge className={`${STATUS_MAP[log.after_snapshot?.status]?.color} text-xs`}>
+                            <span className="flex items-center gap-1">
+                              → <span className={`px-2 py-0.5 rounded-full border text-[10px] ${STATUS_MAP[log.after_snapshot?.status]?.bg}`}>
                                 {STATUS_MAP[log.after_snapshot?.status]?.label}
-                              </Badge>
+                              </span>
                             </span>
                           )}
                         </div>
