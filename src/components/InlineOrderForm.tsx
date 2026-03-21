@@ -216,7 +216,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
                         {offer.old_price && offer.old_price > offer.price && (
                           <span className="text-xs text-muted-foreground line-through">{offer.old_price} {currency.symbol}</span>
                         )}
-                        <span className={`text-base font-black ${isSelected ? "text-primary" : "text-foreground"}`}>
+                        <span className={`text-base font-black ${isSelected ? "text-destructive" : "text-foreground"}`}>
                           {offer.price} {currency.symbol}
                         </span>
                         {discount && (

@@ -258,11 +258,11 @@ function LivePreview({ settings, mobileView }: { settings: CodFormSettings; mobi
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        selectedOffer === offer.id ? "border-primary" : "border-muted-foreground/30"
+                        selectedOffer === offer.id ? "border-destructive" : "border-muted-foreground/30"
                       }`}>
-                        {selectedOffer === offer.id && <div className="w-2 h-2 rounded-full bg-primary" />}
+                        {selectedOffer === offer.id && <div className="w-2 h-2 rounded-full bg-destructive" />}
                       </div>
-                      <span className="text-sm font-semibold text-foreground">{offer.quantity} قطعة</span>
+                      <span className="text-sm font-semibold text-foreground">{offer.title || `${offer.quantity} قطعة`}</span>
                     </div>
                     <div className="flex items-baseline gap-1.5">
                       {offer.old_price && (
