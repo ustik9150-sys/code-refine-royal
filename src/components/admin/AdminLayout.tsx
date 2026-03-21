@@ -19,9 +19,11 @@ import {
   User,
   ChevronRight,
   ChevronLeft,
+  BarChart3,
 } from "lucide-react";
 
 const navItems = [
+  { to: "/admin/analytics", icon: BarChart3, label: "الإحصائيات" },
   { to: "/admin/orders", icon: ShoppingCart, label: "الطلبات" },
   { to: "/admin/products", icon: Package, label: "المنتجات" },
   { to: "/admin/cod-form", icon: FileText, label: "CodForm" },

@@ -20,6 +20,7 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminProductEdit from "./pages/admin/AdminProductEdit";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminCodForm from "./pages/admin/AdminCodForm";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +44,8 @@ const App = () => (
 
           {/* Admin Dashboard */}
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="/admin/orders" replace />} />
+            <Route index element={<Navigate to="/admin/analytics" replace />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="products/:id" element={<AdminProductEdit />} />
