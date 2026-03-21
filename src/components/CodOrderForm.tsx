@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { User, Phone, MapPin, Minus, Plus, ShieldCheck, Truck, Package, Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface CodOrderFormProps {
   productName: string;
