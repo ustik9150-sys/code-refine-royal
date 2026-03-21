@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -7,11 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowRight, Save, Upload, X, GripVertical, Star, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  ArrowRight, Save, Upload, X, GripVertical, Star, Trash2, Package,
+  ImagePlus, Loader2, Eye,
+} from "lucide-react";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
 } from "@dnd-kit/core";
@@ -29,37 +34,129 @@ type ProductImage = {
   is_main: boolean;
 };
 
-function SortableImage({
-  img, onSetMain, onDelete,
-}: {
-  img: ProductImage;
-  onSetMain: () => void;
-  onDelete: () => void;
+// --- Sortable Image ---
+function SortableImage({ img, onSetMain, onDelete }: {
+  img: ProductImage; onSetMain: () => void; onDelete: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: img.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
-    <div ref={setNodeRef} style={style} className="relative group w-24 h-24 rounded-lg overflow-hidden border border-border bg-muted">
-      <div {...attributes} {...listeners} className="absolute top-1 right-1 z-10 cursor-grab">
-        <GripVertical className="w-4 h-4 text-white drop-shadow" />
+    <div ref={setNodeRef} style={style} className="relative group w-24 h-24 rounded-xl overflow-hidden border border-border/50 bg-muted shadow-sm">
+      <div {...attributes} {...listeners} className="absolute top-1.5 right-1.5 z-10 cursor-grab p-0.5 bg-black/30 rounded">
+        <GripVertical className="w-3.5 h-3.5 text-white" />
       </div>
       <img src={img.url} alt="" className="w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
-        <button onClick={onSetMain} className="p-1 bg-white rounded-full" title="صورة رئيسية">
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100">
+        <button onClick={onSetMain} className="p-1.5 bg-white/90 rounded-lg shadow transition-transform hover:scale-110" title="صورة رئيسية">
           <Star className={`w-3.5 h-3.5 ${img.is_main ? "text-yellow-500 fill-yellow-500" : "text-gray-600"}`} />
         </button>
-        <button onClick={onDelete} className="p-1 bg-white rounded-full" title="حذف">
+        <button onClick={onDelete} className="p-1.5 bg-white/90 rounded-lg shadow transition-transform hover:scale-110" title="حذف">
           <Trash2 className="w-3.5 h-3.5 text-destructive" />
         </button>
       </div>
       {img.is_main && (
-        <span className="absolute bottom-0 inset-x-0 bg-yellow-500 text-white text-[10px] text-center py-0.5">رئيسية</span>
+        <span className="absolute bottom-0 inset-x-0 bg-yellow-500 text-white text-[9px] text-center py-0.5 font-medium">رئيسية</span>
       )}
     </div>
   );
 }
 
+// --- Preview Card ---
+function PreviewCard({ name, price, compareAt, image, isActive }: {
+  name: string; price: string; compareAt: string; image: string | null; isActive: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+      className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden"
+    >
+      <div className="p-3 border-b border-border/30 flex items-center gap-2">
+        <Eye className="w-4 h-4 text-muted-foreground" />
+        <span className="text-xs font-medium text-muted-foreground">معاينة المنتج</span>
+      </div>
+      <div className="p-4">
+        <div className="aspect-square bg-muted rounded-xl overflow-hidden mb-3">
+          {image ? (
+            <img src={image} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Package className="w-10 h-10 text-muted-foreground/20" />
+            </div>
+          )}
+        </div>
+        <p className="text-sm font-semibold text-foreground truncate mb-1">
+          {name || "اسم المنتج"}
+        </p>
+        <div className="flex items-baseline gap-2">
+          <span className="text-base font-bold text-foreground">
+            {price ? `${parseFloat(price).toLocaleString("en-US")} ر.س` : "0 ر.س"}
+          </span>
+          {compareAt && parseFloat(compareAt) > (parseFloat(price) || 0) && (
+            <span className="text-xs text-muted-foreground line-through">
+              {parseFloat(compareAt).toLocaleString("en-US")} ر.س
+            </span>
+          )}
+        </div>
+        <div className="mt-2">
+          <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${
+            isActive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-gray-50 text-gray-600 border-gray-200"
+          }`}>
+            {isActive ? "نشط" : "مسودة"}
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// --- Drag & Drop Upload Area ---
+function ImageUploadArea({ onUpload, uploading, disabled }: {
+  onUpload: (files: FileList) => void; uploading: boolean; disabled: boolean;
+}) {
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-200 cursor-pointer ${
+        dragOver ? "border-accent bg-accent/5 scale-[1.01]" : "border-border/60 hover:border-accent/50"
+      } ${disabled ? "opacity-50 pointer-events-none" : ""}`}
+      onClick={() => inputRef.current?.click()}
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        if (e.dataTransfer.files.length > 0) onUpload(e.dataTransfer.files);
+      }}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => e.target.files && onUpload(e.target.files)}
+      />
+      {uploading ? (
+        <Loader2 className="w-8 h-8 text-accent animate-spin mx-auto" />
+      ) : (
+        <ImagePlus className="w-8 h-8 text-muted-foreground/40 mx-auto" />
+      )}
+      <p className="text-sm text-muted-foreground mt-3">
+        {uploading ? "جاري رفع الصور..." : "اسحب الصور هنا أو اضغط للاختيار"}
+      </p>
+      <p className="text-[10px] text-muted-foreground/60 mt-1">PNG, JPG, WEBP</p>
+    </motion.div>
+  );
+}
+
+// === MAIN ===
 export default function AdminProductEdit() {
   const { id } = useParams();
   const isNew = id === "new";
@@ -71,32 +168,19 @@ export default function AdminProductEdit() {
   const [saving, setSaving] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
 
-  // Form
+  // Form state
   const [nameAr, setNameAr] = useState("");
-  const [nameEn, setNameEn] = useState("");
   const [descAr, setDescAr] = useState("");
-  const [descEn, setDescEn] = useState("");
   const [price, setPrice] = useState("");
   const [compareAt, setCompareAt] = useState("");
-  const [cost, setCost] = useState("");
   const [inventory, setInventory] = useState("0");
-  const [sku, setSku] = useState("");
   const [category, setCategory] = useState("");
-  const [tags, setTags] = useState("");
   const [isActive, setIsActive] = useState(false);
   const [images, setImages] = useState<ProductImage[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [tagInput, setTagInput] = useState("");
 
-  const addTag = () => {
-    const val = tagInput.trim();
-    if (!val) return;
-    const arr = tags.split(",").map((t) => t.trim()).filter(Boolean);
-    if (!arr.includes(val)) {
-      setTags([...arr, val].join(", "));
-    }
-    setTagInput("");
-  };
+  // Validation
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -114,16 +198,11 @@ export default function AdminProductEdit() {
       if (!product) { navigate("/admin/products"); return; }
 
       setNameAr(product.name_ar);
-      setNameEn(product.name_en || "");
       setDescAr(product.description_ar || "");
-      setDescEn(product.description_en || "");
       setPrice(String(product.price));
       setCompareAt(product.compare_at_price ? String(product.compare_at_price) : "");
-      setCost(product.cost ? String(product.cost) : "");
       setInventory(String(product.inventory));
-      setSku(product.sku || "");
       setCategory(product.category || "");
-      setTags((product.tags || []).join(", "));
       setIsActive(product.status === "active");
 
       const { data: imgs } = await supabase
@@ -136,25 +215,31 @@ export default function AdminProductEdit() {
     })();
   }, [id]);
 
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!nameAr.trim()) e.nameAr = "اسم المنتج مطلوب";
+    if (!price || parseFloat(price) <= 0) e.price = "السعر مطلوب";
+    if (!inventory && inventory !== "0") e.inventory = "المخزون مطلوب";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
   const handleSave = async (publish = false) => {
-    if (!nameAr.trim()) {
-      toast({ title: "خطأ", description: "اسم المنتج مطلوب", variant: "destructive" });
-      return;
-    }
+    if (!validate()) return;
     setSaving(true);
 
     const payload = {
       name_ar: nameAr.trim(),
-      name_en: nameEn.trim() || null,
+      name_en: null,
       description_ar: descAr.trim() || null,
-      description_en: descEn.trim() || null,
+      description_en: null,
       price: parseFloat(price) || 0,
       compare_at_price: compareAt ? parseFloat(compareAt) : null,
-      cost: cost ? parseFloat(cost) : null,
+      cost: null,
       inventory: parseInt(inventory) || 0,
-      sku: sku.trim() || null,
+      sku: null,
       category: category.trim() || null,
-      tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+      tags: [],
       status: publish ? "active" : isActive ? "active" : "draft",
     };
 
@@ -166,7 +251,6 @@ export default function AdminProductEdit() {
         if (error) throw error;
         productId = data.id;
       } else {
-        // Save revision before updating
         const { data: current } = await supabase.from("products").select("*").eq("id", id).single();
         if (current && userId) {
           await supabase.from("product_revisions").insert({
@@ -174,7 +258,6 @@ export default function AdminProductEdit() {
             admin_id: userId,
             snapshot: current,
           });
-          // Keep only last 10
           const { data: revisions } = await supabase
             .from("product_revisions")
             .select("id")
@@ -190,7 +273,6 @@ export default function AdminProductEdit() {
         if (error) throw error;
       }
 
-      // Audit log
       if (userId) {
         await supabase.from("audit_logs").insert({
           admin_id: userId,
@@ -201,7 +283,7 @@ export default function AdminProductEdit() {
         });
       }
 
-      toast({ title: isNew ? "تم إنشاء المنتج" : "تم الحفظ" });
+      toast({ title: isNew ? "✅ تم إنشاء المنتج بنجاح" : "✅ تم حفظ التغييرات" });
       if (isNew) navigate(`/admin/products/${productId}`);
     } catch (err: any) {
       toast({ title: "خطأ", description: err.message, variant: "destructive" });
@@ -210,9 +292,11 @@ export default function AdminProductEdit() {
     }
   };
 
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || !id || isNew) return;
+  const handleImageUpload = useCallback(async (files: FileList) => {
+    if (!id || isNew) {
+      toast({ title: "تنبيه", description: "احفظ المنتج أولاً ثم أضف الصور", variant: "destructive" });
+      return;
+    }
     setUploading(true);
 
     for (const file of Array.from(files)) {
@@ -233,7 +317,6 @@ export default function AdminProductEdit() {
         .getPublicUrl(path);
 
       const isMain = images.length === 0;
-      const sortOrder = images.length;
 
       const { data: img } = await supabase
         .from("product_images")
@@ -241,7 +324,7 @@ export default function AdminProductEdit() {
           product_id: id,
           url: publicUrl,
           storage_path: path,
-          sort_order: sortOrder,
+          sort_order: images.length,
           is_main: isMain,
         })
         .select()
@@ -251,7 +334,6 @@ export default function AdminProductEdit() {
     }
 
     setUploading(false);
-    e.target.value = "";
   }, [id, isNew, images.length]);
 
   const handleSetMain = async (imgId: string) => {
@@ -276,7 +358,6 @@ export default function AdminProductEdit() {
     const newIdx = images.findIndex((i) => i.id === over.id);
     const reordered = arrayMove(images, oldIdx, newIdx);
     setImages(reordered);
-    // Update sort_order in DB
     for (let i = 0; i < reordered.length; i++) {
       await supabase.from("product_images").update({ sort_order: i }).eq("id", reordered[i].id);
     }
@@ -289,187 +370,278 @@ export default function AdminProductEdit() {
     navigate("/admin/products");
   };
 
+  const mainImage = images.find(i => i.is_main)?.url || images[0]?.url || null;
+
   if (loading) {
-    return <div className="text-center py-12 text-muted-foreground">جاري التحميل...</div>;
+    return (
+      <div className="max-w-5xl mx-auto space-y-6">
+        <Skeleton className="h-10 w-48" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <Skeleton className="h-64 rounded-2xl" />
+            <Skeleton className="h-48 rounded-2xl" />
+          </div>
+          <div className="space-y-4">
+            <Skeleton className="h-72 rounded-2xl" />
+            <Skeleton className="h-64 rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 pb-24">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/admin/products")}>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-3"
+      >
+        <Button variant="ghost" size="icon" onClick={() => navigate("/admin/products")} className="rounded-xl">
           <ArrowRight className="w-5 h-5" />
         </Button>
-        <h2 className="text-xl font-bold text-foreground">
-          {isNew ? "منتج جديد" : "تعديل المنتج"}
-        </h2>
-      </div>
-
-      {/* Form */}
-      <div className="bg-card rounded-xl border border-border p-6 space-y-5">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <Label>اسم المنتج (عربي) *</Label>
-            <Input value={nameAr} onChange={(e) => setNameAr(e.target.value)} className="mt-1" />
-          </div>
-          <div>
-            <Label>اسم المنتج (إنجليزي)</Label>
-            <Input value={nameEn} onChange={(e) => setNameEn(e.target.value)} dir="ltr" className="mt-1" />
-          </div>
-        </div>
-
         <div>
-          <Label>الوصف (عربي)</Label>
-          <textarea
-            value={descAr}
-            onChange={(e) => setDescAr(e.target.value)}
-            className="w-full mt-1 border border-input rounded-lg p-3 text-sm min-h-[120px] bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
-          />
+          <h1 className="text-xl font-bold text-foreground">
+            {isNew ? "منتج جديد" : "تعديل المنتج"}
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            {isNew ? "أضف منتج جديد لمتجرك" : "عدّل تفاصيل المنتج"}
+          </p>
         </div>
+      </motion.div>
 
-        <div>
-          <Label>الوصف (إنجليزي)</Label>
-          <textarea
-            value={descEn}
-            onChange={(e) => setDescEn(e.target.value)}
-            dir="ltr"
-            className="w-full mt-1 border border-input rounded-lg p-3 text-sm min-h-[80px] bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-        </div>
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* LEFT - Main Content */}
+        <div className="lg:col-span-2 space-y-5">
+          {/* Product Info Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="rounded-2xl border border-border/50 bg-card/90 backdrop-blur-sm p-5 space-y-4"
+          >
+            <h3 className="text-sm font-semibold text-foreground">معلومات المنتج</h3>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <div>
-            <Label>السعر (ر.س) *</Label>
-            <Input type="number" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} dir="ltr" className="mt-1" />
-          </div>
-          <div>
-            <Label>سعر المقارنة</Label>
-            <Input type="number" step="0.01" value={compareAt} onChange={(e) => setCompareAt(e.target.value)} dir="ltr" className="mt-1" />
-          </div>
-          <div>
-            <Label>التكلفة</Label>
-            <Input type="number" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)} dir="ltr" className="mt-1" />
-          </div>
-        </div>
+            <div>
+              <Label className="text-xs">اسم المنتج *</Label>
+              <Input
+                value={nameAr}
+                onChange={(e) => { setNameAr(e.target.value); setErrors(p => ({ ...p, nameAr: "" })); }}
+                className={`mt-1 rounded-xl admin-input ${errors.nameAr ? "border-destructive" : ""}`}
+                placeholder="مثال: كريم مرطب طبيعي"
+              />
+              {errors.nameAr && <p className="text-destructive text-xs mt-1">{errors.nameAr}</p>}
+            </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <div>
-            <Label>المخزون</Label>
-            <Input type="number" value={inventory} onChange={(e) => setInventory(e.target.value)} dir="ltr" className="mt-1" />
-          </div>
-          <div>
-            <Label>SKU</Label>
-            <Input value={sku} onChange={(e) => setSku(e.target.value)} dir="ltr" className="mt-1" />
-          </div>
-          <div>
-            <Label>التصنيف</Label>
-            <Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" />
-          </div>
-        </div>
+            <div>
+              <Label className="text-xs">الوصف</Label>
+              <textarea
+                value={descAr}
+                onChange={(e) => setDescAr(e.target.value)}
+                className="w-full mt-1 border border-border rounded-xl p-3 text-sm min-h-[120px] bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+                placeholder="أضف وصفاً جذاباً للمنتج..."
+              />
+            </div>
+          </motion.div>
 
-        <div>
-          <Label>الوسوم (Tags)</Label>
-          <div className="flex flex-wrap gap-2 mt-1 mb-2">
-            {tags
-              .split(",")
-              .map((t) => t.trim())
-              .filter(Boolean)
-              .map((tag, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-1 bg-secondary text-foreground text-sm px-3 py-1 rounded-full border border-border"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const arr = tags.split(",").map((t) => t.trim()).filter(Boolean);
-                      arr.splice(i, 1);
-                      setTags(arr.join(", "));
-                    }}
-                    className="hover:text-destructive transition"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </span>
-              ))}
-          </div>
-          <div className="flex gap-2">
-            <Input
-              placeholder="أضف وسم واضغط Enter"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addTag();
-                }
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addTag}
-              disabled={!tagInput.trim()}
-            >
-              إضافة
-            </Button>
-          </div>
-        </div>
+          {/* Images Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="rounded-2xl border border-border/50 bg-card/90 backdrop-blur-sm p-5 space-y-4"
+          >
+            <h3 className="text-sm font-semibold text-foreground">الصور</h3>
 
-        <div className="flex items-center gap-3">
-          <Switch checked={isActive} onCheckedChange={setIsActive} />
-          <Label>{isActive ? "نشط" : "مسودة"}</Label>
-        </div>
-      </div>
-
-      {/* Images */}
-      {!isNew && (
-        <div className="bg-card rounded-xl border border-border p-6 space-y-4">
-          <Label className="text-base font-semibold">الصور</Label>
-
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={images.map((i) => i.id)} strategy={horizontalListSortingStrategy}>
-              <div className="flex flex-wrap gap-3">
-                {images.map((img) => (
-                  <SortableImage
-                    key={img.id}
-                    img={img}
-                    onSetMain={() => handleSetMain(img.id)}
-                    onDelete={() => handleDeleteImage(img)}
-                  />
-                ))}
-                <label className="w-24 h-24 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-foreground/40 transition">
-                  <Upload className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground mt-1">
-                    {uploading ? "جاري..." : "رفع"}
-                  </span>
-                  <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
-                </label>
+            {!isNew ? (
+              <>
+                {images.length > 0 && (
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={images.map((i) => i.id)} strategy={horizontalListSortingStrategy}>
+                      <div className="flex flex-wrap gap-3">
+                        {images.map((img) => (
+                          <SortableImage
+                            key={img.id}
+                            img={img}
+                            onSetMain={() => handleSetMain(img.id)}
+                            onDelete={() => handleDeleteImage(img)}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                )}
+                <ImageUploadArea onUpload={handleImageUpload} uploading={uploading} disabled={false} />
+              </>
+            ) : (
+              <div className="rounded-xl bg-muted/50 p-6 text-center">
+                <ImagePlus className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground">احفظ المنتج أولاً لتتمكن من إضافة الصور</p>
               </div>
-            </SortableContext>
-          </DndContext>
+            )}
+          </motion.div>
         </div>
-      )}
 
-      {/* Actions */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <Button onClick={() => handleSave(false)} disabled={saving}>
-          <Save className="w-4 h-4 ml-2" />
-          {saving ? "جاري الحفظ..." : "حفظ"}
-        </Button>
-        <Button variant="outline" onClick={() => handleSave(true)} disabled={saving}>
-          نشر
-        </Button>
-        {!isNew && (
-          <Button variant="destructive" size="sm" className="mr-auto" onClick={() => setShowDelete(true)}>
-            <Trash2 className="w-4 h-4 ml-1" /> حذف
-          </Button>
-        )}
+        {/* RIGHT - Sidebar */}
+        <div className="space-y-5">
+          {/* Pricing & Stock Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="rounded-2xl border border-border/50 bg-card/90 backdrop-blur-sm p-5 space-y-4"
+          >
+            <h3 className="text-sm font-semibold text-foreground">التسعير والمخزون</h3>
+
+            <div>
+              <Label className="text-xs">السعر (ر.س) *</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={price}
+                onChange={(e) => { setPrice(e.target.value); setErrors(p => ({ ...p, price: "" })); }}
+                dir="ltr"
+                className={`mt-1 rounded-xl admin-input ${errors.price ? "border-destructive" : ""}`}
+                placeholder="0.00"
+              />
+              {errors.price && <p className="text-destructive text-xs mt-1">{errors.price}</p>}
+            </div>
+
+            <div>
+              <Label className="text-xs">سعر المقارنة (ر.س)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={compareAt}
+                onChange={(e) => setCompareAt(e.target.value)}
+                dir="ltr"
+                className="mt-1 rounded-xl admin-input"
+                placeholder="0.00"
+              />
+              {compareAt && price && parseFloat(compareAt) > parseFloat(price) && (
+                <p className="text-xs text-emerald-600 mt-1">
+                  خصم {Math.round((1 - parseFloat(price) / parseFloat(compareAt)) * 100)}%
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label className="text-xs">المخزون *</Label>
+              <Input
+                type="number"
+                value={inventory}
+                onChange={(e) => { setInventory(e.target.value); setErrors(p => ({ ...p, inventory: "" })); }}
+                dir="ltr"
+                className={`mt-1 rounded-xl admin-input ${errors.inventory ? "border-destructive" : ""}`}
+                placeholder="0"
+              />
+              {errors.inventory && <p className="text-destructive text-xs mt-1">{errors.inventory}</p>}
+            </div>
+          </motion.div>
+
+          {/* Status & Category Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-2xl border border-border/50 bg-card/90 backdrop-blur-sm p-5 space-y-4"
+          >
+            <h3 className="text-sm font-semibold text-foreground">الحالة والتصنيف</h3>
+
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">حالة المنتج</Label>
+              <div className="flex items-center gap-2">
+                <Switch checked={isActive} onCheckedChange={setIsActive} />
+                <span className={`text-xs font-medium ${isActive ? "text-emerald-600" : "text-muted-foreground"}`}>
+                  {isActive ? "نشط" : "مسودة"}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs">التصنيف</Label>
+              <Input
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="mt-1 rounded-xl admin-input"
+                placeholder="مثال: العناية بالبشرة"
+              />
+            </div>
+          </motion.div>
+
+          {/* Preview Card */}
+          <PreviewCard
+            name={nameAr}
+            price={price}
+            compareAt={compareAt}
+            image={mainImage}
+            isActive={isActive}
+          />
+
+          {/* Delete Button */}
+          {!isNew && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.35 }}
+            >
+              <Button
+                variant="outline"
+                className="w-full rounded-xl text-destructive border-destructive/30 hover:bg-destructive/5 gap-2"
+                onClick={() => setShowDelete(true)}
+              >
+                <Trash2 className="w-4 h-4" /> حذف المنتج
+              </Button>
+            </motion.div>
+          )}
+        </div>
       </div>
 
-      {/* Delete confirmation */}
+      {/* Sticky Save Bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="fixed bottom-0 left-0 right-0 z-40 p-4 bg-background/80 backdrop-blur-xl border-t border-border/50"
+      >
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/admin/products")}
+            className="rounded-xl"
+          >
+            إلغاء
+          </Button>
+          <div className="flex items-center gap-3">
+            {!isNew && (
+              <Button
+                variant="outline"
+                onClick={() => handleSave(false)}
+                disabled={saving}
+                className="rounded-xl"
+              >
+                حفظ كمسودة
+              </Button>
+            )}
+            <button
+              onClick={() => handleSave(true)}
+              disabled={saving}
+              className="admin-gradient-btn text-sm flex items-center gap-2"
+            >
+              {saving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              {saving ? "جاري الحفظ..." : isNew ? "إنشاء المنتج" : "حفظ ونشر"}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Delete Dialog */}
       <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
