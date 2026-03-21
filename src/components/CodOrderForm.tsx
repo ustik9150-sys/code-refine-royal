@@ -12,6 +12,8 @@ interface CodOrderFormProps {
 }
 
 const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, productImage }: CodOrderFormProps) => {
+  const { currency } = useCurrency();
+  const cs = currency.symbol;
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
