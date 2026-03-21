@@ -314,7 +314,7 @@ export default function AdminAnalytics() {
         <ChartCard title="الإيرادات اليومية" delay={0.45}>
           <div className="h-64" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mockDailyOrders}>
+              <BarChart data={dailyData}>
                 <defs>
                   <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="hsl(340 75% 55%)" stopOpacity={1} />
