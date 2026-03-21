@@ -195,6 +195,8 @@ function getLast7Days(): string[] {
 
 // --- Main Component ---
 export default function AdminAnalytics() {
+  const { currency } = useCurrency();
+  const cs = ` ${currency.symbol}`;
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, totalOrders: 0, totalRevenue: 0 });
   const [recentOrders, setRecentOrders] = useState<{ name: string; city: string; time: string }[]>([]);
