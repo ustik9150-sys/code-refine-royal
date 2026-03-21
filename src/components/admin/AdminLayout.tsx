@@ -27,6 +27,7 @@ function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -43,6 +44,21 @@ function AdminLogin() {
     setLoading(false);
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك" });
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted p-4" dir="rtl">
       <div className="bg-card rounded-2xl border border-border p-8 w-full max-w-sm space-y-6">
@@ -51,11 +67,13 @@ function AdminLogin() {
             <Lock className="w-6 h-6 text-foreground" />
           </div>
           <h1 className="text-xl font-bold text-foreground">لوحة التحكم</h1>
-          <p className="text-sm text-muted-foreground">سجل دخولك للمتابعة</p>
+          <p className="text-sm text-muted-foreground">
+            {resetMode ? "أدخل بريدك لإعادة تعيين كلمة المرور" : "سجل دخولك للمتابعة"}
+          </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
+        {resetMode ? (
+          <form onSubmit={handleResetPassword} className="space-y-4">
             <Input
               type="email"
               placeholder="البريد الإلكتروني"
@@ -64,8 +82,23 @@ function AdminLogin() {
               dir="ltr"
               className="text-center"
             />
-          </div>
-          <div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "جاري الإرسال..." : "إرسال رابط إعادة التعيين"}
+            </Button>
+            <button type="button" onClick={() => setResetMode(false)} className="w-full text-sm text-muted-foreground hover:text-foreground">
+              العودة لتسجيل الدخول
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <Input
+              type="email"
+              placeholder="البريد الإلكتروني"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              dir="ltr"
+              className="text-center"
+            />
             <Input
               type="password"
               placeholder="كلمة المرور"
@@ -74,11 +107,14 @@ function AdminLogin() {
               dir="ltr"
               className="text-center"
             />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "جاري الدخول..." : "تسجيل الدخول"}
-          </Button>
-        </form>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "جاري الدخول..." : "تسجيل الدخول"}
+            </Button>
+            <button type="button" onClick={() => setResetMode(true)} className="w-full text-sm text-muted-foreground hover:text-foreground">
+              نسيت كلمة المرور؟
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
