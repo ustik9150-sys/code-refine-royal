@@ -89,8 +89,10 @@ export default function AdminSettings() {
     try {
       await supabase.from("store_settings").upsert({
         key: "store_info",
-        value: { name: storeName, description: storeDescription, support_email: supportEmail, support_phone: supportPhone, logo_url: logoUrl } as any,
+        value: { name: storeName, description: storeDescription, support_email: supportEmail, support_phone: supportPhone, logo_url: logoUrl, currency } as any,
       }, { onConflict: "key" });
+
+      invalidateCurrencyCache();
 
       await supabase.from("store_settings").upsert({
         key: "shipping",
