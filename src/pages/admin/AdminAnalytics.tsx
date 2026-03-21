@@ -266,7 +266,7 @@ export default function AdminAnalytics() {
           gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.15} />
         <StatCard icon={TrendingUp} label="إجمالي الطلبات" value={stats.totalOrders}
           gradient="hsl(340 75% 55%), hsl(20 80% 55%)" delay={0.2} />
-        <StatCard icon={BarChart3} label="معدل التحويل" value={stats.conversionRate} suffix="%"
+        <StatCard icon={BarChart3} label="إجمالي الإيرادات" value={stats.totalRevenue} suffix=" ر.س"
           gradient="hsl(200 80% 55%), hsl(220 70% 60%)" delay={0.25} />
       </div>
 
