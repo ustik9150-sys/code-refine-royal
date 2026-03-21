@@ -76,7 +76,12 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
   const [settings, setSettings] = useState<CodFormSettings>(DEFAULT_SETTINGS);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
 
-  const selectedOffer = settings.offers?.find((o) => o.id === selectedOfferId);
+  // Filter offers for this product
+  const filteredOffers = settings.offers?.filter(
+    (o) => !o.product_id || o.product_id === productId
+  ) || [];
+
+  const selectedOffer = filteredOffers.find((o) => o.id === selectedOfferId);
   const finalQuantity = selectedOffer ? selectedOffer.quantity : quantity;
   const finalPrice = selectedOffer ? selectedOffer.price : unitPrice * quantity;
 
