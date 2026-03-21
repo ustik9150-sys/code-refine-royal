@@ -31,18 +31,21 @@ function fetchCurrency(): Promise<CurrencyConfig> {
   if (cachedCurrency) return Promise.resolve(cachedCurrency);
   if (fetchPromise) return fetchPromise;
 
-  fetchPromise = supabase
-    .from("store_settings")
-    .select("value")
-    .eq("key", "store_info")
-    .maybeSingle()
-    .then(({ data }) => {
+  fetchPromise = (async () => {
+    try {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "store_info")
+        .maybeSingle();
       const code = (data?.value as any)?.currency || "SAR";
       const found = CURRENCIES.find((c) => c.code === code) || DEFAULT_CURRENCY;
       cachedCurrency = found;
       return found;
-    })
-    .catch(() => DEFAULT_CURRENCY);
+    } catch {
+      return DEFAULT_CURRENCY;
+    }
+  })();
 
   return fetchPromise;
 }
