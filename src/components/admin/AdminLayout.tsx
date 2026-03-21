@@ -25,32 +25,20 @@ const navItems = [
 
 function AdminLogin() {
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"email" | "otp">("email");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !password.trim()) return;
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ email: email.trim() });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: password.trim(),
+    });
     if (error) {
-      toast({ title: "خطأ", description: error.message, variant: "destructive" });
-    } else {
-      setStep("otp");
-      toast({ title: "تم إرسال رمز التحقق إلى بريدك" });
-    }
-    setLoading(false);
-  };
-
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!otp.trim()) return;
-    setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({ email, token: otp.trim(), type: "email" });
-    if (error) {
-      toast({ title: "خطأ", description: "رمز التحقق غير صحيح", variant: "destructive" });
+      toast({ title: "خطأ", description: "البريد أو كلمة المرور غير صحيحة", variant: "destructive" });
     }
     setLoading(false);
   };
@@ -66,8 +54,8 @@ function AdminLogin() {
           <p className="text-sm text-muted-foreground">سجل دخولك للمتابعة</p>
         </div>
 
-        {step === "email" ? (
-          <form onSubmit={handleSendOtp} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
             <Input
               type="email"
               placeholder="البريد الإلكتروني"
@@ -76,31 +64,21 @@ function AdminLogin() {
               dir="ltr"
               className="text-center"
             />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "جاري الإرسال..." : "إرسال رمز التحقق"}
-            </Button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerify} className="space-y-4">
-            <p className="text-sm text-center text-muted-foreground">أدخل رمز التحقق المرسل إلى</p>
-            <p className="text-sm text-center font-medium" dir="ltr">{email}</p>
+          </div>
+          <div>
             <Input
-              type="text"
-              placeholder="رمز التحقق"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
+              type="password"
+              placeholder="كلمة المرور"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               dir="ltr"
-              className="text-center tracking-widest"
-              maxLength={8}
+              className="text-center"
             />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "جاري التحقق..." : "تحقق"}
-            </Button>
-            <button type="button" onClick={() => setStep("email")} className="w-full text-sm text-muted-foreground hover:text-foreground">
-              تغيير البريد
-            </button>
-          </form>
-        )}
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "جاري الدخول..." : "تسجيل الدخول"}
+          </Button>
+        </form>
       </div>
     </div>
   );
