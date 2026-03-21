@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Save, Eye, FileText, Sparkles, Shield, Type, Palette, BarChart3, Facebook,
   User, Phone, MapPin, GripVertical, Rocket, Zap, Smartphone, Monitor,
   Loader2, CheckCircle, Settings2, Wand2, Crown, Flame, Star,
-  Plus, Trash2, Tag,
+  Plus, Trash2, Tag, Package,
 } from "lucide-react";
 
 // ─── Types ───
