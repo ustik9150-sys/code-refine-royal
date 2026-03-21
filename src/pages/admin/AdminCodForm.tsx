@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Save, Eye, FileText, Sparkles, Shield, Type, Palette } from "lucide-react";
+import { Save, Eye, FileText, Sparkles, Shield, Type, Palette, BarChart3, Facebook } from "lucide-react";
 
 interface CodFormSettings {
   form_title: string;
