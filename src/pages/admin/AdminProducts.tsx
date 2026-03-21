@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -264,14 +265,18 @@ export default function AdminProducts() {
     return { total, outOfStock, totalRevenue, topProduct };
   }, [products]);
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("products").delete().eq("id", id);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("products").delete().eq("id", deleteTarget);
     if (!error) {
       toast({ title: "تم حذف المنتج" });
-      setProducts(prev => prev.filter(p => p.id !== id));
+      setProducts(prev => prev.filter(p => p.id !== deleteTarget));
     } else {
       toast({ title: "خطأ", description: "فشل حذف المنتج", variant: "destructive" });
     }
+    setDeleteTarget(null);
   };
 
   const handleDuplicate = async (product: Product) => {
@@ -393,7 +398,7 @@ export default function AdminProducts() {
                 product={product}
                 index={i}
                 onEdit={(id) => navigate(`/admin/products/${id}`)}
-                onDelete={handleDelete}
+                onDelete={(id) => setDeleteTarget(id)}
                 onDuplicate={handleDuplicate}
                 onView={(id) => {
                   window.open(`/?product=${id}`, "_blank");
@@ -409,6 +414,14 @@ export default function AdminProducts() {
           </AnimatePresence>
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="حذف المنتج"
+        description="هل أنت متأكد أنك تريد حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء."
+      />
     </div>
   );
 }

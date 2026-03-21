@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -418,12 +419,16 @@ export default function AdminOrders() {
     }
   };
 
-  const deleteOrder = async (orderId: string) => {
-    const { error } = await supabase.from("orders").delete().eq("id", orderId);
+  const [deleteOrderTarget, setDeleteOrderTarget] = useState<string | null>(null);
+
+  const confirmDeleteOrder = async () => {
+    if (!deleteOrderTarget) return;
+    const { error } = await supabase.from("orders").delete().eq("id", deleteOrderTarget);
     if (!error) {
       toast({ title: "تم حذف الطلب" });
       fetchOrders();
     }
+    setDeleteOrderTarget(null);
   };
 
   const saveNotes = async () => {
@@ -523,7 +528,7 @@ export default function AdminOrders() {
                 index={i}
                 onStatusChange={updateStatus}
                 onOpen={openOrder}
-                onDelete={deleteOrder}
+                onDelete={(id) => setDeleteOrderTarget(id)}
               />
             ))}
           </AnimatePresence>
@@ -645,6 +650,14 @@ export default function AdminOrders() {
           )}
         </SheetContent>
       </Sheet>
+
+      <ConfirmDeleteDialog
+        open={!!deleteOrderTarget}
+        onOpenChange={(open) => !open && setDeleteOrderTarget(null)}
+        onConfirm={confirmDeleteOrder}
+        title="حذف الطلب"
+        description="هل أنت متأكد أنك تريد حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء."
+      />
     </div>
   );
 }
