@@ -44,14 +44,14 @@ const DEFAULT_FOOTER_LINKS: FooterLink[] = [
 ];
 
 const DEFAULT_PAGES: PageContent = {
-  about: "",
-  privacy: "",
-  return_policy: "",
-  terms: "",
-  faq: "",
-  contact_email: "",
-  contact_phone: "",
-  contact_text: "",
+  about: DEFAULT_ABOUT,
+  privacy: DEFAULT_PRIVACY,
+  return_policy: DEFAULT_RETURN_POLICY,
+  terms: DEFAULT_TERMS,
+  faq: DEFAULT_FAQ,
+  contact_email: DEFAULT_CONTACT_EMAIL,
+  contact_phone: DEFAULT_CONTACT_PHONE,
+  contact_text: DEFAULT_CONTACT_TEXT,
 };
 
 const fadeUp = {
