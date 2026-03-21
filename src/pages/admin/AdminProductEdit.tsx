@@ -15,7 +15,7 @@ import {
 import { motion } from "framer-motion";
 import {
   ArrowRight, Save, Upload, X, GripVertical, Star, Trash2, Package,
-  ImagePlus, Loader2, Eye,
+  ImagePlus, Loader2, Eye, Tag,
 } from "lucide-react";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
@@ -176,6 +176,8 @@ export default function AdminProductEdit() {
   const [inventory, setInventory] = useState("0");
   const [category, setCategory] = useState("");
   const [isActive, setIsActive] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [images, setImages] = useState<ProductImage[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -204,6 +206,7 @@ export default function AdminProductEdit() {
       setInventory(String(product.inventory));
       setCategory(product.category || "");
       setIsActive(product.status === "active");
+      setTags(product.tags || []);
 
       const { data: imgs } = await supabase
         .from("product_images")
@@ -239,7 +242,7 @@ export default function AdminProductEdit() {
       inventory: parseInt(inventory) || 0,
       sku: null,
       category: category.trim() || null,
-      tags: [],
+      tags: tags,
       status: publish ? "active" : isActive ? "active" : "draft",
     };
 
@@ -568,6 +571,60 @@ export default function AdminProductEdit() {
                 className="mt-1 rounded-xl admin-input"
                 placeholder="مثال: العناية بالبشرة"
               />
+            </div>
+
+            <div>
+              <Label className="text-xs flex items-center gap-1.5">
+                <Tag className="w-3.5 h-3.5" /> الوسوم
+              </Label>
+              <div className="flex flex-wrap gap-1.5 mt-1.5 mb-2">
+                {tags.map((tag, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => setTags(tags.filter((_, idx) => idx !== i))}
+                      className="hover:text-destructive transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
+                      e.preventDefault();
+                      if (!tags.includes(tagInput.trim())) {
+                        setTags([...tags, tagInput.trim()]);
+                      }
+                      setTagInput("");
+                    }
+                  }}
+                  className="rounded-xl admin-input flex-1"
+                  placeholder="اكتب وسم واضغط Enter"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={() => {
+                    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+                      setTags([...tags, tagInput.trim()]);
+                    }
+                    setTagInput("");
+                  }}
+                >
+                  إضافة
+                </Button>
+              </div>
             </div>
           </motion.div>
 
