@@ -176,6 +176,8 @@ export default function AdminProductEdit() {
   const [inventory, setInventory] = useState("0");
   const [category, setCategory] = useState("");
   const [isActive, setIsActive] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [images, setImages] = useState<ProductImage[]>([]);
   const [uploading, setUploading] = useState(false);
 
