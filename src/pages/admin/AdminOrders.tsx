@@ -584,7 +584,7 @@ export default function AdminOrders() {
                             <TableRow key={item.id}>
                               <TableCell className="text-sm">{item.product_name}</TableCell>
                               <TableCell className="text-sm">{item.quantity}</TableCell>
-                              <TableCell className="text-sm">{item.total_price} ر.س</TableCell>
+                              <TableCell className="text-sm">{item.total_price} {cs}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
