@@ -39,6 +39,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/order" element={<OrderLanding />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Admin Dashboard */}
           <Route path="/admin" element={<AdminLayout />}>
