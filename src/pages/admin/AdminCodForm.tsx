@@ -633,6 +633,7 @@ export default function AdminCodForm() {
                               offer={offer}
                               onChange={(updated) => updateOffer(offer.id, updated)}
                               onDelete={() => deleteOffer(offer.id)}
+                              products={products}
                             />
                           ))}
                         </AnimatePresence>
