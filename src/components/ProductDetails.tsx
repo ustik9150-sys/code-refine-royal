@@ -187,6 +187,16 @@ const ProductDetails = () => {
           <span className="text-sm">{inStock ? "متوفر" : "غير متوفر"}</span>
         </div>
 
+        {/* Inline Order Form */}
+        <div className="mb-5">
+          <InlineOrderForm
+            productName={product?.name_ar || "منتج"}
+            productId={product?.id}
+            unitPrice={price}
+            quantity={quantity}
+          />
+        </div>
+
         {/* Description */}
         <div className="mb-5">
           {isAntibot ? (
@@ -211,16 +221,6 @@ const ProductDetails = () => {
               </button>
             </>
           )}
-        </div>
-
-        {/* Inline Order Form */}
-        <div className="mb-5">
-          <InlineOrderForm
-            productName={product?.name_ar || "منتج"}
-            productId={product?.id}
-            unitPrice={price}
-            quantity={quantity}
-          />
         </div>
 
         {/* Model number */}
