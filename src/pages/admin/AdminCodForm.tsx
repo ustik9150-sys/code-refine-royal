@@ -76,9 +76,9 @@ const defaultPixels: PixelConfig = {
 };
 
 const DEFAULT_OFFERS: OfferItem[] = [
-  { id: "1", title: "عرض 1", quantity: 1, price: 99, old_price: null, label: "", is_best: false },
-  { id: "2", title: "عرض 2", quantity: 2, price: 180, old_price: 198, label: "الأكثر طلباً 🔥", is_best: true },
-  { id: "3", title: "عرض 3", quantity: 3, price: 250, old_price: 297, label: "وفّر أكثر 💰", is_best: false },
+  { id: "1", title: "عرض 1", quantity: 1, price: 99, old_price: null, label: "", is_best: false, product_id: null },
+  { id: "2", title: "عرض 2", quantity: 2, price: 180, old_price: 198, label: "الأكثر طلباً 🔥", is_best: true, product_id: null },
+  { id: "3", title: "عرض 3", quantity: 3, price: 250, old_price: 297, label: "وفّر أكثر 💰", is_best: false, product_id: null },
 ];
 
 const DEFAULT_SETTINGS: CodFormSettings = {
