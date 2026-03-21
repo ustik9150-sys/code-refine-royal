@@ -113,7 +113,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full h-14 rounded-xl font-bold text-base text-destructive-foreground bg-destructive hover:bg-destructive/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100 flex items-center justify-center gap-2.5"
+            className="w-full h-14 rounded-xl font-bold text-base text-destructive-foreground bg-destructive hover:bg-destructive/90 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100 flex items-center justify-center gap-2.5 animate-[pulse-scale_1.5s_ease-in-out_infinite]"
           >
             {submitting ? (
               <>
