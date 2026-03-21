@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -109,8 +110,11 @@ export default function AdminPages() {
     ]);
   };
 
+  const [deleteLinkTarget, setDeleteLinkTarget] = useState<string | null>(null);
+
   const removeLink = (id: string) => {
     setFooterLinks((prev) => prev.filter((l) => l.id !== id));
+    setDeleteLinkTarget(null);
   };
 
   const updateLink = (id: string, field: keyof FooterLink, value: any) => {
@@ -218,7 +222,7 @@ export default function AdminPages() {
                 />
 
                 <button
-                  onClick={() => removeLink(link.id)}
+                  onClick={() => setDeleteLinkTarget(link.id)}
                   className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -378,6 +382,14 @@ export default function AdminPages() {
           </button>
         </div>
       </motion.div>
+
+      <ConfirmDeleteDialog
+        open={!!deleteLinkTarget}
+        onOpenChange={(open) => !open && setDeleteLinkTarget(null)}
+        onConfirm={() => deleteLinkTarget && removeLink(deleteLinkTarget)}
+        title="حذف الرابط"
+        description="هل أنت متأكد أنك تريد حذف هذا الرابط؟"
+      />
     </div>
   );
 }
