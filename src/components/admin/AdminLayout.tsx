@@ -19,6 +19,7 @@ import {
   User,
   ChevronRight,
   ChevronLeft,
+  BarChart3,
 } from "lucide-react";
 
 const navItems = [
