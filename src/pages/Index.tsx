@@ -9,6 +9,11 @@ import StoreFooter from "@/components/StoreFooter";
 import TrackingPixels from "@/components/TrackingPixels";
 import { useTrackVisit } from "@/hooks/useTrackVisit";
 import { Skeleton } from "@/components/ui/skeleton";
+import avatar1 from "@/assets/testimonial-1.jpg";
+import avatar2 from "@/assets/testimonial-2.jpg";
+import avatar3 from "@/assets/testimonial-3.jpg";
+import avatar4 from "@/assets/testimonial-4.jpg";
+import avatar5 from "@/assets/testimonial-5.jpg";
 
 type Product = {
   id: string;
