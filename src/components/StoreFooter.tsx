@@ -1,16 +1,52 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
-import commercialRegister from "@/assets/commercial-register.avif";
 
-const footerLinks = [
-  { label: "من نحن", href: "/about" },
-  { label: "سياسة الخصوصية", href: "/privacy" },
-  { label: "سياسة الاستبدال والاسترجاع و التوصيل", href: "/return-policy" },
-  { label: "البنود والقوانين", href: "/terms" },
-  { label: "الاسئلة الشائعه", href: "/faq" },
-  { label: "اتصل بنا", href: "/contact" },
+interface FooterLink {
+  id: string;
+  label: string;
+  href: string;
+  enabled: boolean;
+}
+
+const defaultLinks: FooterLink[] = [
+  { id: "1", label: "من نحن", href: "/about", enabled: true },
+  { id: "2", label: "سياسة الخصوصية", href: "/privacy", enabled: true },
+  { id: "3", label: "سياسة الاستبدال والاسترجاع و التوصيل", href: "/return-policy", enabled: true },
+  { id: "4", label: "البنود والقوانين", href: "/terms", enabled: true },
+  { id: "5", label: "الاسئلة الشائعه", href: "/faq", enabled: true },
+  { id: "6", label: "اتصل بنا", href: "/contact", enabled: true },
 ];
 
 const StoreFooter = () => {
+  const [links, setLinks] = useState<FooterLink[]>(defaultLinks);
+  const [storeDescription, setStoreDescription] = useState(
+    "ساكريكس علامة تجارية تجسد جوهر الثقة والهيبة في أبسط صورها، مستوحاة من روح الصقر"
+  );
+  const [storeLogo, setStoreLogo] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("*")
+        .in("key", ["footer_links", "store_info"]);
+      if (data) {
+        for (const row of data) {
+          const v = row.value as any;
+          if (row.key === "footer_links" && Array.isArray(v.links)) {
+            setLinks(v.links);
+          } else if (row.key === "store_info") {
+            if (v.description) setStoreDescription(v.description);
+            if (v.logo_url) setStoreLogo(v.logo_url);
+          }
+        }
+      }
+    })();
+  }, []);
+
+  const activeLinks = links.filter((l) => l.enabled && l.label);
+
   return (
     <footer className="bg-footer-bg relative mt-10">
       {/* Curved top */}
@@ -31,8 +67,8 @@ const StoreFooter = () => {
           <div className="text-center order-1">
             <h3 className="font-bold text-store-primary mb-4">روابط مهمة</h3>
             <ul className="space-y-4">
-              {footerLinks.map((link) => (
-                <li key={link.label}>
+              {activeLinks.map((link) => (
+                <li key={link.id}>
                   <a
                     href={link.href}
                     className="text-sm text-footer-text hover:text-primary transition-colors"
@@ -47,10 +83,10 @@ const StoreFooter = () => {
           {/* Center - Logo & Description */}
           <div className="text-center order-first lg:order-none relative z-[1] lg:-mt-[45px]">
             <a href="/" className="inline-block mb-3">
-              <img src={logo} alt="ساكريكس | SAQRIX" className="h-16 mx-auto" />
+              <img src={storeLogo || logo} alt="ساكريكس | SAQRIX" className="h-16 mx-auto" />
             </a>
             <p className="text-sm text-footer-text leading-6 mb-6">
-              ساكريكس علامة تجارية تجسد جوهر الثقة والهيبة في أبسط صورها، مستوحاة من روح الصقر
+              {storeDescription}
             </p>
           </div>
 

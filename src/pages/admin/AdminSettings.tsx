@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
-import { Save, Store, Truck, CreditCard, Loader2, ImageIcon, Upload, X, FileText, Mail, Phone, Type } from "lucide-react";
+import { Save, Truck, CreditCard, Loader2, ImageIcon, Upload, X, Mail, Phone, Type } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -22,7 +22,6 @@ export default function AdminSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Store info
   const [storeName, setStoreName] = useState("");
   const [storeDescription, setStoreDescription] = useState("");
   const [supportEmail, setSupportEmail] = useState("");
@@ -31,18 +30,9 @@ export default function AdminSettings() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
-  // Shipping
   const [fixedRate, setFixedRate] = useState("30");
   const [freeThreshold, setFreeThreshold] = useState("200");
-
-  // Payment
   const [codEnabled, setCodEnabled] = useState(true);
-
-  // Pages
-  const [aboutText, setAboutText] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [faqText, setFaqText] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -61,11 +51,6 @@ export default function AdminSettings() {
             setFreeThreshold(String(v.free_shipping_threshold ?? 200));
           } else if (row.key === "payment") {
             setCodEnabled(v.cod_enabled ?? true);
-          } else if (row.key === "pages") {
-            setAboutText(v.about || "");
-            setContactEmail(v.contact_email || "");
-            setContactPhone(v.contact_phone || "");
-            setFaqText(v.faq || "");
           }
         }
       }
@@ -76,7 +61,6 @@ export default function AdminSettings() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploadingLogo(true);
     try {
       const ext = file.name.split(".").pop();
@@ -84,13 +68,8 @@ export default function AdminSettings() {
       const { error: uploadError } = await supabase.storage
         .from("product-images")
         .upload(path, file, { upsert: true });
-
       if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(path);
-
+      const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
       setLogoUrl(urlData.publicUrl);
       toast({ title: "✅ تم رفع الشعار بنجاح" });
     } catch {
@@ -103,42 +82,19 @@ export default function AdminSettings() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Store info (upsert)
       await supabase.from("store_settings").upsert({
         key: "store_info",
-        value: {
-          name: storeName,
-          description: storeDescription,
-          support_email: supportEmail,
-          support_phone: supportPhone,
-          logo_url: logoUrl,
-        } as any,
+        value: { name: storeName, description: storeDescription, support_email: supportEmail, support_phone: supportPhone, logo_url: logoUrl } as any,
       }, { onConflict: "key" });
 
-      // Shipping
       await supabase.from("store_settings").upsert({
         key: "shipping",
-        value: {
-          fixed_rate: parseFloat(fixedRate) || 0,
-          free_shipping_threshold: parseFloat(freeThreshold) || 0,
-        } as any,
+        value: { fixed_rate: parseFloat(fixedRate) || 0, free_shipping_threshold: parseFloat(freeThreshold) || 0 } as any,
       }, { onConflict: "key" });
 
-      // Payment
       await supabase.from("store_settings").upsert({
         key: "payment",
         value: { cod_enabled: codEnabled } as any,
-      }, { onConflict: "key" });
-
-      // Pages
-      await supabase.from("store_settings").upsert({
-        key: "pages",
-        value: {
-          about: aboutText,
-          contact_email: contactEmail,
-          contact_phone: contactPhone,
-          faq: faqText,
-        } as any,
       }, { onConflict: "key" });
 
       toast({ title: "✅ تم حفظ الإعدادات بنجاح" });
@@ -159,36 +115,22 @@ export default function AdminSettings() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 pb-28">
-      {/* Page header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <h2 className="text-2xl font-bold text-foreground">الإعدادات</h2>
         <p className="text-sm text-muted-foreground mt-1">إدارة إعدادات متجرك وتخصيصه</p>
       </motion.div>
 
-      {/* ═══ Store Branding Card ═══ */}
-      <motion.div
-        className="admin-card"
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        custom={0}
-      >
+      {/* Store Branding */}
+      <motion.div className="admin-card" variants={fadeUp} initial="hidden" animate="visible" custom={0}>
         <div className="flex items-start gap-4 mb-6">
-          <div className="admin-icon-box">
-            <ImageIcon className="w-5 h-5" />
-          </div>
+          <div className="admin-icon-box"><ImageIcon className="w-5 h-5" /></div>
           <div>
             <h3 className="font-semibold text-foreground">هوية المتجر</h3>
             <p className="text-xs text-muted-foreground mt-0.5">الشعار والوصف والاسم</p>
           </div>
         </div>
-
         <div className="space-y-5">
-          {/* Logo Upload */}
+          {/* Logo */}
           <div>
             <Label className="text-xs font-medium text-muted-foreground mb-2 block">شعار المتجر</Label>
             <div className="flex items-center gap-4">
@@ -197,21 +139,13 @@ export default function AdminSettings() {
                   <div className="w-20 h-20 rounded-xl border-2 border-border overflow-hidden bg-muted/30 flex items-center justify-center">
                     <img src={logoUrl} alt="شعار المتجر" className="w-full h-full object-contain p-1" />
                   </div>
-                  <button
-                    onClick={() => setLogoUrl("")}
-                    className="absolute -top-2 -left-2 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
+                  <button onClick={() => setLogoUrl("")} className="absolute -top-2 -left-2 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <X className="w-3 h-3" />
                   </button>
                 </div>
               ) : (
-                <div
-                  onClick={() => logoInputRef.current?.click()}
-                  className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 flex flex-col items-center justify-center cursor-pointer transition-colors"
-                >
-                  {uploadingLogo ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                  ) : (
+                <div onClick={() => logoInputRef.current?.click()} className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 flex flex-col items-center justify-center cursor-pointer transition-colors">
+                  {uploadingLogo ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /> : (
                     <>
                       <Upload className="w-5 h-5 text-muted-foreground mb-1" />
                       <span className="text-[10px] text-muted-foreground">رفع شعار</span>
@@ -220,162 +154,50 @@ export default function AdminSettings() {
                 </div>
               )}
               {logoUrl && (
-                <button
-                  onClick={() => logoInputRef.current?.click()}
-                  className="text-xs text-primary hover:underline"
-                >
+                <button onClick={() => logoInputRef.current?.click()} className="text-xs text-primary hover:underline">
                   {uploadingLogo ? "جاري الرفع..." : "تغيير الشعار"}
                 </button>
               )}
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleLogoUpload}
-              />
+              <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
             </div>
           </div>
 
-          {/* Store Name */}
           <div>
             <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">اسم المتجر</Label>
             <div className="relative">
               <Type className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-              <Input
-                value={storeName}
-                onChange={(e) => setStoreName(e.target.value)}
-                className="admin-input pr-10"
-                placeholder="اسم متجرك"
-              />
+              <Input value={storeName} onChange={(e) => setStoreName(e.target.value)} className="admin-input pr-10" placeholder="اسم متجرك" />
             </div>
           </div>
 
-          {/* Store Description */}
           <div>
             <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">وصف المتجر</Label>
-            <Textarea
-              value={storeDescription}
-              onChange={(e) => setStoreDescription(e.target.value)}
-              className="admin-input min-h-[80px] resize-none"
-              placeholder="وصف قصير يظهر في الفوتر وصفحة من نحن"
-            />
+            <Textarea value={storeDescription} onChange={(e) => setStoreDescription(e.target.value)} className="admin-input min-h-[80px] resize-none" placeholder="وصف قصير يظهر في الفوتر وصفحة من نحن" />
           </div>
 
-          {/* Contact Info */}
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">بريد الدعم</Label>
               <div className="relative">
                 <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-                <Input
-                  value={supportEmail}
-                  onChange={(e) => setSupportEmail(e.target.value)}
-                  dir="ltr"
-                  className="admin-input text-left pr-10"
-                  placeholder="support@store.com"
-                />
+                <Input value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} dir="ltr" className="admin-input text-left pr-10" placeholder="support@store.com" />
               </div>
             </div>
             <div>
               <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">هاتف الدعم</Label>
               <div className="relative">
                 <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-                <Input
-                  value={supportPhone}
-                  onChange={(e) => setSupportPhone(e.target.value)}
-                  dir="ltr"
-                  className="admin-input text-left pr-10"
-                  placeholder="+966 5XX XXX XXXX"
-                />
+                <Input value={supportPhone} onChange={(e) => setSupportPhone(e.target.value)} dir="ltr" className="admin-input text-left pr-10" placeholder="+966 5XX XXX XXXX" />
               </div>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* ═══ Pages Content Card ═══ */}
-      <motion.div
-        className="admin-card"
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        custom={1}
-      >
+      {/* Shipping */}
+      <motion.div className="admin-card" variants={fadeUp} initial="hidden" animate="visible" custom={1}>
         <div className="flex items-start gap-4 mb-6">
-          <div className="admin-icon-box">
-            <FileText className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">محتوى الصفحات</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">تعديل نصوص صفحات المتجر</p>
-          </div>
-        </div>
-
-        <div className="space-y-5">
-          {/* About Us */}
-          <div>
-            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">صفحة "من نحن"</Label>
-            <Textarea
-              value={aboutText}
-              onChange={(e) => setAboutText(e.target.value)}
-              className="admin-input min-h-[100px] resize-none"
-              placeholder="نبذة عن متجرك وقصته..."
-            />
-          </div>
-
-          {/* Contact Page */}
-          <div className="p-4 rounded-xl bg-muted/30 border border-border/50 space-y-3">
-            <p className="text-sm font-medium text-foreground">صفحة التواصل</p>
-            <div className="grid gap-3 md:grid-cols-2">
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">إيميل التواصل</Label>
-                <Input
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                  dir="ltr"
-                  className="admin-input text-left"
-                  placeholder="contact@store.com"
-                />
-              </div>
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">هاتف التواصل</Label>
-                <Input
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  dir="ltr"
-                  className="admin-input text-left"
-                  placeholder="+966 5XX XXX XXXX"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* FAQ */}
-          <div>
-            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">الأسئلة الشائعة</Label>
-            <Textarea
-              value={faqText}
-              onChange={(e) => setFaqText(e.target.value)}
-              className="admin-input min-h-[100px] resize-none"
-              placeholder="اكتب الأسئلة الشائعة وإجاباتها..."
-            />
-          </div>
-        </div>
-      </motion.div>
-
-      {/* ═══ Shipping Card ═══ */}
-      <motion.div
-        className="admin-card"
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        custom={2}
-      >
-        <div className="flex items-start gap-4 mb-6">
-          <div className="admin-icon-box">
-            <Truck className="w-5 h-5" />
-          </div>
+          <div className="admin-icon-box"><Truck className="w-5 h-5" /></div>
           <div>
             <h3 className="font-semibold text-foreground">إعدادات الشحن</h3>
             <p className="text-xs text-muted-foreground mt-0.5">تكاليف وخيارات التوصيل</p>
@@ -384,23 +206,11 @@ export default function AdminSettings() {
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">سعر الشحن الثابت (ر.س)</Label>
-            <Input
-              type="number"
-              value={fixedRate}
-              onChange={(e) => setFixedRate(e.target.value)}
-              dir="ltr"
-              className="admin-input text-left"
-            />
+            <Input type="number" value={fixedRate} onChange={(e) => setFixedRate(e.target.value)} dir="ltr" className="admin-input text-left" />
           </div>
           <div>
             <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">حد الشحن المجاني (ر.س)</Label>
-            <Input
-              type="number"
-              value={freeThreshold}
-              onChange={(e) => setFreeThreshold(e.target.value)}
-              dir="ltr"
-              className="admin-input text-left"
-            />
+            <Input type="number" value={freeThreshold} onChange={(e) => setFreeThreshold(e.target.value)} dir="ltr" className="admin-input text-left" />
           </div>
         </div>
         <div className="mt-4 p-3 rounded-xl bg-muted/50 text-xs text-muted-foreground">
@@ -408,18 +218,10 @@ export default function AdminSettings() {
         </div>
       </motion.div>
 
-      {/* ═══ Payment Card ═══ */}
-      <motion.div
-        className="admin-card"
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        custom={3}
-      >
+      {/* Payment */}
+      <motion.div className="admin-card" variants={fadeUp} initial="hidden" animate="visible" custom={2}>
         <div className="flex items-start gap-4 mb-6">
-          <div className="admin-icon-box">
-            <CreditCard className="w-5 h-5" />
-          </div>
+          <div className="admin-icon-box"><CreditCard className="w-5 h-5" /></div>
           <div>
             <h3 className="font-semibold text-foreground">إعدادات الدفع</h3>
             <p className="text-xs text-muted-foreground mt-0.5">طرق الدفع المتاحة في متجرك</p>
@@ -439,25 +241,11 @@ export default function AdminSettings() {
         </div>
       </motion.div>
 
-      {/* Sticky Save Button */}
-      <motion.div
-        className="fixed bottom-0 left-0 right-0 lg:right-auto lg:left-0 z-30 p-4"
-        style={{ maxWidth: "calc(100% - 16rem)" }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
+      {/* Sticky Save */}
+      <motion.div className="fixed bottom-0 left-0 right-0 lg:right-auto lg:left-0 z-30 p-4" style={{ maxWidth: "calc(100% - 16rem)" }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <div className="max-w-3xl mx-auto">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="admin-gradient-btn w-full flex items-center justify-center gap-2 disabled:opacity-60"
-          >
-            {saving ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Save className="w-5 h-5" />
-            )}
+          <button onClick={handleSave} disabled={saving} className="admin-gradient-btn w-full flex items-center justify-center gap-2 disabled:opacity-60">
+            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             {saving ? "جاري الحفظ..." : "حفظ الإعدادات"}
           </button>
         </div>
