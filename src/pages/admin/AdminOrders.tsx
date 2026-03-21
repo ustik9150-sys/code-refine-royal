@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/hooks/useCurrency";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
