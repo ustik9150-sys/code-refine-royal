@@ -2,7 +2,7 @@ import StoreHeader from "@/components/StoreHeader";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ProductDetails from "@/components/ProductDetails";
 import StoreFooter from "@/components/StoreFooter";
-import FacebookPixel from "@/components/FacebookPixel";
+import TrackingPixels from "@/components/TrackingPixels";
 
 const breadcrumbItems = [
   { label: "الرئيسية", href: "/" },
