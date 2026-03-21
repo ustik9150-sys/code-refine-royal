@@ -382,6 +382,14 @@ export default function AdminPages() {
           </button>
         </div>
       </motion.div>
+
+      <ConfirmDeleteDialog
+        open={!!deleteLinkTarget}
+        onOpenChange={(open) => !open && setDeleteLinkTarget(null)}
+        onConfirm={() => deleteLinkTarget && removeLink(deleteLinkTarget)}
+        title="حذف الرابط"
+        description="هل أنت متأكد أنك تريد حذف هذا الرابط؟"
+      />
     </div>
   );
 }
