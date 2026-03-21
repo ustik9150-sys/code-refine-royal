@@ -131,9 +131,9 @@ function ProductCard({ product, index, onEdit, onDelete, onDuplicate }: {
 
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-baseline gap-2">
-            <span className="text-base font-bold text-foreground">{product.price.toLocaleString("en-US")} ر.س</span>
+            <span className="text-base font-bold text-foreground">{product.price.toLocaleString("en-US")} {cs}</span>
             {product.compare_at_price && product.compare_at_price > product.price && (
-              <span className="text-xs text-muted-foreground line-through">{product.compare_at_price.toLocaleString("en-US")} ر.س</span>
+              <span className="text-xs text-muted-foreground line-through">{product.compare_at_price.toLocaleString("en-US")} {cs}</span>
             )}
           </div>
           <div className="flex items-center gap-1">
