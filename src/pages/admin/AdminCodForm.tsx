@@ -27,6 +27,28 @@ interface CodFormSettings {
   city_placeholder: string;
 }
 
+interface PixelConfig {
+  facebook_pixel_id: string;
+  facebook_enabled: boolean;
+  snapchat_pixel_id: string;
+  snapchat_enabled: boolean;
+  tiktok_pixel_id: string;
+  tiktok_enabled: boolean;
+  google_ads_id: string;
+  google_ads_enabled: boolean;
+}
+
+const defaultPixels: PixelConfig = {
+  facebook_pixel_id: "",
+  facebook_enabled: false,
+  snapchat_pixel_id: "",
+  snapchat_enabled: false,
+  tiktok_pixel_id: "",
+  tiktok_enabled: false,
+  google_ads_id: "",
+  google_ads_enabled: false,
+};
+
 const DEFAULT_SETTINGS: CodFormSettings = {
   form_title: "للطلب ادخل معلوماتك في الخانات اسفله",
   form_subtitle: "الدفع عند الاستلام - توصيل سريع",
