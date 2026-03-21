@@ -650,6 +650,14 @@ export default function AdminOrders() {
           )}
         </SheetContent>
       </Sheet>
+
+      <ConfirmDeleteDialog
+        open={!!deleteOrderTarget}
+        onOpenChange={(open) => !open && setDeleteOrderTarget(null)}
+        onConfirm={confirmDeleteOrder}
+        title="حذف الطلب"
+        description="هل أنت متأكد أنك تريد حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء."
+      />
     </div>
   );
 }
