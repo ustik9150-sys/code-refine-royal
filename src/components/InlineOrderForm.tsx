@@ -180,8 +180,8 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
                     onClick={() => setSelectedOfferId(offer.id)}
                     className={`w-full relative rounded-xl border-2 p-3.5 text-right transition-all duration-200 ${
                       isSelected
-                        ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
-                        : "border-border hover:border-primary/30"
+                        ? "border-destructive bg-destructive/5 shadow-lg shadow-destructive/10"
+                        : "border-border hover:border-destructive/30"
                     }`}
                   >
                     {/* Badge */}
@@ -199,24 +199,24 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
                       <div className="flex items-center gap-2.5">
                         {/* Radio circle */}
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                          isSelected ? "border-primary" : "border-muted-foreground/30"
+                          isSelected ? "border-destructive" : "border-muted-foreground/30"
                         }`}>
                           {isSelected && (
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="w-2.5 h-2.5 rounded-full bg-primary"
+                              className="w-2.5 h-2.5 rounded-full bg-destructive"
                             />
                           )}
                         </div>
-                        <span className="text-sm font-bold text-foreground">{offer.quantity} قطعة</span>
+                        <span className="text-sm font-bold text-foreground">{offer.title || `${offer.quantity} قطعة`}</span>
                       </div>
 
                       <div className="flex items-baseline gap-2">
                         {offer.old_price && offer.old_price > offer.price && (
                           <span className="text-xs text-muted-foreground line-through">{offer.old_price} {currency.symbol}</span>
                         )}
-                        <span className={`text-base font-black ${isSelected ? "text-primary" : "text-foreground"}`}>
+                        <span className={`text-base font-black ${isSelected ? "text-destructive" : "text-foreground"}`}>
                           {offer.price} {currency.symbol}
                         </span>
                         {discount && (
