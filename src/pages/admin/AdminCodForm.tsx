@@ -11,7 +11,19 @@ import {
   Save, Eye, FileText, Sparkles, Shield, Type, Palette, BarChart3, Facebook,
   User, Phone, MapPin, GripVertical, Rocket, Zap, Smartphone, Monitor,
   Loader2, CheckCircle, Settings2, Wand2, Crown, Flame, Star,
+  Plus, Trash2, Tag,
 } from "lucide-react";
+
+// ─── Types ───
+export interface OfferItem {
+  id: string;
+  title: string;
+  quantity: number;
+  price: number;
+  old_price: number | null;
+  label: string;
+  is_best: boolean;
+}
 
 interface CodFormSettings {
   form_title: string;
@@ -30,6 +42,8 @@ interface CodFormSettings {
   name_placeholder: string;
   phone_placeholder: string;
   city_placeholder: string;
+  show_offers: boolean;
+  offers: OfferItem[];
 }
 
 interface PixelConfig {
@@ -54,6 +68,12 @@ const defaultPixels: PixelConfig = {
   google_ads_enabled: false,
 };
 
+const DEFAULT_OFFERS: OfferItem[] = [
+  { id: "1", title: "عرض 1", quantity: 1, price: 99, old_price: null, label: "", is_best: false },
+  { id: "2", title: "عرض 2", quantity: 2, price: 180, old_price: 198, label: "الأكثر طلباً 🔥", is_best: true },
+  { id: "3", title: "عرض 3", quantity: 3, price: 250, old_price: 297, label: "وفّر أكثر 💰", is_best: false },
+];
+
 const DEFAULT_SETTINGS: CodFormSettings = {
   form_title: "للطلب ادخل معلوماتك في الخانات اسفله",
   form_subtitle: "الدفع عند الاستلام - توصيل سريع",
@@ -71,6 +91,8 @@ const DEFAULT_SETTINGS: CodFormSettings = {
   name_placeholder: "ادخل اسمك هنا",
   phone_placeholder: "ادخل رقم هاتفك هنا",
   city_placeholder: "المدينة / العنوان",
+  show_offers: false,
+  offers: DEFAULT_OFFERS,
 };
 
 type ActivePanel = "fields" | "conversion" | "design" | "pixels" | "messages";
@@ -118,8 +140,74 @@ function FieldCard({ icon: Icon, name, desc, required, enabled, onToggle, requir
   );
 }
 
+// ─── Offer Card (Builder) ───
+function OfferBuilderCard({ offer, onChange, onDelete }: {
+  offer: OfferItem;
+  onChange: (updated: OfferItem) => void;
+  onDelete: () => void;
+}) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className={`rounded-xl border p-4 space-y-3 transition-all ${
+        offer.is_best ? "border-primary/50 bg-primary/5" : "border-border/50 bg-card/80"
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Tag className="w-4 h-4 text-primary" />
+          <span className="text-sm font-bold text-foreground">{offer.title || "عرض"}</span>
+          {offer.is_best && (
+            <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">الأفضل</span>
+          )}
+        </div>
+        <button onClick={onDelete} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label className="text-[11px] text-muted-foreground">العنوان</Label>
+          <Input value={offer.title} onChange={(e) => onChange({ ...offer, title: e.target.value })} className="mt-0.5 rounded-lg h-9 text-sm" />
+        </div>
+        <div>
+          <Label className="text-[11px] text-muted-foreground">الكمية</Label>
+          <Input type="number" min={1} value={offer.quantity} onChange={(e) => onChange({ ...offer, quantity: parseInt(e.target.value) || 1 })} className="mt-0.5 rounded-lg h-9 text-sm" />
+        </div>
+        <div>
+          <Label className="text-[11px] text-muted-foreground">السعر</Label>
+          <Input type="number" min={0} value={offer.price} onChange={(e) => onChange({ ...offer, price: parseFloat(e.target.value) || 0 })} className="mt-0.5 rounded-lg h-9 text-sm" />
+        </div>
+        <div>
+          <Label className="text-[11px] text-muted-foreground">السعر القديم</Label>
+          <Input type="number" min={0} value={offer.old_price || ""} onChange={(e) => onChange({ ...offer, old_price: parseFloat(e.target.value) || null })} className="mt-0.5 rounded-lg h-9 text-sm" placeholder="اختياري" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 items-end">
+        <div>
+          <Label className="text-[11px] text-muted-foreground">الشارة</Label>
+          <Input value={offer.label} onChange={(e) => onChange({ ...offer, label: e.target.value })} className="mt-0.5 rounded-lg h-9 text-sm" placeholder="مثال: الأكثر طلباً 🔥" />
+        </div>
+        <div className="flex items-center gap-2 pb-1">
+          <Switch checked={offer.is_best} onCheckedChange={(v) => onChange({ ...offer, is_best: v })} />
+          <span className="text-xs text-muted-foreground">العرض الأفضل</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // ─── Live Preview ───
 function LivePreview({ settings, mobileView }: { settings: CodFormSettings; mobileView: boolean }) {
+  const [selectedOffer, setSelectedOffer] = useState<string | null>(
+    settings.offers?.find(o => o.is_best)?.id || settings.offers?.[0]?.id || null
+  );
+
   const btnColor =
     settings.button_color === "primary" ? "bg-primary" :
     settings.button_color === "green" ? "bg-emerald-600" : "bg-destructive";
@@ -144,6 +232,50 @@ function LivePreview({ settings, mobileView }: { settings: CodFormSettings; mobi
 
         {/* Form body */}
         <div className="px-5 py-5 space-y-3">
+          {/* Offers */}
+          {settings.show_offers && settings.offers?.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-foreground text-center">اختر العرض المناسب</p>
+              {settings.offers.map((offer) => (
+                <motion.div
+                  key={offer.id}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setSelectedOffer(offer.id)}
+                  className={`relative rounded-xl border-2 p-3 cursor-pointer transition-all duration-200 ${
+                    selectedOffer === offer.id
+                      ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
+                      : "border-border/50 hover:border-primary/30"
+                  }`}
+                >
+                  {offer.label && (
+                    <span className={`absolute -top-2.5 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      offer.is_best ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    }`}>
+                      {offer.label}
+                    </span>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        selectedOffer === offer.id ? "border-primary" : "border-muted-foreground/30"
+                      }`}>
+                        {selectedOffer === offer.id && <div className="w-2 h-2 rounded-full bg-primary" />}
+                      </div>
+                      <span className="text-sm font-semibold text-foreground">{offer.quantity} قطعة</span>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      {offer.old_price && (
+                        <span className="text-xs text-muted-foreground line-through">{offer.old_price}</span>
+                      )}
+                      <span className="text-sm font-bold text-foreground">{offer.price}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+
           {/* Name */}
           <div className="relative">
             <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
@@ -244,7 +376,7 @@ export default function AdminCodForm() {
         for (const row of data) {
           const v = row.value as any;
           if (row.key === "cod_form") {
-            setSettings({ ...DEFAULT_SETTINGS, ...v });
+            setSettings({ ...DEFAULT_SETTINGS, ...v, offers: v.offers || DEFAULT_OFFERS });
           } else if (row.key === "tracking") {
             setPixels({
               facebook_pixel_id: v.facebook_pixel_id || "",
@@ -265,6 +397,27 @@ export default function AdminCodForm() {
 
   const update = (key: keyof CodFormSettings, value: any) => setSettings((prev) => ({ ...prev, [key]: value }));
   const updatePixel = (key: keyof PixelConfig, value: string | boolean) => setPixels((prev) => ({ ...prev, [key]: value }));
+
+  const addOffer = () => {
+    const newOffer: OfferItem = {
+      id: String(Date.now()),
+      title: `عرض ${(settings.offers?.length || 0) + 1}`,
+      quantity: 1,
+      price: 0,
+      old_price: null,
+      label: "",
+      is_best: false,
+    };
+    update("offers", [...(settings.offers || []), newOffer]);
+  };
+
+  const updateOffer = (id: string, updated: OfferItem) => {
+    update("offers", settings.offers.map((o) => (o.id === id ? updated : o)));
+  };
+
+  const deleteOffer = (id: string) => {
+    update("offers", settings.offers.filter((o) => o.id !== id));
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -329,7 +482,6 @@ export default function AdminCodForm() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Preview toggle */}
           <div className="hidden md:flex items-center gap-1 bg-muted/60 rounded-lg p-1">
             <button
               onClick={() => setMobilePreview(false)}
@@ -374,21 +526,19 @@ export default function AdminCodForm() {
         ))}
       </div>
 
-      {/* ─── Main Layout: Settings + Live Preview ─── */}
+      {/* ─── Main Layout ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        {/* LEFT: Settings Panel */}
+        {/* LEFT */}
         <div className="lg:col-span-3 space-y-5">
           <AnimatePresence mode="wait">
             {/* ═══ Fields Panel ═══ */}
             {activePanel === "fields" && (
               <motion.div key="fields" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-5">
-                {/* Field Cards */}
                 <div className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-5 space-y-3">
                   <div className="flex items-center gap-2 mb-1">
                     <FileText className="w-4 h-4 text-primary" />
                     <h3 className="text-sm font-bold text-foreground">حقول النموذج</h3>
                   </div>
-
                   <FieldCard icon={User} name="الاسم الكامل" desc="حقل أساسي لا يمكن إزالته" required />
                   <FieldCard icon={Phone} name="رقم الهاتف" desc="حقل أساسي لا يمكن إزالته" required />
                   <FieldCard
@@ -402,7 +552,6 @@ export default function AdminCodForm() {
                   />
                 </div>
 
-                {/* Placeholders */}
                 <div className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-5 space-y-4">
                   <div className="flex items-center gap-2">
                     <Type className="w-4 h-4 text-primary" />
@@ -431,10 +580,47 @@ export default function AdminCodForm() {
             {/* ═══ Conversion Panel ═══ */}
             {activePanel === "conversion" && (
               <motion.div key="conversion" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-5">
+                {/* Offers Section */}
+                <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent backdrop-blur-sm p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Rocket className="w-4 h-4 text-primary" />
+                      <h3 className="text-sm font-bold text-foreground">العروض الخاصة 🚀</h3>
+                    </div>
+                    <Switch checked={settings.show_offers} onCheckedChange={(v) => update("show_offers", v)} />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">أضف عروض كمية لزيادة متوسط قيمة الطلب</p>
+
+                  <AnimatePresence>
+                    {settings.show_offers && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-3">
+                        <AnimatePresence>
+                          {settings.offers?.map((offer) => (
+                            <OfferBuilderCard
+                              key={offer.id}
+                              offer={offer}
+                              onChange={(updated) => updateOffer(offer.id, updated)}
+                              onDelete={() => deleteOffer(offer.id)}
+                            />
+                          ))}
+                        </AnimatePresence>
+                        <Button
+                          variant="outline"
+                          onClick={addOffer}
+                          className="w-full rounded-xl border-dashed border-primary/30 text-primary hover:bg-primary/5 gap-2"
+                        >
+                          <Plus className="w-4 h-4" />
+                          إضافة عرض جديد
+                        </Button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
                 <div className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-5 space-y-5">
                   <div className="flex items-center gap-2">
-                    <Rocket className="w-4 h-4 text-primary" />
-                    <h3 className="text-sm font-bold text-foreground">تعزيز التحويلات 🚀</h3>
+                    <Flame className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-bold text-foreground">تعزيز التحويلات</h3>
                   </div>
 
                   {/* Urgency */}
@@ -481,7 +667,6 @@ export default function AdminCodForm() {
             {/* ═══ Design Panel ═══ */}
             {activePanel === "design" && (
               <motion.div key="design" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-5">
-                {/* Title */}
                 <div className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-5 space-y-4">
                   <div className="flex items-center gap-2">
                     <Palette className="w-4 h-4 text-primary" />
@@ -497,7 +682,6 @@ export default function AdminCodForm() {
                   </div>
                 </div>
 
-                {/* Button */}
                 <div className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-5 space-y-4">
                   <div className="flex items-center gap-2">
                     <Zap className="w-4 h-4 text-primary" />
