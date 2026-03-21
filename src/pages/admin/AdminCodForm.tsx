@@ -196,6 +196,28 @@ function OfferBuilderCard({ offer, onChange, onDelete, products }: {
         </div>
       </div>
 
+      {/* Product selector */}
+      <div>
+        <Label className="text-[11px] text-muted-foreground flex items-center gap-1">
+          <Package className="w-3 h-3" />
+          المنتج المستهدف
+        </Label>
+        <Select
+          value={offer.product_id || "all"}
+          onValueChange={(v) => onChange({ ...offer, product_id: v === "all" ? null : v })}
+        >
+          <SelectTrigger className="mt-0.5 rounded-lg h-9 text-sm">
+            <SelectValue placeholder="جميع المنتجات" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">جميع المنتجات</SelectItem>
+            {products.map((p) => (
+              <SelectItem key={p.id} value={p.id}>{p.name_ar}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="grid grid-cols-2 gap-2 items-end">
         <div>
           <Label className="text-[11px] text-muted-foreground">الشارة</Label>
