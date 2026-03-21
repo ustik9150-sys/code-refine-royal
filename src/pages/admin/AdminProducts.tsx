@@ -12,8 +12,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus, Search, Edit, Package, Trash2, Eye, Copy,
-  ShoppingCart, AlertTriangle, DollarSign, TrendingUp,
+  Plus, Search, Edit, Package, Trash2, Eye, Copy, Link2,
+  ShoppingCart, AlertTriangle, DollarSign, TrendingUp, ExternalLink,
 } from "lucide-react";
 
 type Product = {
