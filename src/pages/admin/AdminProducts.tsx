@@ -56,7 +56,7 @@ function StatCard({ icon: Icon, label, value, suffix, gradient, delay }: {
 }
 
 // --- Product Card ---
-function ProductCard({ product, index, onEdit, onDelete, onDuplicate }: {
+function ProductCard({ product, index, onEdit, onDelete, onDuplicate, onView, onCopyLink }: {
   product: Product; index: number;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
