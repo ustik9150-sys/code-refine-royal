@@ -24,6 +24,9 @@ export default function AdminSettings() {
   // Payment
   const [codEnabled, setCodEnabled] = useState(true);
 
+  // Pixel
+  const [pixelId, setPixelId] = useState("");
+
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("store_settings").select("*");
