@@ -399,8 +399,12 @@ export default function AdminCodForm() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("store_settings")
+      const [settingsRes, productsRes] = await Promise.all([
+        supabase.from("store_settings").select("*").in("key", ["cod_form", "tracking"]),
+        supabase.from("products").select("id, name_ar").order("created_at", { ascending: false }),
+      ]);
+      if (productsRes.data) setProducts(productsRes.data);
+      const data = settingsRes.data;
         .select("*")
         .in("key", ["cod_form", "tracking"]);
       if (data) {
