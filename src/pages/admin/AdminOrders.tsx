@@ -20,8 +20,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Download, Search, Eye, Phone, MessageCircle, CheckCircle, XCircle,
   ShoppingCart, Clock, TrendingUp, DollarSign, ChevronDown, ChevronUp,
-  Package, Trash2,
+  Package, Trash2, MapPin,
 } from "lucide-react";
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Order = {
   id: string;
