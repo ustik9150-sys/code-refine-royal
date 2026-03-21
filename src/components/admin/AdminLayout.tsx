@@ -13,11 +13,13 @@ import {
   Menu,
   X,
   Lock,
+  FileText,
 } from "lucide-react";
 
 const navItems = [
   { to: "/admin/orders", icon: ShoppingCart, label: "الطلبات" },
   { to: "/admin/products", icon: Package, label: "المنتجات" },
+  { to: "/admin/cod-form", icon: FileText, label: "CodForm" },
   { to: "/admin/settings", icon: Settings, label: "الإعدادات" },
 ];
 

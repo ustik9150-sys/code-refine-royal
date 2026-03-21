@@ -45,6 +45,7 @@ const App = () => (
             <Route path="orders" element={<AdminOrders />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="products/:id" element={<AdminProductEdit />} />
+            <Route path="cod-form" element={<AdminCodForm />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
 
