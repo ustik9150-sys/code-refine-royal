@@ -32,6 +32,8 @@ export default function AdminSettings() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
+  const [currency, setCurrency] = useState("SAR");
+
   const [fixedRate, setFixedRate] = useState("30");
   const [freeThreshold, setFreeThreshold] = useState("200");
   const [codEnabled, setCodEnabled] = useState(true);
