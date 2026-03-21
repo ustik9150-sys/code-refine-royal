@@ -398,7 +398,7 @@ export default function AdminProducts() {
                 product={product}
                 index={i}
                 onEdit={(id) => navigate(`/admin/products/${id}`)}
-                onDelete={handleDelete}
+                onDelete={(id) => setDeleteTarget(id)}
                 onDuplicate={handleDuplicate}
                 onView={(id) => {
                   window.open(`/?product=${id}`, "_blank");
