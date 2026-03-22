@@ -10,7 +10,6 @@ import SaveBadge from "@/components/SaveBadge";
 import barcodeIcon from "@/assets/barcode-icon.png";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getProductCurrencySymbol } from "@/lib/format-price";
-import applePayIcon from "@/assets/apple_pay_mini.avif";
 
 const SarIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
