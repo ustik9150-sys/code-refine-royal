@@ -564,6 +564,51 @@ export default function AdminProductEdit() {
             </div>
           </motion.div>
 
+          {/* Currency Settings Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.17 }}
+            className="rounded-2xl border border-border/50 bg-card/90 backdrop-blur-sm p-5 space-y-4"
+          >
+            <h3 className="text-sm font-semibold text-foreground">إعدادات العملة</h3>
+
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">تخصيص العملة</Label>
+              <div className="flex items-center gap-2">
+                <Switch checked={currencyEnabled} onCheckedChange={setCurrencyEnabled} />
+                <span className={`text-xs font-medium ${currencyEnabled ? "text-emerald-600" : "text-muted-foreground"}`}>
+                  {currencyEnabled ? "مفعل" : "معطل"}
+                </span>
+              </div>
+            </div>
+
+            {currencyEnabled && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Label className="text-xs">اختر العملة</Label>
+                <select
+                  value={currencyCode}
+                  onChange={(e) => setCurrencyCode(e.target.value)}
+                  className="w-full mt-1 h-10 rounded-xl border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/40 transition-all"
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} — {c.name_ar}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-muted-foreground mt-1.5">
+                  سيتم استبدال رمز العملة فقط بدون تحويل السعر
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+
           {/* Status & Category Card */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
