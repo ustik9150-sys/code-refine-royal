@@ -280,7 +280,9 @@ export default function AdminCodNetwork() {
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground">المنتجات والمخزون</p>
-              <p className="text-xs text-muted-foreground">جلب منتجاتك ومخزوناتك من COD Network</p>
+              <p className="text-xs text-muted-foreground">
+                {products.length > 0 ? `${products.length} منتج • يظهر ${filteredProducts.length}` : "جلب منتجاتك ومخزوناتك من COD Network"}
+              </p>
             </div>
           </div>
           <Button
@@ -290,56 +292,101 @@ export default function AdminCodNetwork() {
             disabled={loadingProducts || !settings.api_token}
           >
             {loadingProducts ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : <RefreshCw className="w-4 h-4 ml-2" />}
-            جلب المنتجات
+            {loadingProducts ? "جارٍ الجلب..." : "جلب المنتجات"}
           </Button>
         </div>
 
+        {/* Filters */}
         {products.length > 0 && (
-          <div className="space-y-3 mt-2">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="بحث بالاسم أو SKU..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pr-9 text-sm"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[140px] text-sm">
+                <SelectValue placeholder="الحالة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل الحالات</SelectItem>
+                <SelectItem value="Enabled">مفعّل</SelectItem>
+                <SelectItem value="Disabled">معطّل</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={stockFilter} onValueChange={setStockFilter}>
+              <SelectTrigger className="w-full sm:w-[140px] text-sm">
+                <SelectValue placeholder="المخزون" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل المخزون</SelectItem>
+                <SelectItem value="in_stock">متوفر</SelectItem>
+                <SelectItem value="out_of_stock">نفذ</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Products List */}
+        {products.length > 0 && (
+          <div className="space-y-2">
             <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 px-3 py-2 text-xs font-semibold text-muted-foreground border-b border-border">
               <span>المنتج</span>
               <span>SKU</span>
               <span>السعر</span>
               <span>المخزون</span>
             </div>
-            {products.map((product) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-center px-3 py-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Box className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm font-medium text-foreground truncate">{product.name}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${
-                    product.status === "Enabled" 
-                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" 
-                      : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                  }`}>
-                    {product.status === "Enabled" ? "مفعّل" : "معطّل"}
-                  </span>
+            <div className="max-h-[400px] overflow-y-auto space-y-2">
+              {filteredProducts.length === 0 ? (
+                <div className="text-center py-6 text-sm text-muted-foreground">
+                  <Filter className="w-5 h-5 mx-auto mb-2 opacity-30" />
+                  لا توجد منتجات تطابق الفلاتر
                 </div>
-                <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-lg">{product.sku}</span>
-                <span className="text-sm font-semibold text-foreground whitespace-nowrap">
-                  {product.price} {product.currency}
-                </span>
-                <div className="flex flex-col items-end gap-0.5">
-                  <span className={`text-sm font-bold ${getTotalStock(product.stocks) > 0 ? "text-emerald-600" : "text-destructive"}`}>
-                    {getTotalStock(product.stocks)}
-                  </span>
-                  {product.stocks && product.stocks.length > 0 && (
-                    <div className="flex gap-1">
-                      {product.stocks.map((s, i) => (
-                        <span key={i} className="text-[10px] text-muted-foreground">
-                          {s.country}: {s.quantity}
-                        </span>
-                      ))}
+              ) : (
+                filteredProducts.map((product) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-center px-3 py-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Box className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <span className="text-sm font-medium text-foreground truncate">{product.name}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${
+                        product.status === "Enabled" 
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" 
+                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                      }`}>
+                        {product.status === "Enabled" ? "مفعّل" : "معطّل"}
+                      </span>
                     </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+                    <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-lg">{product.sku}</span>
+                    <span className="text-sm font-semibold text-foreground whitespace-nowrap">
+                      {product.price} {product.currency}
+                    </span>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className={`text-sm font-bold ${getTotalStock(product.stocks) > 0 ? "text-emerald-600" : "text-destructive"}`}>
+                        {getTotalStock(product.stocks)}
+                      </span>
+                      {product.stocks && product.stocks.length > 0 && (
+                        <div className="flex gap-1">
+                          {product.stocks.map((s, i) => (
+                            <span key={i} className="text-[10px] text-muted-foreground">
+                              {s.country}: {s.quantity}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
           </div>
         )}
 
