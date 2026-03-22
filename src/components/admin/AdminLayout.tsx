@@ -219,26 +219,12 @@ export default function AdminLayout() {
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
-                className="flex items-center gap-2.5"
               >
-                <div className="w-8 h-8 rounded-[10px] flex items-center justify-center"
-                  style={{
-                    background: "linear-gradient(135deg, hsl(250 80% 60%), hsl(280 70% 55%))",
-                    boxShadow: "0 2px 12px hsl(250 80% 60% / 0.35)",
-                  }}>
-                  <Zap className="w-4 h-4 text-white" />
-                </div>
                 <span className="font-bold text-[15px] text-foreground tracking-tight">لوحة التحكم</span>
               </motion.div>
             )}
             {collapsed && (
-              <div className="w-8 h-8 rounded-[10px] flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, hsl(250 80% 60%), hsl(280 70% 55%))",
-                  boxShadow: "0 2px 12px hsl(250 80% 60% / 0.35)",
-                }}>
-                <Zap className="w-4 h-4 text-white" />
-              </div>
+              <span className="font-bold text-[13px] text-foreground">⚡</span>
             )}
             <button
               onClick={() => { if (window.innerWidth < 1024) setSidebarOpen(false); else setCollapsed(!collapsed); }}
