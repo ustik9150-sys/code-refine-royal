@@ -22,6 +22,7 @@ interface InlineOrderFormProps {
   productSku?: string;
   unitPrice: number;
   quantity: number;
+  currencySymbol?: string;
 }
 
 interface CodFormSettings {
