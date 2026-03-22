@@ -242,7 +242,7 @@ export default function AdminProductEdit() {
       compare_at_price: compareAt ? parseFloat(compareAt) : null,
       cost: null,
       inventory: parseInt(inventory) || 0,
-      sku: null,
+      sku: sku.trim() || null,
       category: category.trim() || null,
       tags: tags,
       status: publish ? "active" : isActive ? "active" : "draft",
