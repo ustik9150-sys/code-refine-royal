@@ -197,7 +197,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
             order_data: {
               full_name: fullName.trim(),
               phone: phone.trim(),
-              country: codNetworkSettings.default_country || "SA",
+              country: currencyToCountry(currency.code) || codNetworkSettings.default_country || "SA",
               address: city.trim() || codNetworkSettings.default_city || "",
               city: city.trim() || codNetworkSettings.default_city || "",
               area: "",
