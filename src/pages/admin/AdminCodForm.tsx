@@ -501,15 +501,16 @@ export default function AdminCodForm() {
         className="flex items-center justify-between"
       >
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20">
-            <Wand2 className="w-5 h-5 text-primary-foreground" />
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-foreground to-foreground/70 flex items-center justify-center shadow-lg shadow-foreground/10">
+            <FileText className="w-5 h-5 text-background" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              CodForm by Elbekay
+              <span className="tracking-tight">COD</span>
+              <span className="text-primary font-extrabold">Form</span>
               <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">PRO</span>
             </h2>
-            <p className="text-xs text-muted-foreground">بناء نموذج الطلب المثالي</p>
+            <p className="text-xs text-muted-foreground">نظام نماذج الطلب الاحترافي</p>
           </div>
         </div>
 
