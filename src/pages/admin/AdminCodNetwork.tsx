@@ -129,6 +129,18 @@ export default function AdminCodNetwork() {
     );
   }
 
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch = !searchQuery || 
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.sku.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || p.status === statusFilter;
+    const stock = getTotalStock(p.stocks);
+    const matchesStock = stockFilter === "all" || 
+      (stockFilter === "in_stock" && stock > 0) ||
+      (stockFilter === "out_of_stock" && stock === 0);
+    return matchesSearch && matchesStatus && matchesStock;
+  });
+
   return (
     <div className="max-w-2xl mx-auto space-y-6" dir="rtl">
       {/* Header */}
