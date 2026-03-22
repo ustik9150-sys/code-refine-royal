@@ -23,6 +23,7 @@ import {
   BarChart3,
   Zap,
   Table2,
+  Truck,
 } from "lucide-react";
 
 const navItems = [
