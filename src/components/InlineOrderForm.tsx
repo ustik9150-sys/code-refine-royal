@@ -79,6 +79,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
   const [settings, setSettings] = useState<CodFormSettings>(DEFAULT_SETTINGS);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [sheetsWebhook, setSheetsWebhook] = useState("");
+  const [codNetworkSettings, setCodNetworkSettings] = useState<{ enabled: boolean; api_token: string; default_country: string; default_city: string } | null>(null);
 
   // Filter offers for this product
   const filteredOffers = settings.offers?.filter(
@@ -94,7 +95,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
       const { data } = await supabase
         .from("store_settings")
         .select("key, value")
-        .in("key", ["cod_form", "integrations"]);
+        .in("key", ["cod_form", "integrations", "cod_network"]);
       if (data) {
         for (const row of data) {
           const v = row.value as any;
@@ -110,6 +111,8 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
             }
           } else if (row.key === "integrations") {
             setSheetsWebhook(v.google_sheets_webhook || "");
+          } else if (row.key === "cod_network") {
+            if (v.enabled && v.api_token) setCodNetworkSettings(v);
           }
         }
       }
@@ -183,6 +186,29 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
             status: "جديد",
           }),
         }).catch(() => {});
+      }
+
+      // Fire-and-forget: send to CodNetwork
+      if (codNetworkSettings) {
+        supabase.functions.invoke("cod-network-proxy", {
+          body: {
+            action: "send_order",
+            api_token: codNetworkSettings.api_token,
+            order_data: {
+              full_name: fullName.trim(),
+              phone: phone.trim(),
+              country: codNetworkSettings.default_country || "SA",
+              address: city.trim() || codNetworkSettings.default_city || "",
+              city: city.trim() || codNetworkSettings.default_city || "",
+              area: "",
+              items: [{
+                sku: productSku || "",
+                price: finalPrice,
+                quantity: finalQuantity,
+              }],
+            },
+          },
+        }).catch((err) => console.error("CodNetwork send failed:", err));
       }
 
       navigate(`/thank-you?order=${orderData?.order_number || ""}`);

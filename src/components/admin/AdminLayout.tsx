@@ -23,6 +23,7 @@ import {
   BarChart3,
   Zap,
   Table2,
+  Truck,
 } from "lucide-react";
 
 const navItems = [
@@ -30,6 +31,7 @@ const navItems = [
   { to: "/admin/orders", icon: ShoppingCart, label: "الطلبات" },
   { to: "/admin/products", icon: Package, label: "المنتجات" },
   { to: "/admin/cod-form", icon: Zap, label: "CodForm", badge: "PRO", customLabel: true },
+  { to: "/admin/cod-network", icon: Truck, label: "CodNetwork" },
   { to: "/admin/google-sheets", icon: Table2, label: "Google Sheets" },
   { to: "/admin/pages", icon: FileText, label: "الصفحات" },
   { to: "/admin/settings", icon: Settings, label: "الإعدادات" },
