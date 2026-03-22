@@ -261,6 +261,8 @@ export type Database = {
           compare_at_price: number | null
           cost: number | null
           created_at: string
+          currency_code: string | null
+          currency_enabled: boolean
           description_ar: string | null
           description_en: string | null
           id: string
@@ -278,6 +280,8 @@ export type Database = {
           compare_at_price?: number | null
           cost?: number | null
           created_at?: string
+          currency_code?: string | null
+          currency_enabled?: boolean
           description_ar?: string | null
           description_en?: string | null
           id?: string
@@ -295,6 +299,8 @@ export type Database = {
           compare_at_price?: number | null
           cost?: number | null
           created_at?: string
+          currency_code?: string | null
+          currency_enabled?: boolean
           description_ar?: string | null
           description_en?: string | null
           id?: string
