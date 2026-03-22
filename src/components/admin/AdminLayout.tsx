@@ -267,7 +267,7 @@ export default function AdminLayout() {
                   } ${
                     isActive
                       ? "text-white"
-                      : "text-white/40 hover:text-white/70"
+                      : "text-white/70 hover:text-white/90 hover:bg-white/[0.06]"
                   }`
                 }
                 style={({ isActive }) =>
