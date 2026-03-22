@@ -501,14 +501,16 @@ export default function AdminCodForm() {
         className="flex items-center justify-between"
       >
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-foreground to-foreground/70 flex items-center justify-center shadow-lg shadow-foreground/10">
-            <FileText className="w-5 h-5 text-background" />
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-lg"
+            style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(340 75% 55%))" }}>
+            <Zap className="w-5 h-5 text-white" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <span className="tracking-tight">COD</span>
-              <span className="text-primary font-extrabold">Form</span>
-              <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">PRO</span>
+              <span className="tracking-tight">Cod</span>
+              <span className="font-extrabold" style={{ color: "hsl(250 80% 65%)" }}>Form</span>
+              <span className="text-[9px] text-white px-2 py-0.5 rounded-md font-bold"
+                style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(340 75% 55%))" }}>PRO</span>
             </h2>
             <p className="text-xs text-muted-foreground">نظام نماذج الطلب الاحترافي</p>
           </div>
