@@ -23,6 +23,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminCodForm from "./pages/admin/AdminCodForm";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminPages from "./pages/admin/AdminPages";
+import AdminGoogleSheets from "./pages/admin/AdminGoogleSheets";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="products" element={<AdminProducts />} />
             <Route path="products/:id" element={<AdminProductEdit />} />
             <Route path="cod-form" element={<AdminCodForm />} />
+            <Route path="google-sheets" element={<AdminGoogleSheets />} />
             <Route path="pages" element={<AdminPages />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
