@@ -259,7 +259,7 @@ export default function AdminProductEdit() {
       let productId = id;
 
       if (isNew) {
-        const { data, error } = await supabase.from("products").insert(payload).select().single();
+        const { data, error } = await supabase.from("products").insert(payload as any).select().single();
         if (error) throw error;
         productId = data.id;
       } else {
