@@ -145,11 +145,12 @@ const Index = () => {
   );
 };
 
-function ProductCard({ product, index, currencySymbol }: { product: Product; index: number; currencySymbol: string }) {
+function ProductCard({ product, index, systemCurrency }: { product: Product; index: number; systemCurrency: import("@/hooks/useCurrency").CurrencyConfig }) {
   const [liked, setLiked] = useState(false);
   const thumb = product.images.find(i => i.is_main)?.url || product.images[0]?.url || null;
   const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
   const description = product.description_ar?.replace(/<[^>]*>/g, "").slice(0, 60) || "";
+  const currencySymbol = getProductCurrencySymbol(product, systemCurrency);
 
   return (
     <motion.div
