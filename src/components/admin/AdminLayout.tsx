@@ -472,7 +472,7 @@ export default function AdminLayout() {
           </div>
 
           {/* Admin avatar / Profile */}
-          <div className="relative">
+          <div className="relative" data-dropdown>
             <button
               onClick={() => { setShowProfile(!showProfile); setShowNotifications(false); }}
               className="flex items-center gap-2"
