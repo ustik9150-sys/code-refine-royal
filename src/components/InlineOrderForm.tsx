@@ -5,6 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { useCurrency } from "@/hooks/useCurrency";
 import { motion } from "framer-motion";
 
+const CURRENCY_COUNTRY_MAP: Record<string, string> = {
+  SAR: "SA", AED: "AE", KWD: "KW", BHD: "BH", QAR: "QA",
+  OMR: "OM", EGP: "EG", USD: "US", EUR: "DE", GBP: "GB",
+  MAD: "MA", TRY: "TR", MRU: "MR",
+};
+const currencyToCountry = (code: string) => CURRENCY_COUNTRY_MAP[code] || "";
+
 interface OfferItem {
   id: string;
   title: string;
@@ -197,7 +204,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
             order_data: {
               full_name: fullName.trim(),
               phone: phone.trim(),
-              country: codNetworkSettings.default_country || "SA",
+              country: currencyToCountry(currency.code) || codNetworkSettings.default_country || "SA",
               address: city.trim() || codNetworkSettings.default_city || "",
               city: city.trim() || codNetworkSettings.default_city || "",
               area: "",

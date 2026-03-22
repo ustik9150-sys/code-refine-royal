@@ -165,18 +165,22 @@ export default function AdminCodNetwork() {
           />
         </div>
 
-        {/* Default Country */}
+        {/* Default Country - Auto from currency */}
         <div className="space-y-2">
           <label className="text-sm font-semibold text-foreground flex items-center gap-2">
             <Globe className="w-4 h-4 text-muted-foreground" />
             الدولة الافتراضية
           </label>
+          <p className="text-xs text-muted-foreground bg-muted/50 rounded-xl p-3">
+            🌍 يتم تحديد الدولة تلقائياً بناءً على عملة المنتج (مثال: ريال سعودي → SA)
+          </p>
           <Input
             dir="ltr"
-            placeholder="SA"
+            placeholder="SA (احتياطي فقط)"
             value={settings.default_country}
             onChange={(e) => setSettings((s) => ({ ...s, default_country: e.target.value }))}
           />
+          <p className="text-[11px] text-muted-foreground">تُستخدم فقط إذا لم يتم تحديد عملة للمنتج</p>
         </div>
 
         {/* Default City */}
