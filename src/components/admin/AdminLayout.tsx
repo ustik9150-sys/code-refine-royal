@@ -184,97 +184,176 @@ export default function AdminLayout() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
+      {/* Premium iOS-style Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 right-0 z-50 flex flex-col transition-all duration-300 ease-out ${
-          collapsed ? "w-[72px]" : "w-64"
+        className={`fixed lg:static inset-y-0 right-0 z-50 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          collapsed ? "w-[78px]" : "w-[272px]"
         } ${sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}`}
-        style={{
-          background: "linear-gradient(180deg, hsl(228 24% 12%) 0%, hsl(228 24% 8%) 100%)",
-        }}
       >
-        {/* Logo area */}
-        <div className={`h-16 flex items-center border-b border-white/5 ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
-          {!collapsed && (
-            <motion.h1
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="font-bold text-base text-white/90"
-            >
-              لوحة التحكم
-            </motion.h1>
-          )}
-          <button
-            onClick={() => { if (window.innerWidth < 1024) setSidebarOpen(false); else setCollapsed(!collapsed); }}
-            className="p-1.5 rounded-lg hover:bg-white/5 transition-colors"
-          >
-            {window.innerWidth < 1024 ? (
-              <X className="w-5 h-5 text-white/60" />
-            ) : collapsed ? (
-              <ChevronLeft className="w-4 h-4 text-white/60" />
-            ) : (
-              <ChevronRight className="w-4 h-4 text-white/60" />
+        {/* Floating glass container */}
+        <div className="flex flex-col h-full m-2 rounded-[22px] overflow-hidden relative"
+          style={{
+            background: "linear-gradient(165deg, rgba(20, 20, 35, 0.92) 0%, rgba(12, 12, 24, 0.97) 100%)",
+            backdropFilter: "blur(40px) saturate(180%)",
+            WebkitBackdropFilter: "blur(40px) saturate(180%)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            boxShadow: "0 8px 40px rgba(0, 0, 0, 0.4), 0 0 80px rgba(120, 80, 255, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+          }}
+        >
+          {/* Ambient glow overlay */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[22px]">
+            <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-[0.07]"
+              style={{ background: "radial-gradient(circle, hsl(250 80% 65%), transparent)" }} />
+            <div className="absolute -bottom-16 -left-16 w-32 h-32 rounded-full opacity-[0.05]"
+              style={{ background: "radial-gradient(circle, hsl(340 75% 55%), transparent)" }} />
+          </div>
+
+          {/* Logo area */}
+          <div className={`relative z-10 flex items-center h-[68px] border-b border-white/[0.06] ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center gap-2.5"
+              >
+                <div className="w-8 h-8 rounded-[10px] flex items-center justify-center"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(250 80% 60%), hsl(280 70% 55%))",
+                    boxShadow: "0 2px 12px hsl(250 80% 60% / 0.35)",
+                  }}>
+                  <Zap className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-bold text-[15px] text-white/90 tracking-tight">لوحة التحكم</span>
+              </motion.div>
             )}
-          </button>
-        </div>
-
-        {/* Nav items */}
-        <nav className="flex-1 py-4 space-y-1 px-2">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  collapsed ? "justify-center px-2 py-3" : "px-4 py-3"
-                } ${
-                  isActive
-                    ? "text-white shadow-lg"
-                    : "text-white/50 hover:text-white/80 hover:bg-white/5"
-                }`
-              }
-              style={({ isActive }) =>
-                isActive
-                  ? {
-                      background: "linear-gradient(135deg, hsl(250 80% 65% / 0.3), hsl(340 75% 55% / 0.2))",
-                      boxShadow: "0 4px 12px hsl(250 80% 65% / 0.2), inset 0 0 0 1px hsl(250 80% 65% / 0.15)",
-                    }
-                  : {}
-              }
+            {collapsed && (
+              <div className="w-8 h-8 rounded-[10px] flex items-center justify-center"
+                style={{
+                  background: "linear-gradient(135deg, hsl(250 80% 60%), hsl(280 70% 55%))",
+                  boxShadow: "0 2px 12px hsl(250 80% 60% / 0.35)",
+                }}>
+                <Zap className="w-4 h-4 text-white" />
+              </div>
+            )}
+            <button
+              onClick={() => { if (window.innerWidth < 1024) setSidebarOpen(false); else setCollapsed(!collapsed); }}
+              className="p-1.5 rounded-[10px] hover:bg-white/[0.06] transition-all duration-200 group"
             >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && (
-                <span className="flex items-center gap-2">
-                  {(item as any).customLabel ? <CodFormLogo size="sm" variant="light" /> : item.label}
-                </span>
+              {window.innerWidth < 1024 ? (
+                <X className="w-4 h-4 text-white/40 group-hover:text-white/70 transition-colors" />
+              ) : collapsed ? (
+                <ChevronLeft className="w-3.5 h-3.5 text-white/40 group-hover:text-white/70 transition-colors" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5 text-white/40 group-hover:text-white/70 transition-colors" />
               )}
-            </NavLink>
-          ))}
-        </nav>
+            </button>
+          </div>
 
-        {/* User / Logout */}
-        <div className="p-2 border-t border-white/5">
-          {!collapsed && adminEmail && (
-            <div className="px-3 py-2 mb-1">
-              <p className="text-[10px] text-white/30 truncate">{adminEmail}</p>
-            </div>
-          )}
-          <button
-            onClick={handleLogout}
-            className={`flex items-center gap-3 rounded-xl text-sm font-medium text-red-400/80 hover:text-red-400 hover:bg-red-500/10 w-full transition-all duration-200 ${
-              collapsed ? "justify-center px-2 py-3" : "px-4 py-3"
-            }`}
-          >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
-            {!collapsed && <span>تسجيل الخروج</span>}
-          </button>
+          {/* Nav items */}
+          <nav className="relative z-10 flex-1 py-3 space-y-0.5 px-2.5 overflow-y-auto">
+            {navItems.map((item, index) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `group relative flex items-center gap-3 rounded-[14px] text-[13px] font-medium transition-all duration-300 ease-out ${
+                    collapsed ? "justify-center px-2 py-3" : "px-3.5 py-2.5"
+                  } ${
+                    isActive
+                      ? "text-white"
+                      : "text-white/40 hover:text-white/70"
+                  }`
+                }
+                style={({ isActive }) =>
+                  isActive
+                    ? {
+                        background: "linear-gradient(135deg, hsl(250 80% 60% / 0.25), hsl(290 70% 55% / 0.18), hsl(340 75% 55% / 0.12))",
+                        boxShadow: "0 0 20px hsl(250 80% 60% / 0.12), inset 0 0 0 1px rgba(255,255,255,0.08)",
+                      }
+                    : {}
+                }
+              >
+                {({ isActive }: { isActive: boolean }) => (
+                  <>
+                    {/* Active indicator dot */}
+                    {isActive && !collapsed && (
+                      <motion.div
+                        layoutId="sidebar-active-dot"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full"
+                        style={{ background: "linear-gradient(180deg, hsl(250 80% 65%), hsl(340 75% 55%))" }}
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
+
+                    <motion.div
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className={`flex-shrink-0 ${isActive ? "drop-shadow-[0_0_6px_rgba(140,100,255,0.5)]" : ""}`}
+                    >
+                      <item.icon className={`w-[18px] h-[18px] transition-all duration-300 ${isActive ? "text-white" : "text-white/40 group-hover:text-white/60"}`} />
+                    </motion.div>
+
+                    {!collapsed && (
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.05 }}
+                        className="flex items-center gap-2"
+                      >
+                        {(item as any).customLabel ? <CodFormLogo size="sm" variant="light" /> : item.label}
+                        {(item as any).badge && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                            style={{
+                              background: "linear-gradient(135deg, hsl(250 80% 60% / 0.2), hsl(340 75% 55% / 0.15))",
+                              color: "hsl(250 80% 80%)",
+                              border: "1px solid hsl(250 80% 60% / 0.2)",
+                            }}>
+                            {(item as any).badge}
+                          </span>
+                        )}
+                      </motion.span>
+                    )}
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* User / Logout */}
+          <div className="relative z-10 p-2.5 border-t border-white/[0.06]">
+            {!collapsed && adminEmail && (
+              <div className="px-3 py-2 mb-1 flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-[9px] flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(250 60% 50% / 0.2), hsl(340 60% 50% / 0.15))",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                  }}>
+                  <User className="w-3.5 h-3.5 text-white/50" />
+                </div>
+                <p className="text-[10px] text-white/25 truncate">{adminEmail}</p>
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className={`group flex items-center gap-3 rounded-[14px] text-[13px] font-medium text-red-400/50 hover:text-red-400/90 w-full transition-all duration-300 hover:bg-red-500/[0.08] ${
+                collapsed ? "justify-center px-2 py-3" : "px-3.5 py-2.5"
+              }`}
+            >
+              <motion.div whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}>
+                <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
+              </motion.div>
+              {!collapsed && <span>تسجيل الخروج</span>}
+            </button>
+          </div>
         </div>
       </aside>
 
