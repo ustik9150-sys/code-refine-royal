@@ -2,10 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const COD_NETWORK_API = "https://api.cod.network/v1/seller/orders";
+const COD_NETWORK_API_BASE = "https://api.cod.network/v1/seller";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -23,31 +23,40 @@ serve(async (req) => {
       });
     }
 
+    const authHeaders = {
+      Authorization: `Bearer ${api_token}`,
+      "Content-Type": "application/json",
+    };
+
     if (action === "test") {
-      // Test connection by making a lightweight request
-      const res = await fetch(COD_NETWORK_API, {
+      const res = await fetch(`${COD_NETWORK_API_BASE}/orders`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${api_token}`,
-          "Content-Type": "application/json",
-        },
+        headers: authHeaders,
         body: JSON.stringify({}),
       });
-      // Even a 422/400 means the token is valid (just invalid body)
       const success = res.status !== 401 && res.status !== 403;
       return new Response(JSON.stringify({ success, status: res.status }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    if (action === "get_products") {
+      const res = await fetch(`${COD_NETWORK_API_BASE}/products`, {
+        method: "GET",
+        headers: authHeaders,
+      });
+      const data = await res.json().catch(() => ({}));
+      console.log("CodNetwork products response:", res.status);
+      return new Response(JSON.stringify({ success: res.ok, status: res.status, data }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "send_order" && order_data) {
       console.log("CodNetwork order_data:", JSON.stringify(order_data));
-      const res = await fetch(COD_NETWORK_API, {
+      const res = await fetch(`${COD_NETWORK_API_BASE}/orders`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${api_token}`,
-          "Content-Type": "application/json",
-        },
+        headers: authHeaders,
         body: JSON.stringify(order_data),
       });
       const data = await res.json().catch(() => ({}));
