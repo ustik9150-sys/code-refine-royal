@@ -101,6 +101,7 @@ const ProductDetails = ({ productId }: { productId?: string }) => {
     );
   }
 
+  const currencySymbol = getProductCurrencySymbol(product, currency);
   const name = product?.name_ar || "باقة المسك";
   const price = product?.price ?? 222;
   const compareAtPrice = product?.compare_at_price ?? 1119;
