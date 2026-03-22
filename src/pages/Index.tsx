@@ -19,6 +19,8 @@ type Product = {
   price: number;
   compare_at_price: number | null;
   inventory: number;
+  currency_enabled?: boolean;
+  currency_code?: string | null;
   images: { url: string; is_main: boolean }[];
 };
 
