@@ -275,8 +275,9 @@ export default function AdminLayout() {
                 style={({ isActive }) =>
                   isActive
                     ? {
-                        background: "linear-gradient(135deg, hsl(250 80% 60% / 0.25), hsl(290 70% 55% / 0.18), hsl(340 75% 55% / 0.12))",
-                        boxShadow: "0 0 20px hsl(250 80% 60% / 0.12), inset 0 0 0 1px rgba(255,255,255,0.08)",
+                        background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.06))",
+                        boxShadow: "0 4px 16px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.12), 0 0 24px hsl(250 80% 60% / 0.08)",
+                        backdropFilter: "blur(10px)",
                       }
                     : {}
                 }
