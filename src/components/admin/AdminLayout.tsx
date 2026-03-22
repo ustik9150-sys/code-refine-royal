@@ -199,19 +199,17 @@ export default function AdminLayout() {
         {/* Floating glass container */}
         <div className="flex flex-col h-full m-2.5 rounded-3xl overflow-hidden relative"
           style={{
-            background: "linear-gradient(165deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%)",
+            background: "linear-gradient(165deg, rgba(15, 15, 25, 0.75) 0%, rgba(10, 10, 20, 0.85) 100%)",
             backdropFilter: "blur(50px) saturate(200%)",
             WebkitBackdropFilter: "blur(50px) saturate(200%)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05) inset, 0 32px 64px -16px rgba(0, 0, 0, 0.3)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04) inset, 0 32px 64px -16px rgba(0, 0, 0, 0.35)",
           }}
         >
           {/* Glass light reflection */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-            <div className="absolute top-0 right-0 w-full h-1/2 opacity-[0.08]"
-              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)" }} />
-            <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-[0.06]"
-              style={{ background: "radial-gradient(circle, rgba(255,255,255,0.8), transparent)" }} />
+            <div className="absolute top-0 right-0 w-full h-1/3 opacity-[0.06]"
+              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%)" }} />
           </div>
 
           {/* Logo area */}
@@ -269,7 +267,7 @@ export default function AdminLayout() {
                   } ${
                     isActive
                       ? "text-white"
-                      : "text-white/40 hover:text-white/70"
+                      : "text-white/70 hover:text-white/90 hover:bg-white/[0.06]"
                   }`
                 }
                 style={({ isActive }) =>
@@ -300,7 +298,7 @@ export default function AdminLayout() {
                       transition={{ duration: 0.15 }}
                       className={`flex-shrink-0 ${isActive ? "drop-shadow-[0_0_6px_rgba(140,100,255,0.5)]" : ""}`}
                     >
-                      <item.icon className={`w-[18px] h-[18px] transition-all duration-300 ${isActive ? "text-white" : "text-white/40 group-hover:text-white/60"}`} />
+                      <item.icon className={`w-[18px] h-[18px] transition-all duration-300 ${isActive ? "text-white" : "text-white/70 group-hover:text-white/90"}`} />
                     </motion.div>
 
                     {!collapsed && (
@@ -340,12 +338,12 @@ export default function AdminLayout() {
                   }}>
                   <User className="w-3.5 h-3.5 text-white/50" />
                 </div>
-                <p className="text-[10px] text-white/25 truncate">{adminEmail}</p>
+                <p className="text-[10px] text-white/50 truncate">{adminEmail}</p>
               </div>
             )}
             <button
               onClick={handleLogout}
-              className={`group flex items-center gap-3 rounded-[14px] text-[13px] font-medium text-red-400/50 hover:text-red-400/90 w-full transition-all duration-300 hover:bg-red-500/[0.08] ${
+              className={`group flex items-center gap-3 rounded-[14px] text-[13px] font-medium text-red-400/70 hover:text-red-400 w-full transition-all duration-300 hover:bg-red-500/[0.1] ${
                 collapsed ? "justify-center px-2 py-3" : "px-3.5 py-2.5"
               }`}
             >
