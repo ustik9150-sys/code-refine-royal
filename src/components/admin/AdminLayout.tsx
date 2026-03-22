@@ -242,14 +242,14 @@ export default function AdminLayout() {
             )}
             <button
               onClick={() => { if (window.innerWidth < 1024) setSidebarOpen(false); else setCollapsed(!collapsed); }}
-              className="p-1.5 rounded-[10px] hover:bg-white/[0.06] transition-all duration-200 group"
+              className="p-1.5 rounded-[10px] hover:bg-black/[0.05] transition-all duration-200 group"
             >
               {window.innerWidth < 1024 ? (
-                <X className="w-4 h-4 text-white/40 group-hover:text-white/70 transition-colors" />
+                <X className="w-4 h-4 text-foreground/40 group-hover:text-foreground/70 transition-colors" />
               ) : collapsed ? (
-                <ChevronLeft className="w-3.5 h-3.5 text-white/40 group-hover:text-white/70 transition-colors" />
+                <ChevronLeft className="w-3.5 h-3.5 text-foreground/40 group-hover:text-foreground/70 transition-colors" />
               ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-white/40 group-hover:text-white/70 transition-colors" />
+                <ChevronRight className="w-3.5 h-3.5 text-foreground/40 group-hover:text-foreground/70 transition-colors" />
               )}
             </button>
           </div>
