@@ -41,13 +41,41 @@ serve(async (req) => {
     }
 
     if (action === "get_products") {
-      const res = await fetch(`${COD_NETWORK_API_BASE}/products`, {
-        method: "GET",
-        headers: authHeaders,
-      });
-      const data = await res.json().catch(() => ({}));
-      console.log("CodNetwork products response:", res.status);
-      return new Response(JSON.stringify({ success: res.ok, status: res.status, data }), {
+      // Fetch ALL pages of products
+      const allProducts: any[] = [];
+      let page = 1;
+      let hasMore = true;
+
+      while (hasMore) {
+        const res = await fetch(`${COD_NETWORK_API_BASE}/products?page=${page}`, {
+          method: "GET",
+          headers: authHeaders,
+        });
+        const data = await res.json().catch(() => ({}));
+        
+        if (!res.ok) {
+          return new Response(JSON.stringify({ success: false, status: res.status, data }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const products = data?.data || [];
+        allProducts.push(...products);
+
+        // Check pagination
+        const pagination = data?.meta?.pagination;
+        if (pagination && pagination.current_page < pagination.total_pages) {
+          page++;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      console.log(`CodNetwork: fetched ${allProducts.length} products across ${page} pages`);
+      return new Response(JSON.stringify({ 
+        success: true, 
+        data: { data: allProducts, total: allProducts.length } 
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
