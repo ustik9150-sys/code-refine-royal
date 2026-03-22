@@ -6,9 +6,9 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { motion } from "framer-motion";
 
 const CURRENCY_COUNTRY_MAP: Record<string, string> = {
-  SAR: "SA", AED: "AE", KWD: "KW", BHD: "BH", QAR: "QA",
-  OMR: "OM", EGP: "EG", USD: "US", EUR: "DE", GBP: "GB",
-  MAD: "MA", TRY: "TR", MRU: "MR",
+  SAR: "KSA", AED: "ARE", KWD: "KWT", BHD: "BHR", QAR: "QAT",
+  OMR: "OMN", EGP: "EGY", USD: "USA", EUR: "DEU", GBP: "GBR",
+  MAD: "MAR", TRY: "TUR", MRU: "MRT",
 };
 const currencyToCountry = (code: string) => CURRENCY_COUNTRY_MAP[code] || "";
 
