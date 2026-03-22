@@ -185,7 +185,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
         }).catch(() => {});
       }
 
-      navigate(`/thank-you`);
+      navigate(`/thank-you?order=${orderData?.order_number || ""}`);
     } catch (err) {
       console.error("Order creation failed:", err);
       setErrors({ fullName: "حدث خطأ، حاول مرة أخرى" });
