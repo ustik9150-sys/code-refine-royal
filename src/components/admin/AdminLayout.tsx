@@ -327,17 +327,17 @@ export default function AdminLayout() {
           </nav>
 
           {/* User / Logout */}
-          <div className="relative z-10 p-2.5 border-t border-white/[0.06]">
+          <div className="relative z-10 p-2.5 border-t border-black/[0.06]">
             {!collapsed && adminEmail && (
               <div className="px-3 py-2 mb-1 flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-[9px] flex items-center justify-center flex-shrink-0"
                   style={{
-                    background: "linear-gradient(135deg, hsl(250 60% 50% / 0.2), hsl(340 60% 50% / 0.15))",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: "linear-gradient(135deg, hsl(250 60% 50% / 0.1), hsl(340 60% 50% / 0.08))",
+                    border: "1px solid rgba(0,0,0,0.06)",
                   }}>
-                  <User className="w-3.5 h-3.5 text-white/50" />
+                  <User className="w-3.5 h-3.5 text-foreground/40" />
                 </div>
-                <p className="text-[10px] text-white/50 truncate">{adminEmail}</p>
+                <p className="text-[10px] text-foreground/40 truncate">{adminEmail}</p>
               </div>
             )}
             <button
