@@ -147,7 +147,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
           shipping_cost: 0,
           total: finalPrice,
         })
-        .select("id")
+        .select("id, order_number")
         .single();
 
       if (orderError) throw orderError;
@@ -185,7 +185,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
         }).catch(() => {});
       }
 
-      navigate(`/thank-you`);
+      navigate(`/thank-you?order=${orderData?.order_number || ""}`);
     } catch (err) {
       console.error("Order creation failed:", err);
       setErrors({ fullName: "حدث خطأ، حاول مرة أخرى" });

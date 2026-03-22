@@ -5,11 +5,21 @@ import celebrationSvg from "@/assets/celebration.svg";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
 
+const generateTrackingCode = (orderNum: string): string => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const num = parseInt(orderNum) || Date.now();
+  const prefix = chars[num % chars.length] + chars[(num * 7 + 3) % chars.length];
+  const suffix = chars[(num * 13 + 5) % chars.length];
+  const padded = String(num).padStart(4, "0");
+  return `${prefix}-${padded}-${suffix}`;
+};
+
 const ThankYou: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const orderNumber = searchParams.get("order") || "000000";
+  const rawOrder = searchParams.get("order") || "";
+  const trackingCode = rawOrder ? generateTrackingCode(rawOrder) : "N/A";
   const email = searchParams.get("email") || "";
 
   return (
@@ -29,12 +39,12 @@ const ThankYou: React.FC = () => {
           </h1>
 
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <span>رقم الطلب:</span>
-            <span className="font-semibold text-foreground" dir="ltr">#{orderNumber}</span>
+            <span>رقم التتبع:</span>
+            <span className="font-semibold text-foreground tracking-wider" dir="ltr">{trackingCode}</span>
             <button
-              onClick={() => navigator.clipboard?.writeText(orderNumber)}
+              onClick={() => navigator.clipboard?.writeText(trackingCode)}
               className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="نسخ رقم الطلب"
+              aria-label="نسخ رقم التتبع"
             >
               <FileText className="w-4 h-4" />
             </button>
