@@ -174,6 +174,7 @@ export default function AdminProductEdit() {
   const [price, setPrice] = useState("");
   const [compareAt, setCompareAt] = useState("");
   const [inventory, setInventory] = useState("0");
+  const [sku, setSku] = useState("");
   const [category, setCategory] = useState("");
   const [isActive, setIsActive] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
