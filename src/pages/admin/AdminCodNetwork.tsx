@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle, XCircle, Send, Key, Globe, MapPin, RefreshCw, Package, Box } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Send, Key, Globe, MapPin, RefreshCw, Package, Box, Search, Filter } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CodNetworkSettings {
   enabled: boolean;
