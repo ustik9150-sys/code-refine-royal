@@ -147,7 +147,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
           shipping_cost: 0,
           total: finalPrice,
         })
-        .select("id")
+        .select("id, order_number")
         .single();
 
       if (orderError) throw orderError;
