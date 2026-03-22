@@ -212,6 +212,8 @@ export default function AdminProductEdit() {
       setSku(product.sku || "");
       setIsActive(product.status === "active");
       setTags(product.tags || []);
+      setCurrencyEnabled((product as any).currency_enabled || false);
+      setCurrencyCode((product as any).currency_code || "SAR");
 
       const { data: imgs } = await supabase
         .from("product_images")
