@@ -174,6 +174,7 @@ export default function AdminProductEdit() {
   const [price, setPrice] = useState("");
   const [compareAt, setCompareAt] = useState("");
   const [inventory, setInventory] = useState("0");
+  const [sku, setSku] = useState("");
   const [category, setCategory] = useState("");
   const [isActive, setIsActive] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
@@ -205,6 +206,7 @@ export default function AdminProductEdit() {
       setCompareAt(product.compare_at_price ? String(product.compare_at_price) : "");
       setInventory(String(product.inventory));
       setCategory(product.category || "");
+      setSku(product.sku || "");
       setIsActive(product.status === "active");
       setTags(product.tags || []);
 
@@ -240,7 +242,7 @@ export default function AdminProductEdit() {
       compare_at_price: compareAt ? parseFloat(compareAt) : null,
       cost: null,
       inventory: parseInt(inventory) || 0,
-      sku: null,
+      sku: sku.trim() || null,
       category: category.trim() || null,
       tags: tags,
       status: publish ? "active" : isActive ? "active" : "draft",
@@ -541,6 +543,17 @@ export default function AdminProductEdit() {
                 placeholder="0"
               />
               {errors.inventory && <p className="text-destructive text-xs mt-1">{errors.inventory}</p>}
+            </div>
+
+            <div>
+              <Label className="text-xs">SKU (رمز المنتج)</Label>
+              <Input
+                value={sku}
+                onChange={(e) => setSku(e.target.value)}
+                dir="ltr"
+                className="mt-1 rounded-xl admin-input"
+                placeholder="مثال: PRF-001"
+              />
             </div>
           </motion.div>
 
