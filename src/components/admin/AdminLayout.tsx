@@ -199,11 +199,11 @@ export default function AdminLayout() {
         {/* Floating glass container */}
         <div className="flex flex-col h-full m-2.5 rounded-3xl overflow-hidden relative"
           style={{
-            background: "linear-gradient(165deg, rgba(15, 15, 25, 0.75) 0%, rgba(10, 10, 20, 0.85) 100%)",
-            backdropFilter: "blur(50px) saturate(200%)",
-            WebkitBackdropFilter: "blur(50px) saturate(200%)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04) inset, 0 32px 64px -16px rgba(0, 0, 0, 0.35)",
+            background: "linear-gradient(165deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.45) 100%)",
+            backdropFilter: "blur(50px) saturate(180%)",
+            WebkitBackdropFilter: "blur(50px) saturate(180%)",
+            border: "1px solid rgba(255, 255, 255, 0.6)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.3) inset",
           }}
         >
           {/* Glass light reflection */}
