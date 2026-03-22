@@ -43,12 +43,12 @@ export default function AdminSettings() {
   const appsScriptCode = `function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["الاسم", "الهاتف", "المدينة", "المنتج", "الكمية", "العرض", "السعر", "التاريخ"]);
+    sheet.appendRow(["الاسم", "الهاتف", "المدينة", "المنتج", "SKU", "الكمية", "العرض", "السعر", "التاريخ"]);
   }
   var data = JSON.parse(e.postData.contents);
   sheet.appendRow([
     data.name, data.phone, data.city,
-    data.product, data.quantity, data.offer,
+    data.product, data.sku, data.quantity, data.offer,
     data.price, data.date
   ]);
   return ContentService.createTextOutput("OK");
