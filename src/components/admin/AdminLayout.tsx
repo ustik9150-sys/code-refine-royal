@@ -295,9 +295,9 @@ export default function AdminLayout() {
                       whileHover={{ scale: 1.08 }}
                       whileTap={{ scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className={`flex-shrink-0 ${isActive ? "drop-shadow-[0_0_6px_rgba(140,100,255,0.5)]" : ""}`}
+                      className={`flex-shrink-0 ${isActive ? "drop-shadow-[0_0_4px_rgba(100,80,200,0.3)]" : ""}`}
                     >
-                      <item.icon className={`w-[18px] h-[18px] transition-all duration-300 ${isActive ? "text-white" : "text-white/70 group-hover:text-white/90"}`} />
+                      <item.icon className={`w-[18px] h-[18px] transition-all duration-300 ${isActive ? "text-foreground" : "text-foreground/50 group-hover:text-foreground/75"}`} />
                     </motion.div>
 
                     {!collapsed && (
