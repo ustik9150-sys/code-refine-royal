@@ -181,6 +181,7 @@ export default function AdminCodNetwork() {
             onChange={(e) => setSettings((s) => ({ ...s, default_country: e.target.value }))}
           />
           <p className="text-[11px] text-muted-foreground">تُستخدم فقط إذا لم يتم تحديد عملة للمنتج</p>
+        </div>
 
         {/* Default City */}
         <div className="space-y-2">
