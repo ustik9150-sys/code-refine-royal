@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Navigate, Outlet, NavLink, useNavigate } from "react-router-dom";
+import CodFormLogo from "@/components/CodFormLogo";
 import { useAdmin } from "@/hooks/useAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ const navItems = [
   { to: "/admin/analytics", icon: BarChart3, label: "الإحصائيات" },
   { to: "/admin/orders", icon: ShoppingCart, label: "الطلبات" },
   { to: "/admin/products", icon: Package, label: "المنتجات" },
-  { to: "/admin/cod-form", icon: FileText, label: "CodForm", badge: "PRO" },
+  { to: "/admin/cod-form", icon: FileText, label: "CodForm", badge: "PRO", customLabel: true },
   { to: "/admin/pages", icon: FileText, label: "الصفحات" },
   { to: "/admin/settings", icon: Settings, label: "الإعدادات" },
 ];
@@ -248,13 +249,7 @@ export default function AdminLayout() {
               <item.icon className="w-5 h-5 flex-shrink-0" />
               {!collapsed && (
                 <span className="flex items-center gap-2">
-                  {item.label}
-                  {item.badge && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md text-white"
-                      style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(340 75% 55%))" }}>
-                      {item.badge}
-                    </span>
-                  )}
+                  {(item as any).customLabel ? <CodFormLogo size="sm" /> : item.label}
                 </span>
               )}
             </NavLink>
