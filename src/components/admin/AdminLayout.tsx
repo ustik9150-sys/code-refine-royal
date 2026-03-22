@@ -395,7 +395,7 @@ export default function AdminLayout() {
           <div className="flex-1" />
 
           {/* Notification bell */}
-          <div className="relative">
+          <div className="relative" data-dropdown>
             <button
               onClick={() => { setShowNotifications(!showNotifications); setShowProfile(false); }}
               className="relative p-2 rounded-xl hover:bg-muted transition-colors"
