@@ -265,6 +265,7 @@ export type Database = {
           currency_enabled: boolean
           description_ar: string | null
           description_en: string | null
+          hidden_from_home: boolean
           id: string
           inventory: number
           name_ar: string
@@ -284,6 +285,7 @@ export type Database = {
           currency_enabled?: boolean
           description_ar?: string | null
           description_en?: string | null
+          hidden_from_home?: boolean
           id?: string
           inventory?: number
           name_ar: string
@@ -303,6 +305,7 @@ export type Database = {
           currency_enabled?: boolean
           description_ar?: string | null
           description_en?: string | null
+          hidden_from_home?: boolean
           id?: string
           inventory?: number
           name_ar?: string
