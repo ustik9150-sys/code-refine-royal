@@ -184,6 +184,7 @@ export default function AdminProductEdit() {
   const [uploading, setUploading] = useState(false);
   const [currencyEnabled, setCurrencyEnabled] = useState(false);
   const [currencyCode, setCurrencyCode] = useState("SAR");
+  const [hiddenFromHome, setHiddenFromHome] = useState(false);
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
