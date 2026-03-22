@@ -382,20 +382,141 @@ export default function AdminLayout() {
           <div className="flex-1" />
 
           {/* Notification bell */}
-          <button className="relative p-2 rounded-xl hover:bg-muted transition-colors">
-            <Bell className="w-5 h-5 text-muted-foreground" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive" />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => { setShowNotifications(!showNotifications); setShowProfile(false); }}
+              className="relative p-2 rounded-xl hover:bg-muted transition-colors"
+            >
+              <Bell className="w-5 h-5 text-muted-foreground" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white px-1">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
 
-          {/* Admin avatar */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold"
-              style={{
-                background: "linear-gradient(135deg, hsl(250 80% 65% / 0.15), hsl(340 75% 55% / 0.1))",
-                color: "hsl(250 80% 65%)",
-              }}>
-              <User className="w-4 h-4" />
-            </div>
+            <AnimatePresence>
+              {showNotifications && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute left-0 top-full mt-2 w-80 rounded-2xl border border-border bg-card shadow-xl z-50 overflow-hidden"
+                  dir="rtl"
+                >
+                  <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+                    <span className="text-sm font-bold text-foreground">الإشعارات</span>
+                    {unreadCount > 0 && (
+                      <span className="text-[10px] bg-destructive/10 text-destructive px-2 py-0.5 rounded-full font-semibold">
+                        {unreadCount} جديد
+                      </span>
+                    )}
+                  </div>
+                  <div className="max-h-72 overflow-y-auto">
+                    {recentOrders.length === 0 ? (
+                      <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                        لا توجد إشعارات
+                      </div>
+                    ) : (
+                      recentOrders.map((order: any) => {
+                        const time = new Date(order.created_at);
+                        const ago = Math.round((Date.now() - time.getTime()) / 60000);
+                        const agoText = ago < 60 ? `منذ ${ago} د` : ago < 1440 ? `منذ ${Math.round(ago / 60)} س` : "أمس";
+                        return (
+                          <button
+                            key={order.id}
+                            onClick={() => { navigate("/admin/orders"); setShowNotifications(false); }}
+                            className={`w-full px-4 py-3 flex items-start gap-3 hover:bg-muted/50 transition-colors text-right ${order.status === "pending" ? "bg-primary/[0.03]" : ""}`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${order.status === "pending" ? "bg-green-500/10 text-green-600" : "bg-muted text-muted-foreground"}`}>
+                              <ShoppingCart className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-foreground truncate">
+                                طلب جديد #{order.order_number}
+                              </p>
+                              <p className="text-[11px] text-muted-foreground truncate">
+                                {order.customer_name} — {order.total} ر.س
+                              </p>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground flex-shrink-0 mt-0.5">{agoText}</span>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                  <button
+                    onClick={() => { navigate("/admin/orders"); setShowNotifications(false); }}
+                    className="w-full px-4 py-2.5 text-xs font-semibold text-center border-t border-border hover:bg-muted/50 transition-colors"
+                    style={{ color: "hsl(250 80% 60%)" }}
+                  >
+                    عرض كل الطلبات
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Admin avatar / Profile */}
+          <div className="relative">
+            <button
+              onClick={() => { setShowProfile(!showProfile); setShowNotifications(false); }}
+              className="flex items-center gap-2"
+            >
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold"
+                style={{
+                  background: "linear-gradient(135deg, hsl(250 80% 65% / 0.15), hsl(340 75% 55% / 0.1))",
+                  color: "hsl(250 80% 65%)",
+                }}>
+                <User className="w-4 h-4" />
+              </div>
+            </button>
+
+            <AnimatePresence>
+              {showProfile && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute left-0 top-full mt-2 w-64 rounded-2xl border border-border bg-card shadow-xl z-50 overflow-hidden"
+                  dir="rtl"
+                >
+                  <div className="px-4 py-4 border-b border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{
+                          background: "linear-gradient(135deg, hsl(250 80% 65% / 0.15), hsl(340 75% 55% / 0.1))",
+                          color: "hsl(250 80% 65%)",
+                        }}>
+                        <User className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-foreground">المسؤول</p>
+                        <p className="text-[11px] text-muted-foreground truncate" dir="ltr">{adminEmail}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="py-1">
+                    <button
+                      onClick={() => { navigate("/admin/settings"); setShowProfile(false); }}
+                      className="w-full px-4 py-2.5 text-sm text-right flex items-center gap-3 hover:bg-muted/50 transition-colors text-foreground"
+                    >
+                      <Settings className="w-4 h-4 text-muted-foreground" />
+                      الإعدادات
+                    </button>
+                    <button
+                      onClick={() => { handleLogout(); setShowProfile(false); }}
+                      className="w-full px-4 py-2.5 text-sm text-right flex items-center gap-3 hover:bg-muted/50 transition-colors text-destructive"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      تسجيل الخروج
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </header>
 
