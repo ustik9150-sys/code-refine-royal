@@ -268,7 +268,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
 
                       <div className="flex items-baseline gap-2">
                         {offer.old_price && offer.old_price > offer.price && (
-                          <span className="text-xs text-muted-foreground line-through">{offer.old_price} {currency.symbol}</span>
+                          <span className="text-xs text-muted-foreground line-through">{offer.old_price} {displaySymbol}</span>
                         )}
                         <span className={`text-base font-black ${isSelected ? "text-destructive" : "text-foreground"}`}>
                           {offer.price} {currency.symbol}
