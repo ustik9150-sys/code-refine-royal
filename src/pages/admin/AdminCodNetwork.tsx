@@ -1,18 +1,28 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle, XCircle, Send, Key, Globe, MapPin, RefreshCw } from "lucide-react";
-
+import { Loader2, CheckCircle, XCircle, Send, Key, Globe, MapPin, RefreshCw, Package, Box } from "lucide-react";
 
 interface CodNetworkSettings {
   enabled: boolean;
   api_token: string;
   default_country: string;
   default_city: string;
+}
+
+interface CodProduct {
+  id: number;
+  sku: string;
+  name: string;
+  price: number;
+  currency: string;
+  status: string;
+  stocks: { country: string; quantity: number; project?: string }[];
+  created_at: string;
 }
 
 const DEFAULT: CodNetworkSettings = {
@@ -29,6 +39,8 @@ export default function AdminCodNetwork() {
   const [testing, setTesting] = useState(false);
   const [connected, setConnected] = useState<boolean | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [products, setProducts] = useState<CodProduct[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -77,6 +89,32 @@ export default function AdminCodNetwork() {
       toast({ title: "❌ فشل الاتصال", variant: "destructive" });
     }
     setTesting(false);
+  };
+
+  const fetchProducts = async () => {
+    if (!settings.api_token) {
+      toast({ title: "أدخل API Token أولاً", variant: "destructive" });
+      return;
+    }
+    setLoadingProducts(true);
+    try {
+      const res = await supabase.functions.invoke("cod-network-proxy", {
+        body: { action: "get_products", api_token: settings.api_token },
+      });
+      if (res.error) throw res.error;
+      const productData = res.data?.data?.data || [];
+      setProducts(Array.isArray(productData) ? productData : []);
+      toast({ title: `✅ تم جلب ${Array.isArray(productData) ? productData.length : 0} منتج` });
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
+      toast({ title: "❌ فشل جلب المنتجات", variant: "destructive" });
+    }
+    setLoadingProducts(false);
+  };
+
+  const getTotalStock = (stocks: CodProduct["stocks"]) => {
+    if (!stocks || !Array.isArray(stocks)) return 0;
+    return stocks.reduce((sum, s) => sum + (s.quantity || 0), 0);
   };
 
   if (!loaded) {
@@ -165,7 +203,7 @@ export default function AdminCodNetwork() {
           />
         </div>
 
-        {/* Default Country - Auto from currency */}
+        {/* Default Country */}
         <div className="space-y-2">
           <label className="text-sm font-semibold text-foreground flex items-center gap-2">
             <Globe className="w-4 h-4 text-muted-foreground" />
@@ -209,6 +247,92 @@ export default function AdminCodNetwork() {
             اختبار الاتصال
           </Button>
         </div>
+      </motion.div>
+
+      {/* Products Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="rounded-2xl border border-border bg-card p-6 space-y-4"
+        style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Package className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">المنتجات والمخزون</p>
+              <p className="text-xs text-muted-foreground">جلب منتجاتك ومخزوناتك من COD Network</p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchProducts}
+            disabled={loadingProducts || !settings.api_token}
+          >
+            {loadingProducts ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : <RefreshCw className="w-4 h-4 ml-2" />}
+            جلب المنتجات
+          </Button>
+        </div>
+
+        {products.length > 0 && (
+          <div className="space-y-3 mt-2">
+            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 px-3 py-2 text-xs font-semibold text-muted-foreground border-b border-border">
+              <span>المنتج</span>
+              <span>SKU</span>
+              <span>السعر</span>
+              <span>المخزون</span>
+            </div>
+            {products.map((product) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-center px-3 py-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Box className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm font-medium text-foreground truncate">{product.name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${
+                    product.status === "Enabled" 
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" 
+                      : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                  }`}>
+                    {product.status === "Enabled" ? "مفعّل" : "معطّل"}
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-lg">{product.sku}</span>
+                <span className="text-sm font-semibold text-foreground whitespace-nowrap">
+                  {product.price} {product.currency}
+                </span>
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className={`text-sm font-bold ${getTotalStock(product.stocks) > 0 ? "text-emerald-600" : "text-destructive"}`}>
+                    {getTotalStock(product.stocks)}
+                  </span>
+                  {product.stocks && product.stocks.length > 0 && (
+                    <div className="flex gap-1">
+                      {product.stocks.map((s, i) => (
+                        <span key={i} className="text-[10px] text-muted-foreground">
+                          {s.country}: {s.quantity}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {products.length === 0 && !loadingProducts && (
+          <div className="text-center py-8 text-sm text-muted-foreground">
+            <Package className="w-8 h-8 mx-auto mb-2 opacity-30" />
+            اضغط "جلب المنتجات" لعرض منتجاتك من COD Network
+          </div>
+        )}
       </motion.div>
 
       {/* Info */}
