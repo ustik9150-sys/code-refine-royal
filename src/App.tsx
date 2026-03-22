@@ -24,6 +24,7 @@ import AdminCodForm from "./pages/admin/AdminCodForm";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminPages from "./pages/admin/AdminPages";
 import AdminGoogleSheets from "./pages/admin/AdminGoogleSheets";
+import AdminCodNetwork from "./pages/admin/AdminCodNetwork";
 
 const queryClient = new QueryClient();
 
