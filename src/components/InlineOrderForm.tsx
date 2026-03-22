@@ -197,7 +197,8 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
 
       // Fire-and-forget: send to CodNetwork
       if (codNetworkSettings) {
-        const codCity = city.trim() || codNetworkSettings.default_city || "غير محدد";
+        const codCity = city.trim() || codNetworkSettings.default_city || "N/A";
+        const codAddress = city.trim() || "N/A";
         const codCountry = currencyToCountry(currency.code) || codNetworkSettings.default_country || "KSA";
         supabase.functions.invoke("cod-network-proxy", {
           body: {
@@ -207,13 +208,13 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
               full_name: fullName.trim(),
               phone: phone.trim(),
               country: codCountry,
-              address: codCity,
+              address: codAddress,
               city: codCity,
               area: codCity,
               items: [{
-                sku: productSku || productName,
-                price: finalPrice,
-                quantity: finalQuantity,
+                sku: productSku || "DEFAULT",
+                price: Number(finalPrice),
+                quantity: Number(finalQuantity),
               }],
             },
           },
