@@ -204,6 +204,7 @@ const ProductDetails = ({ productId }: { productId?: string }) => {
             productSku={product?.sku || undefined}
             unitPrice={price}
             quantity={quantity}
+            currencySymbol={currencySymbol}
           />
         </div>
 
