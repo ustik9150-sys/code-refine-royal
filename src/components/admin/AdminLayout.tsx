@@ -22,6 +22,7 @@ import {
   ChevronLeft,
   BarChart3,
   Zap,
+  Table2,
 } from "lucide-react";
 
 const navItems = [
