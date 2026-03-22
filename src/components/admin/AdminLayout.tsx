@@ -266,16 +266,15 @@ export default function AdminLayout() {
                     collapsed ? "justify-center px-2 py-3" : "px-3.5 py-2.5"
                   } ${
                     isActive
-                      ? "text-white"
-                      : "text-white/70 hover:text-white/90 hover:bg-white/[0.06]"
+                      ? "text-foreground font-semibold"
+                      : "text-foreground/55 hover:text-foreground/80 hover:bg-black/[0.04]"
                   }`
                 }
                 style={({ isActive }) =>
                   isActive
                     ? {
-                        background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.06))",
-                        boxShadow: "0 4px 16px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.12), 0 0 24px hsl(250 80% 60% / 0.08)",
-                        backdropFilter: "blur(10px)",
+                        background: "linear-gradient(135deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02))",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(0,0,0,0.04)",
                       }
                     : {}
                 }
