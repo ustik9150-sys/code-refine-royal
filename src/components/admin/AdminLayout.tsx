@@ -199,19 +199,17 @@ export default function AdminLayout() {
         {/* Floating glass container */}
         <div className="flex flex-col h-full m-2.5 rounded-3xl overflow-hidden relative"
           style={{
-            background: "linear-gradient(165deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%)",
+            background: "linear-gradient(165deg, rgba(15, 15, 25, 0.75) 0%, rgba(10, 10, 20, 0.85) 100%)",
             backdropFilter: "blur(50px) saturate(200%)",
             WebkitBackdropFilter: "blur(50px) saturate(200%)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05) inset, 0 32px 64px -16px rgba(0, 0, 0, 0.3)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04) inset, 0 32px 64px -16px rgba(0, 0, 0, 0.35)",
           }}
         >
           {/* Glass light reflection */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-            <div className="absolute top-0 right-0 w-full h-1/2 opacity-[0.08]"
-              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)" }} />
-            <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-[0.06]"
-              style={{ background: "radial-gradient(circle, rgba(255,255,255,0.8), transparent)" }} />
+            <div className="absolute top-0 right-0 w-full h-1/3 opacity-[0.06]"
+              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%)" }} />
           </div>
 
           {/* Logo area */}
