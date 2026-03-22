@@ -37,7 +37,7 @@ const Index = () => {
     const fetchData = async () => {
       const { data: productsData } = await supabase
         .from("products")
-        .select("id, name_ar, description_ar, price, compare_at_price, inventory, product_images(url, is_main)")
+        .select("id, name_ar, description_ar, price, compare_at_price, inventory, currency_enabled, currency_code, product_images(url, is_main)")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
