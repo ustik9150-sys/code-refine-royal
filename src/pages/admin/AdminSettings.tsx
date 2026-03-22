@@ -37,6 +37,7 @@ export default function AdminSettings() {
   const [fixedRate, setFixedRate] = useState("30");
   const [freeThreshold, setFreeThreshold] = useState("200");
   const [codEnabled, setCodEnabled] = useState(true);
+  const [googleSheetsUrl, setGoogleSheetsUrl] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -56,6 +57,8 @@ export default function AdminSettings() {
             setFreeThreshold(String(v.free_shipping_threshold ?? 200));
           } else if (row.key === "payment") {
             setCodEnabled(v.cod_enabled ?? true);
+          } else if (row.key === "integrations") {
+            setGoogleSheetsUrl(v.google_sheets_webhook || "");
           }
         }
       }
