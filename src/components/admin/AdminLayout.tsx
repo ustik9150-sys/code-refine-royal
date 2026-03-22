@@ -338,7 +338,7 @@ export default function AdminLayout() {
                   }}>
                   <User className="w-3.5 h-3.5 text-white/50" />
                 </div>
-                <p className="text-[10px] text-white/25 truncate">{adminEmail}</p>
+                <p className="text-[10px] text-white/50 truncate">{adminEmail}</p>
               </div>
             )}
             <button
