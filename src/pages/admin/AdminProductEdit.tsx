@@ -631,6 +631,19 @@ export default function AdminProductEdit() {
               </div>
             </div>
 
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-xs">إخفاء من الصفحة الرئيسية</Label>
+                <p className="text-[10px] text-muted-foreground mt-0.5">المنتج يبقى متاحاً عبر الرابط المباشر</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={hiddenFromHome} onCheckedChange={setHiddenFromHome} />
+                <span className={`text-xs font-medium ${hiddenFromHome ? "text-destructive" : "text-muted-foreground"}`}>
+                  {hiddenFromHome ? "مخفي" : "ظاهر"}
+                </span>
+              </div>
+            </div>
+
             <div>
               <Label className="text-xs">التصنيف</Label>
               <Input

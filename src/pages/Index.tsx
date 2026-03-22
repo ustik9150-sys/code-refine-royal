@@ -43,10 +43,12 @@ const Index = () => {
 
       if (productsData) {
         setProducts(
-          productsData.map((p: any) => ({
-            ...p,
-            images: p.product_images || [],
-          }))
+          productsData
+            .filter((p: any) => !(p as any).hidden_from_home)
+            .map((p: any) => ({
+              ...p,
+              images: p.product_images || [],
+            }))
         );
       }
 
