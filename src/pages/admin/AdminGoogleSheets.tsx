@@ -17,12 +17,12 @@ const fadeUp = {
 const appsScriptCode = `function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["الاسم", "الهاتف", "المدينة", "المنتج", "الكمية", "العرض", "السعر", "التاريخ"]);
+    sheet.appendRow(["الاسم", "الهاتف", "المدينة", "المنتج", "SKU", "الكمية", "العرض", "السعر", "التاريخ"]);
   }
   var data = JSON.parse(e.postData.contents);
   sheet.appendRow([
     data.name, data.phone, data.city,
-    data.product, data.quantity, data.offer,
+    data.product, data.sku, data.quantity, data.offer,
     data.price, data.date
   ]);
   return ContentService.createTextOutput("OK");
@@ -170,7 +170,7 @@ export default function AdminGoogleSheets() {
           </div>
         </div>
         <div className="grid grid-cols-4 gap-2">
-          {["الاسم", "الهاتف", "المدينة", "المنتج", "الكمية", "العرض", "السعر", "التاريخ"].map((col) => (
+          {["الاسم", "الهاتف", "المدينة", "المنتج", "SKU", "الكمية", "العرض", "السعر", "التاريخ"].map((col) => (
             <div key={col} className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
               <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0" />
               {col}

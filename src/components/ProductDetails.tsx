@@ -197,6 +197,7 @@ const ProductDetails = ({ productId }: { productId?: string }) => {
           <InlineOrderForm
             productName={product?.name_ar || "منتج"}
             productId={product?.id}
+            productSku={product?.sku || undefined}
             unitPrice={price}
             quantity={quantity}
           />

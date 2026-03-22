@@ -19,6 +19,7 @@ interface OfferItem {
 interface InlineOrderFormProps {
   productName: string;
   productId?: string;
+  productSku?: string;
   unitPrice: number;
   quantity: number;
 }
@@ -65,7 +66,7 @@ const DEFAULT_SETTINGS: CodFormSettings = {
   offers: [],
 };
 
-const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: InlineOrderFormProps) => {
+const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quantity }: InlineOrderFormProps) => {
   const navigate = useNavigate();
   const { currency } = useCurrency();
   const [fullName, setFullName] = useState("");
@@ -167,6 +168,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
             phone: phone.trim(),
             city: city.trim() || "-",
             product: productName,
+            sku: productSku || "-",
             quantity: finalQuantity,
             offer: selectedOffer?.title || "-",
             price: finalPrice,
