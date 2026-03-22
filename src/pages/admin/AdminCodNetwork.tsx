@@ -95,7 +95,9 @@ export default function AdminCodNetwork() {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-4"
       >
-        <img src={codNetworkLogo} alt="COD Network" className="w-12 h-12 rounded-2xl object-contain bg-background border border-border p-1" />
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center border border-border shadow-sm">
+          <Send className="w-5 h-5 text-white" />
+        </div>
         <div>
           <h1 className="text-xl font-bold text-foreground">COD Network</h1>
           <p className="text-sm text-muted-foreground">إرسال الطلبات تلقائياً إلى COD Network</p>
