@@ -163,6 +163,19 @@ export default function AdminLayout() {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-dropdown]")) {
+        setShowNotifications(false);
+        setShowProfile(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center"
