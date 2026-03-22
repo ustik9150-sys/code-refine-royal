@@ -42,6 +42,9 @@ export default function AdminCodNetwork() {
   const [loaded, setLoaded] = useState(false);
   const [products, setProducts] = useState<CodProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [stockFilter, setStockFilter] = useState<string>("all");
 
   useEffect(() => {
     (async () => {
