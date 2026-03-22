@@ -17,13 +17,27 @@ const fadeUp = {
 const appsScriptCode = `function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["الاسم", "الهاتف", "المدينة", "المنتج", "SKU", "الكمية", "العرض", "السعر", "التاريخ"]);
+    sheet.appendRow([
+      "#", "الاسم", "الهاتف", "المدينة", "المنتج",
+      "SKU", "الكمية", "العرض", "السعر", "التاريخ",
+      "الوقت", "الحالة"
+    ]);
   }
   var data = JSON.parse(e.postData.contents);
+  var orderId = sheet.getLastRow();
   sheet.appendRow([
-    data.name, data.phone, data.city,
-    data.product, data.sku, data.quantity, data.offer,
-    data.price, data.date
+    orderId,
+    data.name || "",
+    data.phone || "",
+    data.city || "غير محدد",
+    data.product || "",
+    data.sku || "",
+    data.quantity || 1,
+    data.offer || "",
+    data.price || 0,
+    data.date || "",
+    data.time || "",
+    data.status || "جديد"
   ]);
   return ContentService.createTextOutput("OK");
 }`;
