@@ -66,7 +66,7 @@ const DEFAULT_SETTINGS: CodFormSettings = {
   offers: [],
 };
 
-const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: InlineOrderFormProps) => {
+const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quantity }: InlineOrderFormProps) => {
   const navigate = useNavigate();
   const { currency } = useCurrency();
   const [fullName, setFullName] = useState("");
