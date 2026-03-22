@@ -197,21 +197,21 @@ export default function AdminLayout() {
         } ${sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}`}
       >
         {/* Floating glass container */}
-        <div className="flex flex-col h-full m-2 rounded-[22px] overflow-hidden relative"
+        <div className="flex flex-col h-full m-2.5 rounded-3xl overflow-hidden relative"
           style={{
-            background: "linear-gradient(165deg, rgba(20, 20, 35, 0.92) 0%, rgba(12, 12, 24, 0.97) 100%)",
-            backdropFilter: "blur(40px) saturate(180%)",
-            WebkitBackdropFilter: "blur(40px) saturate(180%)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            boxShadow: "0 8px 40px rgba(0, 0, 0, 0.4), 0 0 80px rgba(120, 80, 255, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+            background: "linear-gradient(165deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%)",
+            backdropFilter: "blur(50px) saturate(200%)",
+            WebkitBackdropFilter: "blur(50px) saturate(200%)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05) inset, 0 32px 64px -16px rgba(0, 0, 0, 0.3)",
           }}
         >
-          {/* Ambient glow overlay */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[22px]">
-            <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-[0.07]"
-              style={{ background: "radial-gradient(circle, hsl(250 80% 65%), transparent)" }} />
-            <div className="absolute -bottom-16 -left-16 w-32 h-32 rounded-full opacity-[0.05]"
-              style={{ background: "radial-gradient(circle, hsl(340 75% 55%), transparent)" }} />
+          {/* Glass light reflection */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
+            <div className="absolute top-0 right-0 w-full h-1/2 opacity-[0.08]"
+              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)" }} />
+            <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-[0.06]"
+              style={{ background: "radial-gradient(circle, rgba(255,255,255,0.8), transparent)" }} />
           </div>
 
           {/* Logo area */}
@@ -275,8 +275,9 @@ export default function AdminLayout() {
                 style={({ isActive }) =>
                   isActive
                     ? {
-                        background: "linear-gradient(135deg, hsl(250 80% 60% / 0.25), hsl(290 70% 55% / 0.18), hsl(340 75% 55% / 0.12))",
-                        boxShadow: "0 0 20px hsl(250 80% 60% / 0.12), inset 0 0 0 1px rgba(255,255,255,0.08)",
+                        background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.06))",
+                        boxShadow: "0 4px 16px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.12), 0 0 24px hsl(250 80% 60% / 0.08)",
+                        backdropFilter: "blur(10px)",
                       }
                     : {}
                 }
