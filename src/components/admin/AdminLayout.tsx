@@ -307,7 +307,7 @@ export default function AdminLayout() {
                         transition={{ delay: 0.05 }}
                         className="flex items-center gap-2"
                       >
-                        {(item as any).customLabel ? <CodFormLogo size="sm" variant="light" /> : item.label}
+                        {(item as any).customLabel ? <CodFormLogo size="sm" variant="dark" /> : item.label}
                         {(item as any).badge && (
                           <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
                             style={{
