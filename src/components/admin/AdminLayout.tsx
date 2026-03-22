@@ -249,7 +249,7 @@ export default function AdminLayout() {
               <item.icon className="w-5 h-5 flex-shrink-0" />
               {!collapsed && (
                 <span className="flex items-center gap-2">
-                  {(item as any).customLabel ? <CodFormLogo size="sm" /> : item.label}
+                  {(item as any).customLabel ? <CodFormLogo size="sm" variant="light" /> : item.label}
                 </span>
               )}
             </NavLink>
