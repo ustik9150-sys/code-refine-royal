@@ -107,6 +107,11 @@ export default function AdminSettings() {
         value: { cod_enabled: codEnabled } as any,
       }, { onConflict: "key" });
 
+      await supabase.from("store_settings").upsert({
+        key: "integrations",
+        value: { google_sheets_webhook: googleSheetsUrl.trim() } as any,
+      }, { onConflict: "key" });
+
       toast({ title: "✅ تم حفظ الإعدادات بنجاح" });
     } catch {
       toast({ title: "خطأ", description: "فشل حفظ الإعدادات", variant: "destructive" });
