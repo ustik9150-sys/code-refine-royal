@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, XCircle, Send, Key, Globe, MapPin, RefreshCw } from "lucide-react";
-import codNetworkLogo from "@/assets/cod-network-logo.png";
+
 
 interface CodNetworkSettings {
   enabled: boolean;
