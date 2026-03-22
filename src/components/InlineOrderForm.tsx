@@ -156,6 +156,25 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
         }).catch(() => {});
       }
 
+      // Fire-and-forget: send to Google Sheets
+      if (sheetsWebhook) {
+        fetch(sheetsWebhook, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            name: fullName.trim(),
+            phone: phone.trim(),
+            city: city.trim() || "-",
+            product: productName,
+            quantity: finalQuantity,
+            offer: selectedOffer?.title || "-",
+            price: finalPrice,
+            date: new Date().toLocaleString("ar-SA", { timeZone: "Asia/Riyadh" }),
+          }),
+        }).catch(() => {});
+      }
+
       navigate(`/thank-you`);
     } catch (err) {
       console.error("Order creation failed:", err);
