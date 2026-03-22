@@ -255,6 +255,7 @@ export default function AdminProductEdit() {
       status: publish ? "active" : isActive ? "active" : "draft",
       currency_enabled: currencyEnabled,
       currency_code: currencyEnabled ? currencyCode : null,
+      hidden_from_home: hiddenFromHome,
     };
 
     try {
