@@ -228,7 +228,7 @@ export default function AdminLayout() {
                   }}>
                   <Zap className="w-4 h-4 text-white" />
                 </div>
-                <span className="font-bold text-[15px] text-white/90 tracking-tight">لوحة التحكم</span>
+                <span className="font-bold text-[15px] text-foreground tracking-tight">لوحة التحكم</span>
               </motion.div>
             )}
             {collapsed && (
