@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { Save, Truck, CreditCard, Loader2, ImageIcon, Upload, X, Mail, Phone, Type, Coins } from "lucide-react";
+import { Save, Truck, CreditCard, Loader2, ImageIcon, Upload, X, Mail, Phone, Type, Coins, Link2 } from "lucide-react";
 import { CURRENCIES, invalidateCurrencyCache } from "@/hooks/useCurrency";
 
 const fadeUp = {
