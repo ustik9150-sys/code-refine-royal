@@ -56,6 +56,7 @@ const App = () => (
             <Route path="products/:id" element={<AdminProductEdit />} />
             <Route path="cod-form" element={<AdminCodForm />} />
             <Route path="google-sheets" element={<AdminGoogleSheets />} />
+            <Route path="cod-network" element={<AdminCodNetwork />} />
             <Route path="pages" element={<AdminPages />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
