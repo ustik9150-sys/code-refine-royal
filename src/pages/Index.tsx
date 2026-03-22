@@ -129,7 +129,7 @@ const Index = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               <AnimatePresence>
                 {products.map((product, i) => (
-                  <ProductCard key={product.id} product={product} index={i} currencySymbol={currency.symbol} />
+                  <ProductCard key={product.id} product={product} index={i} systemCurrency={currency} />
                 ))}
               </AnimatePresence>
             </div>
