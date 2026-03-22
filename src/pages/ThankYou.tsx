@@ -5,11 +5,21 @@ import celebrationSvg from "@/assets/celebration.svg";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
 
+const generateTrackingCode = (orderNum: string): string => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const num = parseInt(orderNum) || Date.now();
+  const prefix = chars[num % chars.length] + chars[(num * 7 + 3) % chars.length];
+  const suffix = chars[(num * 13 + 5) % chars.length];
+  const padded = String(num).padStart(4, "0");
+  return `${prefix}-${padded}-${suffix}`;
+};
+
 const ThankYou: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const orderNumber = searchParams.get("order") || "000000";
+  const rawOrder = searchParams.get("order") || "";
+  const trackingCode = rawOrder ? generateTrackingCode(rawOrder) : "N/A";
   const email = searchParams.get("email") || "";
 
   return (
