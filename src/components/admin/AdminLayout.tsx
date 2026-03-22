@@ -21,6 +21,7 @@ import {
   ChevronRight,
   ChevronLeft,
   BarChart3,
+  Zap,
 } from "lucide-react";
 
 const navItems = [
