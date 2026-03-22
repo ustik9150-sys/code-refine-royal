@@ -544,6 +544,17 @@ export default function AdminProductEdit() {
               />
               {errors.inventory && <p className="text-destructive text-xs mt-1">{errors.inventory}</p>}
             </div>
+
+            <div>
+              <Label className="text-xs">SKU (رمز المنتج)</Label>
+              <Input
+                value={sku}
+                onChange={(e) => setSku(e.target.value)}
+                dir="ltr"
+                className="mt-1 rounded-xl admin-input"
+                placeholder="مثال: PRF-001"
+              />
+            </div>
           </motion.div>
 
           {/* Status & Category Card */}
