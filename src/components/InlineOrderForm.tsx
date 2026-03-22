@@ -5,6 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { useCurrency } from "@/hooks/useCurrency";
 import { motion } from "framer-motion";
 
+const CURRENCY_COUNTRY_MAP: Record<string, string> = {
+  SAR: "SA", AED: "AE", KWD: "KW", BHD: "BH", QAR: "QA",
+  OMR: "OM", EGP: "EG", USD: "US", EUR: "DE", GBP: "GB",
+  MAD: "MA", TRY: "TR", MRU: "MR",
+};
+const currencyToCountry = (code: string) => CURRENCY_COUNTRY_MAP[code] || "";
+
 interface OfferItem {
   id: string;
   title: string;
