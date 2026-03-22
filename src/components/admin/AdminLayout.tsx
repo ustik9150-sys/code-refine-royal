@@ -213,7 +213,7 @@ export default function AdminLayout() {
           </div>
 
           {/* Logo area */}
-          <div className={`relative z-10 flex items-center h-[68px] border-b border-white/[0.06] ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
+          <div className={`relative z-10 flex items-center h-[68px] border-b border-black/[0.06] ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
             {!collapsed && (
               <motion.div
                 initial={{ opacity: 0, x: 10 }}
