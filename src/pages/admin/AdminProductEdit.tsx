@@ -206,6 +206,7 @@ export default function AdminProductEdit() {
       setCompareAt(product.compare_at_price ? String(product.compare_at_price) : "");
       setInventory(String(product.inventory));
       setCategory(product.category || "");
+      setSku(product.sku || "");
       setIsActive(product.status === "active");
       setTags(product.tags || []);
 
