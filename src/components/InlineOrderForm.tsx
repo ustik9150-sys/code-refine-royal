@@ -79,6 +79,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
   const [settings, setSettings] = useState<CodFormSettings>(DEFAULT_SETTINGS);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [sheetsWebhook, setSheetsWebhook] = useState("");
+  const [codNetworkSettings, setCodNetworkSettings] = useState<{ enabled: boolean; api_token: string; default_country: string; default_city: string } | null>(null);
 
   // Filter offers for this product
   const filteredOffers = settings.offers?.filter(
