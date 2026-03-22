@@ -38,6 +38,27 @@ export default function AdminSettings() {
   const [freeThreshold, setFreeThreshold] = useState("200");
   const [codEnabled, setCodEnabled] = useState(true);
   const [googleSheetsUrl, setGoogleSheetsUrl] = useState("");
+  const [codeCopied, setCodeCopied] = useState(false);
+
+  const appsScriptCode = `function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["الاسم", "الهاتف", "المدينة", "المنتج", "الكمية", "العرض", "السعر", "التاريخ"]);
+  }
+  var data = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    data.name, data.phone, data.city,
+    data.product, data.quantity, data.offer,
+    data.price, data.date
+  ]);
+  return ContentService.createTextOutput("OK");
+}`;
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(appsScriptCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
 
   useEffect(() => {
     (async () => {
