@@ -506,7 +506,7 @@ export default function AdminCodForm() {
             <Zap className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2" dir="ltr">
               <span className="tracking-tight">Cod</span>
               <span className="font-extrabold" style={{ color: "hsl(250 80% 65%)" }}>Form</span>
               <span className="text-[9px] text-white px-2 py-0.5 rounded-md font-bold"
