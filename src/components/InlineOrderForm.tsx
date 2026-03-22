@@ -75,6 +75,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
   const [submitting, setSubmitting] = useState(false);
   const [settings, setSettings] = useState<CodFormSettings>(DEFAULT_SETTINGS);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+  const [sheetsWebhook, setSheetsWebhook] = useState("");
 
   // Filter offers for this product
   const filteredOffers = settings.offers?.filter(
