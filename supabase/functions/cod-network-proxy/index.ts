@@ -41,6 +41,7 @@ serve(async (req) => {
     }
 
     if (action === "send_order" && order_data) {
+      console.log("CodNetwork order_data:", JSON.stringify(order_data));
       const res = await fetch(COD_NETWORK_API, {
         method: "POST",
         headers: {
@@ -50,6 +51,7 @@ serve(async (req) => {
         body: JSON.stringify(order_data),
       });
       const data = await res.json().catch(() => ({}));
+      console.log("CodNetwork response:", res.status, JSON.stringify(data));
       return new Response(JSON.stringify({ success: res.ok, status: res.status, data }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
