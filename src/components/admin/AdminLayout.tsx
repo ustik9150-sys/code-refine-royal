@@ -199,11 +199,11 @@ export default function AdminLayout() {
         {/* Floating glass container */}
         <div className="flex flex-col h-full m-2.5 rounded-3xl overflow-hidden relative"
           style={{
-            background: "linear-gradient(165deg, rgba(15, 15, 25, 0.75) 0%, rgba(10, 10, 20, 0.85) 100%)",
-            backdropFilter: "blur(50px) saturate(200%)",
-            WebkitBackdropFilter: "blur(50px) saturate(200%)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04) inset, 0 32px 64px -16px rgba(0, 0, 0, 0.35)",
+            background: "linear-gradient(165deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.45) 100%)",
+            backdropFilter: "blur(50px) saturate(180%)",
+            WebkitBackdropFilter: "blur(50px) saturate(180%)",
+            border: "1px solid rgba(255, 255, 255, 0.6)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.3) inset",
           }}
         >
           {/* Glass light reflection */}
@@ -213,7 +213,7 @@ export default function AdminLayout() {
           </div>
 
           {/* Logo area */}
-          <div className={`relative z-10 flex items-center h-[68px] border-b border-white/[0.06] ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
+          <div className={`relative z-10 flex items-center h-[68px] border-b border-black/[0.06] ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
             {!collapsed && (
               <motion.div
                 initial={{ opacity: 0, x: 10 }}
@@ -228,7 +228,7 @@ export default function AdminLayout() {
                   }}>
                   <Zap className="w-4 h-4 text-white" />
                 </div>
-                <span className="font-bold text-[15px] text-white/90 tracking-tight">لوحة التحكم</span>
+                <span className="font-bold text-[15px] text-foreground tracking-tight">لوحة التحكم</span>
               </motion.div>
             )}
             {collapsed && (
@@ -242,14 +242,14 @@ export default function AdminLayout() {
             )}
             <button
               onClick={() => { if (window.innerWidth < 1024) setSidebarOpen(false); else setCollapsed(!collapsed); }}
-              className="p-1.5 rounded-[10px] hover:bg-white/[0.06] transition-all duration-200 group"
+              className="p-1.5 rounded-[10px] hover:bg-black/[0.05] transition-all duration-200 group"
             >
               {window.innerWidth < 1024 ? (
-                <X className="w-4 h-4 text-white/40 group-hover:text-white/70 transition-colors" />
+                <X className="w-4 h-4 text-foreground/40 group-hover:text-foreground/70 transition-colors" />
               ) : collapsed ? (
-                <ChevronLeft className="w-3.5 h-3.5 text-white/40 group-hover:text-white/70 transition-colors" />
+                <ChevronLeft className="w-3.5 h-3.5 text-foreground/40 group-hover:text-foreground/70 transition-colors" />
               ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-white/40 group-hover:text-white/70 transition-colors" />
+                <ChevronRight className="w-3.5 h-3.5 text-foreground/40 group-hover:text-foreground/70 transition-colors" />
               )}
             </button>
           </div>
@@ -266,16 +266,15 @@ export default function AdminLayout() {
                     collapsed ? "justify-center px-2 py-3" : "px-3.5 py-2.5"
                   } ${
                     isActive
-                      ? "text-white"
-                      : "text-white/70 hover:text-white/90 hover:bg-white/[0.06]"
+                      ? "text-foreground font-semibold"
+                      : "text-foreground/55 hover:text-foreground/80 hover:bg-black/[0.04]"
                   }`
                 }
                 style={({ isActive }) =>
                   isActive
                     ? {
-                        background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.06))",
-                        boxShadow: "0 4px 16px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.12), 0 0 24px hsl(250 80% 60% / 0.08)",
-                        backdropFilter: "blur(10px)",
+                        background: "linear-gradient(135deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02))",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(0,0,0,0.04)",
                       }
                     : {}
                 }
@@ -296,9 +295,9 @@ export default function AdminLayout() {
                       whileHover={{ scale: 1.08 }}
                       whileTap={{ scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className={`flex-shrink-0 ${isActive ? "drop-shadow-[0_0_6px_rgba(140,100,255,0.5)]" : ""}`}
+                      className={`flex-shrink-0 ${isActive ? "drop-shadow-[0_0_4px_rgba(100,80,200,0.3)]" : ""}`}
                     >
-                      <item.icon className={`w-[18px] h-[18px] transition-all duration-300 ${isActive ? "text-white" : "text-white/70 group-hover:text-white/90"}`} />
+                      <item.icon className={`w-[18px] h-[18px] transition-all duration-300 ${isActive ? "text-foreground" : "text-foreground/50 group-hover:text-foreground/75"}`} />
                     </motion.div>
 
                     {!collapsed && (
@@ -328,22 +327,22 @@ export default function AdminLayout() {
           </nav>
 
           {/* User / Logout */}
-          <div className="relative z-10 p-2.5 border-t border-white/[0.06]">
+          <div className="relative z-10 p-2.5 border-t border-black/[0.06]">
             {!collapsed && adminEmail && (
               <div className="px-3 py-2 mb-1 flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-[9px] flex items-center justify-center flex-shrink-0"
                   style={{
-                    background: "linear-gradient(135deg, hsl(250 60% 50% / 0.2), hsl(340 60% 50% / 0.15))",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: "linear-gradient(135deg, hsl(250 60% 50% / 0.1), hsl(340 60% 50% / 0.08))",
+                    border: "1px solid rgba(0,0,0,0.06)",
                   }}>
-                  <User className="w-3.5 h-3.5 text-white/50" />
+                  <User className="w-3.5 h-3.5 text-foreground/40" />
                 </div>
-                <p className="text-[10px] text-white/50 truncate">{adminEmail}</p>
+                <p className="text-[10px] text-foreground/40 truncate">{adminEmail}</p>
               </div>
             )}
             <button
               onClick={handleLogout}
-              className={`group flex items-center gap-3 rounded-[14px] text-[13px] font-medium text-red-400/70 hover:text-red-400 w-full transition-all duration-300 hover:bg-red-500/[0.1] ${
+              className={`group flex items-center gap-3 rounded-[14px] text-[13px] font-medium text-red-500/60 hover:text-red-500 w-full transition-all duration-300 hover:bg-red-500/[0.06] ${
                 collapsed ? "justify-center px-2 py-3" : "px-3.5 py-2.5"
               }`}
             >
