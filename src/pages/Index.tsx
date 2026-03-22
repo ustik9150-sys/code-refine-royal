@@ -4,6 +4,7 @@ import { Heart, Eye, Plus, Package } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/useCurrency";
+import { getProductCurrencySymbol } from "@/lib/format-price";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
 import TestimonialsSection from "@/components/TestimonialsSection";
@@ -18,6 +19,8 @@ type Product = {
   price: number;
   compare_at_price: number | null;
   inventory: number;
+  currency_enabled?: boolean;
+  currency_code?: string | null;
   images: { url: string; is_main: boolean }[];
 };
 
@@ -34,7 +37,7 @@ const Index = () => {
     const fetchData = async () => {
       const { data: productsData } = await supabase
         .from("products")
-        .select("id, name_ar, description_ar, price, compare_at_price, inventory, product_images(url, is_main)")
+        .select("id, name_ar, description_ar, price, compare_at_price, inventory, currency_enabled, currency_code, product_images(url, is_main)")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
@@ -126,7 +129,7 @@ const Index = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               <AnimatePresence>
                 {products.map((product, i) => (
-                  <ProductCard key={product.id} product={product} index={i} currencySymbol={currency.symbol} />
+                  <ProductCard key={product.id} product={product} index={i} systemCurrency={currency} />
                 ))}
               </AnimatePresence>
             </div>
@@ -142,11 +145,12 @@ const Index = () => {
   );
 };
 
-function ProductCard({ product, index, currencySymbol }: { product: Product; index: number; currencySymbol: string }) {
+function ProductCard({ product, index, systemCurrency }: { product: Product; index: number; systemCurrency: import("@/hooks/useCurrency").CurrencyConfig }) {
   const [liked, setLiked] = useState(false);
   const thumb = product.images.find(i => i.is_main)?.url || product.images[0]?.url || null;
   const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
   const description = product.description_ar?.replace(/<[^>]*>/g, "").slice(0, 60) || "";
+  const currencySymbol = getProductCurrencySymbol(product, systemCurrency);
 
   return (
     <motion.div
