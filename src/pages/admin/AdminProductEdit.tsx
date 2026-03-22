@@ -281,7 +281,7 @@ export default function AdminProductEdit() {
           }
         }
 
-        const { error } = await supabase.from("products").update(payload).eq("id", id);
+        const { error } = await supabase.from("products").update(payload as any).eq("id", id);
         if (error) throw error;
       }
 
