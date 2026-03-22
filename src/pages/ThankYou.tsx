@@ -39,12 +39,12 @@ const ThankYou: React.FC = () => {
           </h1>
 
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <span>رقم الطلب:</span>
-            <span className="font-semibold text-foreground" dir="ltr">#{orderNumber}</span>
+            <span>رقم التتبع:</span>
+            <span className="font-semibold text-foreground tracking-wider" dir="ltr">{trackingCode}</span>
             <button
-              onClick={() => navigator.clipboard?.writeText(orderNumber)}
+              onClick={() => navigator.clipboard?.writeText(trackingCode)}
               className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="نسخ رقم الطلب"
+              aria-label="نسخ رقم التتبع"
             >
               <FileText className="w-4 h-4" />
             </button>
