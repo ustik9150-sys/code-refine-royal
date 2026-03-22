@@ -327,13 +327,27 @@ export default function AdminSettings() {
               <Input value={googleSheetsUrl} onChange={(e) => setGoogleSheetsUrl(e.target.value)} dir="ltr" className="admin-input text-left pr-10 text-xs" placeholder="https://script.google.com/macros/s/..." />
             </div>
           </div>
-          <div className="p-3 rounded-xl bg-muted/50 text-xs text-muted-foreground space-y-2">
+          <div className="p-3 rounded-xl bg-muted/50 text-xs text-muted-foreground space-y-3">
             <p className="font-bold text-foreground">📋 طريقة الإعداد:</p>
             <ol className="list-decimal list-inside space-y-1 text-right">
               <li>افتح Google Sheets وأنشئ جدول جديد</li>
               <li>اذهب إلى Extensions → Apps Script</li>
-              <li>الصق كود الاستقبال (متوفر في التوثيق)</li>
-              <li>انشر كـ Web App والصق الرابط هنا</li>
+              <li>الصق الكود التالي:</li>
+            </ol>
+            <div className="relative">
+              <button
+                onClick={handleCopyCode}
+                className="absolute top-2 left-2 z-10 flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-background border border-border hover:bg-muted transition-colors"
+              >
+                {codeCopied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                {codeCopied ? "تم النسخ!" : "نسخ"}
+              </button>
+              <pre dir="ltr" className="bg-background border border-border rounded-lg p-3 pt-9 text-[11px] leading-relaxed overflow-x-auto text-left font-mono text-foreground whitespace-pre">{appsScriptCode}</pre>
+            </div>
+            <ol className="list-decimal list-inside space-y-1 text-right" start={4}>
+              <li>انشر كـ Web App: Deploy → New deployment → Web App</li>
+              <li>اختر Execute as: Me و Access: Anyone</li>
+              <li>انسخ الرابط والصقه في الحقل أعلاه</li>
             </ol>
           </div>
         </div>
