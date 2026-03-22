@@ -141,6 +141,28 @@ export default function AdminLayout() {
     });
   }, [isAuthenticated]);
 
+  // Fetch recent orders for notifications
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchRecent = async () => {
+      const since = new Date();
+      since.setHours(since.getHours() - 24);
+      const { data } = await supabase
+        .from("orders")
+        .select("id, order_number, customer_name, total, created_at, status")
+        .gte("created_at", since.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (data) {
+        setRecentOrders(data);
+        setUnreadCount(data.filter((o: any) => o.status === "pending").length);
+      }
+    };
+    fetchRecent();
+    const interval = setInterval(fetchRecent, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center"
