@@ -168,6 +168,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
             phone: phone.trim(),
             city: city.trim() || "-",
             product: productName,
+            sku: productSku || "-",
             quantity: finalQuantity,
             offer: selectedOffer?.title || "-",
             price: finalPrice,
