@@ -184,6 +184,7 @@ export default function AdminProductEdit() {
   const [uploading, setUploading] = useState(false);
   const [currencyEnabled, setCurrencyEnabled] = useState(false);
   const [currencyCode, setCurrencyCode] = useState("SAR");
+  const [hiddenFromHome, setHiddenFromHome] = useState(false);
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -214,6 +215,7 @@ export default function AdminProductEdit() {
       setTags(product.tags || []);
       setCurrencyEnabled((product as any).currency_enabled || false);
       setCurrencyCode((product as any).currency_code || "SAR");
+      setHiddenFromHome((product as any).hidden_from_home || false);
 
       const { data: imgs } = await supabase
         .from("product_images")
@@ -253,6 +255,7 @@ export default function AdminProductEdit() {
       status: publish ? "active" : isActive ? "active" : "draft",
       currency_enabled: currencyEnabled,
       currency_code: currencyEnabled ? currencyCode : null,
+      hidden_from_home: hiddenFromHome,
     };
 
     try {
@@ -624,6 +627,19 @@ export default function AdminProductEdit() {
                 <Switch checked={isActive} onCheckedChange={setIsActive} />
                 <span className={`text-xs font-medium ${isActive ? "text-emerald-600" : "text-muted-foreground"}`}>
                   {isActive ? "نشط" : "مسودة"}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-xs">إخفاء من الصفحة الرئيسية</Label>
+                <p className="text-[10px] text-muted-foreground mt-0.5">المنتج يبقى متاحاً عبر الرابط المباشر</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={hiddenFromHome} onCheckedChange={setHiddenFromHome} />
+                <span className={`text-xs font-medium ${hiddenFromHome ? "text-destructive" : "text-muted-foreground"}`}>
+                  {hiddenFromHome ? "مخفي" : "ظاهر"}
                 </span>
               </div>
             </div>
