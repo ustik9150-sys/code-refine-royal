@@ -238,7 +238,7 @@ export default function AdminProductEdit() {
     if (!validate()) return;
     setSaving(true);
 
-    const payload = {
+    const payload: Record<string, any> = {
       name_ar: nameAr.trim(),
       name_en: null,
       description_ar: descAr.trim() || null,
@@ -251,6 +251,8 @@ export default function AdminProductEdit() {
       category: category.trim() || null,
       tags: tags,
       status: publish ? "active" : isActive ? "active" : "draft",
+      currency_enabled: currencyEnabled,
+      currency_code: currencyEnabled ? currencyCode : null,
     };
 
     try {
