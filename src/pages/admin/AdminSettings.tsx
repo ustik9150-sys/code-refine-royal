@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { Save, Truck, CreditCard, Loader2, ImageIcon, Upload, X, Mail, Phone, Type, Coins } from "lucide-react";
+import { Save, Truck, CreditCard, Loader2, ImageIcon, Upload, X, Mail, Phone, Type, Coins, Link2 } from "lucide-react";
 import { CURRENCIES, invalidateCurrencyCache } from "@/hooks/useCurrency";
 
 const fadeUp = {
@@ -37,6 +37,7 @@ export default function AdminSettings() {
   const [fixedRate, setFixedRate] = useState("30");
   const [freeThreshold, setFreeThreshold] = useState("200");
   const [codEnabled, setCodEnabled] = useState(true);
+  const [googleSheetsUrl, setGoogleSheetsUrl] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -56,6 +57,8 @@ export default function AdminSettings() {
             setFreeThreshold(String(v.free_shipping_threshold ?? 200));
           } else if (row.key === "payment") {
             setCodEnabled(v.cod_enabled ?? true);
+          } else if (row.key === "integrations") {
+            setGoogleSheetsUrl(v.google_sheets_webhook || "");
           }
         }
       }
@@ -102,6 +105,11 @@ export default function AdminSettings() {
       await supabase.from("store_settings").upsert({
         key: "payment",
         value: { cod_enabled: codEnabled } as any,
+      }, { onConflict: "key" });
+
+      await supabase.from("store_settings").upsert({
+        key: "integrations",
+        value: { google_sheets_webhook: googleSheetsUrl.trim() } as any,
       }, { onConflict: "key" });
 
       toast({ title: "✅ تم حفظ الإعدادات بنجاح" });
@@ -278,6 +286,35 @@ export default function AdminSettings() {
             </div>
           </div>
           <Switch checked={codEnabled} onCheckedChange={setCodEnabled} />
+        </div>
+      </motion.div>
+
+      {/* Google Sheets Integration */}
+      <motion.div className="admin-card" variants={fadeUp} initial="hidden" animate="visible" custom={4}>
+        <div className="flex items-start gap-4 mb-6">
+          <div className="admin-icon-box"><Link2 className="w-5 h-5" /></div>
+          <div>
+            <h3 className="font-semibold text-foreground">ربط Google Sheets</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">إرسال الطلبات تلقائياً إلى جدول بيانات Google</p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">رابط Webhook (Google Apps Script)</Label>
+            <div className="relative">
+              <Link2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+              <Input value={googleSheetsUrl} onChange={(e) => setGoogleSheetsUrl(e.target.value)} dir="ltr" className="admin-input text-left pr-10 text-xs" placeholder="https://script.google.com/macros/s/..." />
+            </div>
+          </div>
+          <div className="p-3 rounded-xl bg-muted/50 text-xs text-muted-foreground space-y-2">
+            <p className="font-bold text-foreground">📋 طريقة الإعداد:</p>
+            <ol className="list-decimal list-inside space-y-1 text-right">
+              <li>افتح Google Sheets وأنشئ جدول جديد</li>
+              <li>اذهب إلى Extensions → Apps Script</li>
+              <li>الصق كود الاستقبال (متوفر في التوثيق)</li>
+              <li>انشر كـ Web App والصق الرابط هنا</li>
+            </ol>
+          </div>
         </div>
       </motion.div>
 

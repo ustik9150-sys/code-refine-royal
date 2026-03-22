@@ -75,6 +75,7 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
   const [submitting, setSubmitting] = useState(false);
   const [settings, setSettings] = useState<CodFormSettings>(DEFAULT_SETTINGS);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+  const [sheetsWebhook, setSheetsWebhook] = useState("");
 
   // Filter offers for this product
   const filteredOffers = settings.offers?.filter(
@@ -89,19 +90,24 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
     (async () => {
       const { data } = await supabase
         .from("store_settings")
-        .select("value")
-        .eq("key", "cod_form")
-        .maybeSingle();
-      if (data?.value) {
-        const s = { ...DEFAULT_SETTINGS, ...(data.value as any) };
-        setSettings(s);
-        // Auto-select best offer from filtered offers
-        const filtered = s.offers?.filter(
-          (o: OfferItem) => !o.product_id || o.product_id === productId
-        ) || [];
-        if (s.show_offers && filtered.length > 0) {
-          const best = filtered.find((o: OfferItem) => o.is_best);
-          setSelectedOfferId(best?.id || filtered[0].id);
+        .select("key, value")
+        .in("key", ["cod_form", "integrations"]);
+      if (data) {
+        for (const row of data) {
+          const v = row.value as any;
+          if (row.key === "cod_form") {
+            const s = { ...DEFAULT_SETTINGS, ...v };
+            setSettings(s);
+            const filtered = s.offers?.filter(
+              (o: OfferItem) => !o.product_id || o.product_id === productId
+            ) || [];
+            if (s.show_offers && filtered.length > 0) {
+              const best = filtered.find((o: OfferItem) => o.is_best);
+              setSelectedOfferId(best?.id || filtered[0].id);
+            }
+          } else if (row.key === "integrations") {
+            setSheetsWebhook(v.google_sheets_webhook || "");
+          }
         }
       }
     })();
@@ -147,6 +153,25 @@ const InlineOrderForm = ({ productName, productId, unitPrice, quantity }: Inline
       if (orderData?.id) {
         supabase.functions.invoke("geolocate-ip", {
           body: { order_id: orderData.id },
+        }).catch(() => {});
+      }
+
+      // Fire-and-forget: send to Google Sheets
+      if (sheetsWebhook) {
+        fetch(sheetsWebhook, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            name: fullName.trim(),
+            phone: phone.trim(),
+            city: city.trim() || "-",
+            product: productName,
+            quantity: finalQuantity,
+            offer: selectedOffer?.title || "-",
+            price: finalPrice,
+            date: new Date().toLocaleString("ar-SA", { timeZone: "Asia/Riyadh" }),
+          }),
         }).catch(() => {});
       }
 
