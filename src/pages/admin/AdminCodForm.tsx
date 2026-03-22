@@ -506,12 +506,7 @@ export default function AdminCodForm() {
             <Zap className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground flex items-center gap-2" dir="ltr">
-              <span className="tracking-tight">Cod</span>
-              <span className="font-extrabold" style={{ color: "hsl(250 80% 65%)" }}>Form</span>
-              <span className="text-[9px] text-white px-2 py-0.5 rounded-md font-bold"
-                style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(340 75% 55%))" }}>PRO</span>
-            </h2>
+            <CodFormLogo size="lg" />
             <p className="text-xs text-muted-foreground">نظام نماذج الطلب الاحترافي</p>
           </div>
         </div>
