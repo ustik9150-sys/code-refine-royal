@@ -298,7 +298,7 @@ export default function AdminLayout() {
                       transition={{ duration: 0.15 }}
                       className={`flex-shrink-0 ${isActive ? "drop-shadow-[0_0_6px_rgba(140,100,255,0.5)]" : ""}`}
                     >
-                      <item.icon className={`w-[18px] h-[18px] transition-all duration-300 ${isActive ? "text-white" : "text-white/40 group-hover:text-white/60"}`} />
+                      <item.icon className={`w-[18px] h-[18px] transition-all duration-300 ${isActive ? "text-white" : "text-white/70 group-hover:text-white/90"}`} />
                     </motion.div>
 
                     {!collapsed && (
