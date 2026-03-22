@@ -184,7 +184,7 @@ export default function AdminGoogleSheets() {
           </div>
         </div>
         <div className="grid grid-cols-4 gap-2">
-          {["الاسم", "الهاتف", "المدينة", "المنتج", "SKU", "الكمية", "العرض", "السعر", "التاريخ"].map((col) => (
+          {["#", "الاسم", "الهاتف", "المدينة", "المنتج", "SKU", "الكمية", "العرض", "السعر", "التاريخ", "الوقت", "الحالة"].map((col) => (
             <div key={col} className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
               <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0" />
               {col}

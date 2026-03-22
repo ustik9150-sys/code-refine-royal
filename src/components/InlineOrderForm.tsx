@@ -159,6 +159,10 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
 
       // Fire-and-forget: send to Google Sheets
       if (sheetsWebhook) {
+        const now = new Date();
+        const riyadhDate = now.toLocaleDateString("en-CA", { timeZone: "Asia/Riyadh" }); // YYYY-MM-DD
+        const riyadhTime = now.toLocaleTimeString("en-GB", { timeZone: "Asia/Riyadh", hour: "2-digit", minute: "2-digit", hour12: false }); // HH:mm
+        const offerText = selectedOffer ? `${selectedOffer.quantity} ب ${selectedOffer.price}` : "";
         fetch(sheetsWebhook, {
           method: "POST",
           mode: "no-cors",
@@ -166,13 +170,15 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
           body: JSON.stringify({
             name: fullName.trim(),
             phone: phone.trim(),
-            city: city.trim() || "-",
+            city: city.trim() || "غير محدد",
             product: productName,
-            sku: productSku || "-",
+            sku: productSku || "",
             quantity: finalQuantity,
-            offer: selectedOffer?.title || "-",
-            price: finalPrice,
-            date: new Date().toLocaleString("ar-SA", { timeZone: "Asia/Riyadh" }),
+            offer: offerText,
+            price: Number(finalPrice),
+            date: riyadhDate,
+            time: riyadhTime,
+            status: "جديد",
           }),
         }).catch(() => {});
       }
