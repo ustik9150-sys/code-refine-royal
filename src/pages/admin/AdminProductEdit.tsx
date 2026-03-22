@@ -182,6 +182,8 @@ export default function AdminProductEdit() {
   const [tagInput, setTagInput] = useState("");
   const [images, setImages] = useState<ProductImage[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [currencyEnabled, setCurrencyEnabled] = useState(false);
+  const [currencyCode, setCurrencyCode] = useState("SAR");
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
