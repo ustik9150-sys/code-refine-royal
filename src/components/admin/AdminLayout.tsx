@@ -126,9 +126,14 @@ function AdminLogin() {
 export default function AdminLayout() {
   const { isAdmin, loading, isAuthenticated } = useAdmin();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
   const [adminEmail, setAdminEmail] = React.useState("");
+  const [showNotifications, setShowNotifications] = React.useState(false);
+  const [showProfile, setShowProfile] = React.useState(false);
+  const [recentOrders, setRecentOrders] = React.useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = React.useState(0);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
