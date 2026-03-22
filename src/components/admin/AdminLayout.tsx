@@ -26,7 +26,7 @@ const navItems = [
   { to: "/admin/analytics", icon: BarChart3, label: "الإحصائيات" },
   { to: "/admin/orders", icon: ShoppingCart, label: "الطلبات" },
   { to: "/admin/products", icon: Package, label: "المنتجات" },
-  { to: "/admin/cod-form", icon: FileText, label: "CodForm" },
+  { to: "/admin/cod-form", icon: FileText, label: "نموذج الطلب", badge: "PRO" },
   { to: "/admin/pages", icon: FileText, label: "الصفحات" },
   { to: "/admin/settings", icon: Settings, label: "الإعدادات" },
 ];
