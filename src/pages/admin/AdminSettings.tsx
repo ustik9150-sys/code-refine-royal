@@ -289,6 +289,35 @@ export default function AdminSettings() {
         </div>
       </motion.div>
 
+      {/* Google Sheets Integration */}
+      <motion.div className="admin-card" variants={fadeUp} initial="hidden" animate="visible" custom={4}>
+        <div className="flex items-start gap-4 mb-6">
+          <div className="admin-icon-box"><Link2 className="w-5 h-5" /></div>
+          <div>
+            <h3 className="font-semibold text-foreground">ربط Google Sheets</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">إرسال الطلبات تلقائياً إلى جدول بيانات Google</p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">رابط Webhook (Google Apps Script)</Label>
+            <div className="relative">
+              <Link2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+              <Input value={googleSheetsUrl} onChange={(e) => setGoogleSheetsUrl(e.target.value)} dir="ltr" className="admin-input text-left pr-10 text-xs" placeholder="https://script.google.com/macros/s/..." />
+            </div>
+          </div>
+          <div className="p-3 rounded-xl bg-muted/50 text-xs text-muted-foreground space-y-2">
+            <p className="font-bold text-foreground">📋 طريقة الإعداد:</p>
+            <ol className="list-decimal list-inside space-y-1 text-right">
+              <li>افتح Google Sheets وأنشئ جدول جديد</li>
+              <li>اذهب إلى Extensions → Apps Script</li>
+              <li>الصق كود الاستقبال (متوفر في التوثيق)</li>
+              <li>انشر كـ Web App والصق الرابط هنا</li>
+            </ol>
+          </div>
+        </div>
+      </motion.div>
+
       {/* Sticky Save */}
       <motion.div className="fixed bottom-0 left-0 right-0 lg:right-auto lg:left-0 z-30 p-4" style={{ maxWidth: "calc(100% - 16rem)" }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <div className="max-w-3xl mx-auto">
