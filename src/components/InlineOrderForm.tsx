@@ -19,6 +19,7 @@ interface OfferItem {
 interface InlineOrderFormProps {
   productName: string;
   productId?: string;
+  productSku?: string;
   unitPrice: number;
   quantity: number;
 }
