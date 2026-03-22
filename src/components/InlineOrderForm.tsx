@@ -188,6 +188,29 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
         }).catch(() => {});
       }
 
+      // Fire-and-forget: send to CodNetwork
+      if (codNetworkSettings) {
+        supabase.functions.invoke("cod-network-proxy", {
+          body: {
+            action: "send_order",
+            api_token: codNetworkSettings.api_token,
+            order_data: {
+              full_name: fullName.trim(),
+              phone: phone.trim(),
+              country: codNetworkSettings.default_country || "SA",
+              address: city.trim() || codNetworkSettings.default_city || "",
+              city: city.trim() || codNetworkSettings.default_city || "",
+              area: "",
+              items: [{
+                sku: productSku || "",
+                price: finalPrice,
+                quantity: finalQuantity,
+              }],
+            },
+          },
+        }).catch((err) => console.error("CodNetwork send failed:", err));
+      }
+
       navigate(`/thank-you?order=${orderData?.order_number || ""}`);
     } catch (err) {
       console.error("Order creation failed:", err);
