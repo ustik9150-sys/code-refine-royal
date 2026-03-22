@@ -22,6 +22,7 @@ interface InlineOrderFormProps {
   productSku?: string;
   unitPrice: number;
   quantity: number;
+  currencySymbol?: string;
 }
 
 interface CodFormSettings {
@@ -66,9 +67,10 @@ const DEFAULT_SETTINGS: CodFormSettings = {
   offers: [],
 };
 
-const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quantity }: InlineOrderFormProps) => {
+const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quantity, currencySymbol: propCurrencySymbol }: InlineOrderFormProps) => {
   const navigate = useNavigate();
   const { currency } = useCurrency();
+  const displaySymbol = propCurrencySymbol || currency.symbol;
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
@@ -266,10 +268,10 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
 
                       <div className="flex items-baseline gap-2">
                         {offer.old_price && offer.old_price > offer.price && (
-                          <span className="text-xs text-muted-foreground line-through">{offer.old_price} {currency.symbol}</span>
+                          <span className="text-xs text-muted-foreground line-through">{offer.old_price} {displaySymbol}</span>
                         )}
                         <span className={`text-base font-black ${isSelected ? "text-destructive" : "text-foreground"}`}>
-                          {offer.price} {currency.symbol}
+                          {offer.price} {displaySymbol}
                         </span>
                         {discount && (
                           <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-bold">

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CURRENCIES } from "@/hooks/useCurrency";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -181,6 +182,8 @@ export default function AdminProductEdit() {
   const [tagInput, setTagInput] = useState("");
   const [images, setImages] = useState<ProductImage[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [currencyEnabled, setCurrencyEnabled] = useState(false);
+  const [currencyCode, setCurrencyCode] = useState("SAR");
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -209,6 +212,8 @@ export default function AdminProductEdit() {
       setSku(product.sku || "");
       setIsActive(product.status === "active");
       setTags(product.tags || []);
+      setCurrencyEnabled((product as any).currency_enabled || false);
+      setCurrencyCode((product as any).currency_code || "SAR");
 
       const { data: imgs } = await supabase
         .from("product_images")
@@ -233,7 +238,7 @@ export default function AdminProductEdit() {
     if (!validate()) return;
     setSaving(true);
 
-    const payload = {
+    const payload: Record<string, any> = {
       name_ar: nameAr.trim(),
       name_en: null,
       description_ar: descAr.trim() || null,
@@ -246,13 +251,15 @@ export default function AdminProductEdit() {
       category: category.trim() || null,
       tags: tags,
       status: publish ? "active" : isActive ? "active" : "draft",
+      currency_enabled: currencyEnabled,
+      currency_code: currencyEnabled ? currencyCode : null,
     };
 
     try {
       let productId = id;
 
       if (isNew) {
-        const { data, error } = await supabase.from("products").insert(payload).select().single();
+        const { data, error } = await supabase.from("products").insert(payload as any).select().single();
         if (error) throw error;
         productId = data.id;
       } else {
@@ -274,7 +281,7 @@ export default function AdminProductEdit() {
           }
         }
 
-        const { error } = await supabase.from("products").update(payload).eq("id", id);
+        const { error } = await supabase.from("products").update(payload as any).eq("id", id);
         if (error) throw error;
       }
 
@@ -555,6 +562,51 @@ export default function AdminProductEdit() {
                 placeholder="مثال: PRF-001"
               />
             </div>
+          </motion.div>
+
+          {/* Currency Settings Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.17 }}
+            className="rounded-2xl border border-border/50 bg-card/90 backdrop-blur-sm p-5 space-y-4"
+          >
+            <h3 className="text-sm font-semibold text-foreground">إعدادات العملة</h3>
+
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">تخصيص العملة</Label>
+              <div className="flex items-center gap-2">
+                <Switch checked={currencyEnabled} onCheckedChange={setCurrencyEnabled} />
+                <span className={`text-xs font-medium ${currencyEnabled ? "text-emerald-600" : "text-muted-foreground"}`}>
+                  {currencyEnabled ? "مفعل" : "معطل"}
+                </span>
+              </div>
+            </div>
+
+            {currencyEnabled && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Label className="text-xs">اختر العملة</Label>
+                <select
+                  value={currencyCode}
+                  onChange={(e) => setCurrencyCode(e.target.value)}
+                  className="w-full mt-1 h-10 rounded-xl border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/40 transition-all"
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} — {c.name_ar}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-muted-foreground mt-1.5">
+                  سيتم استبدال رمز العملة فقط بدون تحويل السعر
+                </p>
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Status & Category Card */}

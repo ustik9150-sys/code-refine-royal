@@ -9,17 +9,19 @@ import fallbackImage from "@/assets/product-main.jpg";
 import SaveBadge from "@/components/SaveBadge";
 import barcodeIcon from "@/assets/barcode-icon.png";
 import { useCurrency } from "@/hooks/useCurrency";
-import applePayIcon from "@/assets/apple_pay_mini.avif";
-import bankIcon from "@/assets/bank_mini.avif";
-import codIcon from "@/assets/cod_mini.avif";
-import sbcIcon from "@/assets/sbc.avif";
-import madeInKsaIcon from "@/assets/made-in-ksa.svg";
+import { getProductCurrencySymbol } from "@/lib/format-price";
 
 const SarIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M745.4 512.5c-1.5-1.1-3-2.1-4.6-3.1 48.3-42 78.2-104.2 78.2-173.4 0-126.8-103.2-230-230-230-84.2 0-158.1 45.4-198.2 113H230c-19.9 0-36 16.1-36 36s16.1 36 36 36h124.7c-2.9 18.3-4.4 37-4.4 56 0 11.7.6 23.2 1.6 34.6-37.7 11.7-74.4 32.1-106.1 62.4-17.3 16.6-32.5 36.6-44.4 60.6-11.4 22.9-19.2 48.1-23 75.4-6.1 43.7-.7 91.2 18.8 136.5 1.4 3.2 3 6.3 4.7 9.4 31.3 57.3 88.3 96 157.5 96 24.2 0 47-5 67.5-14 2.3-1 4.6-2.1 6.8-3.2.5-.2.9-.5 1.4-.7 2.7-1.5 5.3-3 7.8-4.7 1.4-.9 2.7-1.9 4.1-2.8 1.6-1.1 3.3-2.2 4.9-3.4 6.5-4.8 12.5-10.2 18-16.1 3-3.2 5.8-6.5 8.4-10 .3-.3.5-.7.8-1 3-4 5.7-8.2 8.2-12.5.4-.7.8-1.5 1.2-2.2 36 17.2 76.2 26.8 118.7 26.8 2.7 0 5.4-.1 8.1-.2l-42.1-67.2c-64.8-3.5-121.2-38.6-153.8-89.4l19.2-12.1c3.1-2 6.1-4 9.1-6.2 2.1-1.5 4.2-3.1 6.2-4.7 2.2-1.7 4.3-3.5 6.4-5.3 4-3.5 7.8-7.2 11.4-11.1 14.2-15.4 24.6-33 31.4-51.5 15.9 4.8 32.7 7.3 50.1 7.3 41.5 0 79.7-14.5 109.7-38.7l-43.5-69.5c-17.7 14.7-40.4 23.5-65.2 23.5-24 0-46-8.3-63.4-22.1 0-.1.1-.2.1-.3 10.7-34.9 12.5-70.3 7.3-102.7h56.1c55.5 0 106-22.8 142.2-59.6l-50.2-55.3c-24.5 24.9-58.5 40.3-96.1 40.3h-74.9c-11.6-30.3-30.1-57.1-53.8-78.4h128.7c87.1 0 158 70.9 158 158s-70.9 158-158 158h-6.1zm-291.7 74.2c-2.1 1.2-4.3 2.4-6.4 3.5-24.2 12.2-44 29.7-58.2 52.1-6.4 10.2-11.5 21.2-15 33-4.5 15.3-6.5 31.7-5.3 48.7 1.2 17.3 6.2 33.9 14.1 48.4.6 1.1 1.2 2.2 1.9 3.2 16.3 26.2 44.3 44.3 77.7 44.3 11.2 0 22.2-2.5 32.4-7 1.1-.5 2.1-1 3.2-1.5-3 2.8-6.1 5.5-9.4 7.9-1.2.9-2.4 1.7-3.7 2.5-.6.4-1.2.8-1.8 1.2-1.8 1.1-3.6 2.2-5.5 3.2-1.2.6-2.4 1.2-3.7 1.8-1.7.8-3.4 1.5-5.1 2.1-13.1 5.3-27.3 8.1-42.2 8.1-47.7 0-85.9-27.6-107-66.4-.6-1.2-1.2-2.3-1.8-3.5-14.5-33.5-18.6-68.9-13.8-103.3 3-21.4 9.1-40.7 18.1-57.8 9.4-17.8 21.6-33.1 36.1-45.5 25.2-21.6 53.4-35.1 80.9-43.5-.6 10.5-1.1 20.7-1.5 30.5 5.4 12.3 12.3 24 20.5 34.8-1.1.8-2.3 1.4-3.4 2.2z" />
   </svg>
 );
+
+import applePayIcon from "@/assets/apple_pay_mini.avif";
+import bankIcon from "@/assets/bank_mini.avif";
+import codIcon from "@/assets/cod_mini.avif";
+import sbcIcon from "@/assets/sbc.avif";
+import madeInKsaIcon from "@/assets/made-in-ksa.svg";
 
 type Product = {
   id: string;
@@ -31,11 +33,12 @@ type Product = {
   sku: string | null;
   status: string;
   tags: string[] | null;
+  currency_enabled?: boolean;
+  currency_code?: string | null;
 };
 
 const ProductDetails = ({ productId }: { productId?: string }) => {
   const { currency } = useCurrency();
-  const currencySymbol = currency.symbol;
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showLoginSheet, setShowLoginSheet] = useState(false);
@@ -98,6 +101,7 @@ const ProductDetails = ({ productId }: { productId?: string }) => {
     );
   }
 
+  const currencySymbol = getProductCurrencySymbol(product, currency);
   const name = product?.name_ar || "باقة المسك";
   const price = product?.price ?? 222;
   const compareAtPrice = product?.compare_at_price ?? 1119;
@@ -200,6 +204,7 @@ const ProductDetails = ({ productId }: { productId?: string }) => {
             productSku={product?.sku || undefined}
             unitPrice={price}
             quantity={quantity}
+            currencySymbol={currencySymbol}
           />
         </div>
 
