@@ -215,6 +215,7 @@ export default function AdminProductEdit() {
       setTags(product.tags || []);
       setCurrencyEnabled((product as any).currency_enabled || false);
       setCurrencyCode((product as any).currency_code || "SAR");
+      setHiddenFromHome((product as any).hidden_from_home || false);
 
       const { data: imgs } = await supabase
         .from("product_images")
