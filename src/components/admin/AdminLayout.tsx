@@ -343,7 +343,7 @@ export default function AdminLayout() {
             )}
             <button
               onClick={handleLogout}
-              className={`group flex items-center gap-3 rounded-[14px] text-[13px] font-medium text-red-400/50 hover:text-red-400/90 w-full transition-all duration-300 hover:bg-red-500/[0.08] ${
+              className={`group flex items-center gap-3 rounded-[14px] text-[13px] font-medium text-red-400/70 hover:text-red-400 w-full transition-all duration-300 hover:bg-red-500/[0.1] ${
                 collapsed ? "justify-center px-2 py-3" : "px-3.5 py-2.5"
               }`}
             >
