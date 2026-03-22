@@ -21,6 +21,12 @@ const SarIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 );
 
+import applePayIcon from "@/assets/apple_pay_mini.avif";
+import bankIcon from "@/assets/bank_mini.avif";
+import codIcon from "@/assets/cod_mini.avif";
+import sbcIcon from "@/assets/sbc.avif";
+import madeInKsaIcon from "@/assets/made-in-ksa.svg";
+
 type Product = {
   id: string;
   name_ar: string;
@@ -31,6 +37,8 @@ type Product = {
   sku: string | null;
   status: string;
   tags: string[] | null;
+  currency_enabled?: boolean;
+  currency_code?: string | null;
 };
 
 const ProductDetails = ({ productId }: { productId?: string }) => {
