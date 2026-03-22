@@ -95,7 +95,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
       const { data } = await supabase
         .from("store_settings")
         .select("key, value")
-        .in("key", ["cod_form", "integrations"]);
+        .in("key", ["cod_form", "integrations", "cod_network"]);
       if (data) {
         for (const row of data) {
           const v = row.value as any;
