@@ -25,7 +25,6 @@ import {
   Table2,
   Truck,
 } from "lucide-react";
-import Aurora from "@/components/Aurora";
 
 const navItems = [
   { to: "/admin/analytics", icon: BarChart3, label: "الإحصائيات" },
@@ -219,16 +218,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen flex relative" dir="rtl">
-      {/* Aurora Background */}
-      <div className="fixed inset-0 z-0" style={{ background: "linear-gradient(135deg, hsl(228 24% 10%) 0%, hsl(250 30% 18%) 50%, hsl(340 30% 15%) 100%)" }}>
-        <Aurora
-          colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
-          amplitude={1.2}
-          blend={0.6}
-          speed={0.8}
-        />
-      </div>
+    <div className="min-h-screen flex bg-muted/50" dir="rtl">
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -244,7 +234,7 @@ export default function AdminLayout() {
 
       {/* Premium iOS-style Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 right-0 z-50 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] relative ${
+        className={`fixed lg:static inset-y-0 right-0 z-50 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           collapsed ? "w-[78px]" : "w-[272px]"
         } ${sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}`}
       >
@@ -394,7 +384,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 relative z-10">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar */}
         <header className="h-16 admin-glass-nav sticky top-0 z-30 flex items-center px-4 lg:px-6 gap-4">
           <button
