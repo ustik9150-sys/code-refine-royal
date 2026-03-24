@@ -154,6 +154,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
   const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
   const description = product.description_ar?.replace(/<[^>]*>/g, "").slice(0, 60) || "";
   const currencySymbol = getProductCurrencySymbol(product, systemCurrency);
+  const productLink = `/product/${product.slug || product.id}`;
 
   return (
     <motion.div
