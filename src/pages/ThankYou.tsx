@@ -1,17 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { FileText, Mail, Phone } from "lucide-react";
+import { FileText, Mail } from "lucide-react";
 import celebrationSvg from "@/assets/celebration.svg";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
 
-const generateTrackingCode = (orderNum: string): string => {
+const generateTrackingCode = (orderId: string): string => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-  const num = parseInt(orderNum) || Date.now();
-  const prefix = chars[num % chars.length] + chars[(num * 7 + 3) % chars.length];
-  const suffix = chars[(num * 13 + 5) % chars.length];
-  const padded = String(num).padStart(4, "0");
-  return `${prefix}-${padded}-${suffix}`;
+  // Use a simple hash from the UUID string
+  let hash = 0;
+  for (let i = 0; i < orderId.length; i++) {
+    hash = (hash * 31 + orderId.charCodeAt(i)) >>> 0;
+  }
+  const prefix = chars[hash % chars.length] + chars[(hash >> 5) % chars.length];
+  const middle = String(hash % 10000).padStart(4, "0");
+  const suffix = chars[(hash >> 10) % chars.length];
+  return `${prefix}-${middle}-${suffix}`;
 };
 
 const ThankYou: React.FC = () => {
@@ -21,6 +25,10 @@ const ThankYou: React.FC = () => {
   const rawOrder = searchParams.get("order") || "";
   const trackingCode = rawOrder ? generateTrackingCode(rawOrder) : "N/A";
   const email = searchParams.get("email") || "";
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col" dir="rtl">
@@ -54,7 +62,7 @@ const ThankYou: React.FC = () => {
             onClick={() => navigate("/")}
             className="inline-block bg-foreground text-background px-8 py-3 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
           >
-            عرض تفاصيل الفاتورة
+            العودة للمتجر
           </button>
         </section>
 
