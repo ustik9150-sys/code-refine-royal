@@ -402,10 +402,14 @@ export default function AdminProducts() {
                 onDelete={(id) => setDeleteTarget(id)}
                 onDuplicate={handleDuplicate}
                 onView={(id) => {
-                  window.open(`/?product=${id}`, "_blank");
+                  const p = filtered.find(pr => pr.id === id);
+                  const link = p?.slug || id;
+                  window.open(`/product/${link}`, "_blank");
                 }}
                 onCopyLink={(id, name) => {
-                  const url = `${window.location.origin}/?product=${id}`;
+                  const p = filtered.find(pr => pr.id === id);
+                  const link = p?.slug || id;
+                  const url = `${window.location.origin}/product/${link}`;
                   navigator.clipboard.writeText(url).then(() => {
                     toast({ title: "تم نسخ الرابط ✅", description: name });
                   });
