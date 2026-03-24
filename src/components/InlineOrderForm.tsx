@@ -145,9 +145,11 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
     setSubmitting(true);
 
     try {
-      const { data: orderData, error: orderError } = await supabase
+      const orderId = crypto.randomUUID();
+      const { error: orderError } = await supabase
         .from("orders")
         .insert({
+          id: orderId,
           customer_name: fullName.trim(),
           customer_phone: phone.trim(),
           address: city.trim() || null,
@@ -156,18 +158,14 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
           subtotal: finalPrice,
           shipping_cost: 0,
           total: finalPrice,
-        })
-        .select("id, order_number")
-        .single();
+        });
 
       if (orderError) throw orderError;
 
       // Fire-and-forget: geolocate IP for this order
-      if (orderData?.id) {
-        supabase.functions.invoke("geolocate-ip", {
-          body: { order_id: orderData.id },
-        }).catch(() => {});
-      }
+      supabase.functions.invoke("geolocate-ip", {
+        body: { order_id: orderId },
+      }).catch(() => {});
 
       // Fire-and-forget: send to Google Sheets
       if (sheetsWebhook) {
@@ -221,7 +219,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
         }).catch((err) => console.error("CodNetwork send failed:", err));
       }
 
-      navigate(`/thank-you?order=${orderData?.order_number || ""}`);
+      navigate(`/thank-you`);
     } catch (err) {
       console.error("Order creation failed:", err);
       setErrors({ fullName: "حدث خطأ، حاول مرة أخرى" });

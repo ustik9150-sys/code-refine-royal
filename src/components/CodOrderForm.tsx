@@ -42,9 +42,11 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
     setSubmitting(true);
 
     try {
-      const { data: order, error: orderError } = await supabase
+      const orderId = crypto.randomUUID();
+      const { error: orderError } = await supabase
         .from("orders")
         .insert({
+          id: orderId,
           customer_name: fullName.trim(),
           customer_phone: phone.trim(),
           city: city.trim() || null,
@@ -54,14 +56,12 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
           subtotal: totalPrice,
           shipping_cost: 0,
           total: totalPrice,
-        })
-        .select("id, order_number")
-        .single();
+        });
 
       if (orderError) throw orderError;
 
       await supabase.from("order_items").insert({
-        order_id: order.id,
+        order_id: orderId,
         product_id: productId || null,
         product_name: productName,
         quantity,
