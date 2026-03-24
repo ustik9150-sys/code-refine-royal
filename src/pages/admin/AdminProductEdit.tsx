@@ -258,6 +258,7 @@ export default function AdminProductEdit() {
       currency_enabled: currencyEnabled,
       currency_code: currencyEnabled ? currencyCode : null,
       hidden_from_home: hiddenFromHome,
+      slug: slug.trim() || null,
     };
 
     try {
