@@ -42,43 +42,29 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
     setSubmitting(true);
 
     try {
-      const orderId = crypto.randomUUID();
-      const { error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          id: orderId,
+      const { data, error } = await supabase.functions.invoke("create-order", {
+        body: {
           customer_name: fullName.trim(),
           customer_phone: phone.trim(),
           city: city.trim() || null,
           address: city.trim() || null,
-          payment_method: "cod" as const,
-          shipping_method: "standard" as const,
+          payment_method: "cod",
+          shipping_method: "standard",
           subtotal: totalPrice,
           shipping_cost: 0,
           total: totalPrice,
-        });
-
-      if (orderError) throw orderError;
-
-      await supabase.from("order_items").insert({
-        order_id: orderId,
-        product_id: productId || null,
-        product_name: productName,
-        quantity,
-        unit_price: unitPrice,
-        total_price: totalPrice,
+          items: [{
+            product_id: productId || null,
+            product_name: productName,
+            quantity,
+            unit_price: unitPrice,
+            total_price: totalPrice,
+          }],
+        },
       });
 
-      // Fire-and-forget: send Pushover notification
-      supabase.functions.invoke("notify-order", {
-        body: {
-          customer_name: fullName.trim(),
-          customer_phone: phone.trim(),
-          product_name: productName,
-          quantity,
-          total: totalPrice,
-        },
-      }).catch((err) => console.error("Pushover notify failed:", err));
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Order creation failed");
 
       setSuccess(true);
     } catch (err) {
