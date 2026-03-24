@@ -454,6 +454,25 @@ export default function AdminProductEdit() {
             </div>
 
             <div>
+              <Label className="text-xs flex items-center gap-1.5">
+                رابط المنتج (Slug)
+              </Label>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs text-muted-foreground whitespace-nowrap" dir="ltr">/product/</span>
+                <Input
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value.replace(/[^a-zA-Z0-9\u0600-\u06FF-_]/g, "-").toLowerCase())}
+                  dir="ltr"
+                  className="rounded-xl admin-input flex-1"
+                  placeholder="my-product-name"
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                اتركه فارغاً لاستخدام الرابط التلقائي. يقبل حروف إنجليزية وأرقام وشرطات.
+              </p>
+            </div>
+
+            <div>
               <Label className="text-xs">الوصف</Label>
               <textarea
                 value={descAr}
