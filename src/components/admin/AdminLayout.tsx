@@ -244,7 +244,7 @@ export default function AdminLayout() {
 
       {/* Premium iOS-style Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 right-0 z-50 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`fixed lg:static inset-y-0 right-0 z-50 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] relative ${
           collapsed ? "w-[78px]" : "w-[272px]"
         } ${sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}`}
       >
