@@ -1,9 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+const allowedOrigins = ["https://essakr.vercel.app", "https://www.essaqr.shop"];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") || "";
+
+  return {
+    "Access-Control-Allow-Origin": allowedOrigins.includes(origin) ? origin : "null",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+  };
+}
 
 const COD_NETWORK_API_BASE = "https://api.cod.network/v1/seller";
 
@@ -52,7 +60,7 @@ serve(async (req) => {
           headers: authHeaders,
         });
         const data = await res.json().catch(() => ({}));
-        
+
         if (!res.ok) {
           return new Response(JSON.stringify({ success: false, status: res.status, data }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -72,12 +80,15 @@ serve(async (req) => {
       }
 
       console.log(`CodNetwork: fetched ${allProducts.length} products across ${page} pages`);
-      return new Response(JSON.stringify({ 
-        success: true, 
-        data: { data: allProducts, total: allProducts.length } 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: { data: allProducts, total: allProducts.length },
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     if (action === "send_order" && order_data) {
