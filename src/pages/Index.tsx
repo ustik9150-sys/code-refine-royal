@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 type Product = {
   id: string;
+  slug: string | null;
   name_ar: string;
   description_ar: string | null;
   price: number;
