@@ -185,6 +185,7 @@ export default function AdminProductEdit() {
   const [currencyEnabled, setCurrencyEnabled] = useState(false);
   const [currencyCode, setCurrencyCode] = useState("SAR");
   const [hiddenFromHome, setHiddenFromHome] = useState(false);
+  const [slug, setSlug] = useState("");
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
