@@ -108,9 +108,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
 
       const unitPrice = totalAmount / quantity;
 
-      const { data: order, error: orderError } = await supabase
+      const orderId = crypto.randomUUID();
+      const { error: orderError } = await supabase
         .from("orders")
         .insert({
+          id: orderId,
           customer_name: customerName,
           customer_phone: phone,
           customer_email: email || null,
@@ -122,15 +124,13 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
           shipping_cost: 0,
           total: totalAmount,
           user_id: userId,
-        })
-        .select("id, order_number")
-        .single();
+        });
 
       if (orderError) throw orderError;
 
       // Insert order item
       await supabase.from("order_items").insert({
-        order_id: order.id,
+        order_id: orderId,
         product_id: productId || null,
         product_name: productName,
         quantity,

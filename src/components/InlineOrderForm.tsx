@@ -145,9 +145,11 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
     setSubmitting(true);
 
     try {
-      const { data: orderData, error: orderError } = await supabase
+      const orderId = crypto.randomUUID();
+      const { error: orderError } = await supabase
         .from("orders")
         .insert({
+          id: orderId,
           customer_name: fullName.trim(),
           customer_phone: phone.trim(),
           address: city.trim() || null,
@@ -156,9 +158,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
           subtotal: finalPrice,
           shipping_cost: 0,
           total: finalPrice,
-        })
-        .select("id, order_number")
-        .single();
+        });
 
       if (orderError) throw orderError;
 
