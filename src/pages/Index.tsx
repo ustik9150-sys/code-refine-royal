@@ -221,7 +221,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
       </div>
 
       <Link
-        to={`/product/${product.id}`}
+        to={productLink}
         className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-opacity"
       >
         <Plus className="w-4 h-4" />
