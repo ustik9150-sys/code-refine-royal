@@ -219,6 +219,17 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
         }).catch((err) => console.error("CodNetwork send failed:", err));
       }
 
+      // Fire-and-forget: send Pushover notification
+      supabase.functions.invoke("notify-order", {
+        body: {
+          customer_name: fullName.trim(),
+          customer_phone: phone.trim(),
+          product_name: productName,
+          quantity: finalQuantity,
+          total: finalPrice,
+        },
+      }).catch((err) => console.error("Pushover notify failed:", err));
+
       navigate(`/thank-you?order=${encodeURIComponent(orderId)}`);
     } catch (err) {
       console.error("Order creation failed:", err);
