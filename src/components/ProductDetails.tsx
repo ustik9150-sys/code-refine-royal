@@ -37,7 +37,7 @@ type Product = {
   currency_code?: string | null;
 };
 
-const ProductDetails = ({ productId }: { productId?: string }) => {
+const ProductDetails = ({ productSlug }: { productSlug?: string }) => {
   const { currency } = useCurrency();
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
