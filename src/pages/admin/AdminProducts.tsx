@@ -19,6 +19,7 @@ import {
 
 type Product = {
   id: string;
+  slug: string | null;
   name_ar: string;
   price: number;
   compare_at_price: number | null;
