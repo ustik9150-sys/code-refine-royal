@@ -164,7 +164,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
       className="group"
     >
       <div className="relative aspect-square bg-muted/30 rounded-2xl overflow-hidden mb-3">
-        <Link to={`/product/${product.id}`}>
+        <Link to={productLink}>
           {thumb ? (
             <img
               src={thumb}
