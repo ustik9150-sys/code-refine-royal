@@ -7,8 +7,8 @@ import TrackingPixels from "@/components/TrackingPixels";
 import { useTrackVisit } from "@/hooks/useTrackVisit";
 
 const ProductPage = () => {
-  const { id } = useParams<{ id: string }>();
-  useTrackVisit(`/product/${id}`);
+  const { slug } = useParams<{ slug: string }>();
+  useTrackVisit(`/product/${slug}`);
 
   return (
     <div className="min-h-screen flex flex-col bg-background" dir="rtl">
