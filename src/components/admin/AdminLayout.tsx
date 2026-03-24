@@ -219,7 +219,16 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen flex bg-muted/50" dir="rtl">
+    <div className="min-h-screen flex relative" dir="rtl">
+      {/* Aurora Background */}
+      <div className="fixed inset-0 z-0" style={{ background: "linear-gradient(135deg, hsl(228 24% 10%) 0%, hsl(250 30% 18%) 50%, hsl(340 30% 15%) 100%)" }}>
+        <Aurora
+          colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
+          amplitude={1.2}
+          blend={0.6}
+          speed={0.8}
+        />
+      </div>
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
