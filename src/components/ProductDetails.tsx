@@ -50,15 +50,21 @@ const ProductDetails = ({ productSlug }: { productSlug?: string }) => {
 
   useEffect(() => {
     (async () => {
-      let query = supabase.from("products").select("*");
+      let data: any = null;
       
-      if (productId) {
-        query = query.eq("id", productId);
+      if (productSlug) {
+        // Try slug first, then fall back to id (for backward compatibility)
+        const { data: bySlug } = await supabase.from("products").select("*").eq("slug", productSlug).maybeSingle();
+        if (bySlug) {
+          data = bySlug;
+        } else {
+          const { data: byId } = await supabase.from("products").select("*").eq("id", productSlug).maybeSingle();
+          data = byId;
+        }
       } else {
-        query = query.eq("status", "active").order("created_at", { ascending: true }).limit(1);
+        const { data: first } = await supabase.from("products").select("*").eq("status", "active").order("created_at", { ascending: true }).limit(1).maybeSingle();
+        data = first;
       }
-      
-      const { data } = await query.maybeSingle();
 
       if (data) {
         setProduct(data as Product);
