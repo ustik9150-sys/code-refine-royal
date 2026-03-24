@@ -163,11 +163,9 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
       if (orderError) throw orderError;
 
       // Fire-and-forget: geolocate IP for this order
-      if (orderData?.id) {
-        supabase.functions.invoke("geolocate-ip", {
-          body: { order_id: orderData.id },
-        }).catch(() => {});
-      }
+      supabase.functions.invoke("geolocate-ip", {
+        body: { order_id: orderId },
+      }).catch(() => {});
 
       // Fire-and-forget: send to Google Sheets
       if (sheetsWebhook) {
