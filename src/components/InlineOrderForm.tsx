@@ -219,7 +219,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
         }).catch((err) => console.error("CodNetwork send failed:", err));
       }
 
-      navigate(`/thank-you?order=${orderData?.order_number || ""}`);
+      navigate(`/thank-you`);
     } catch (err) {
       console.error("Order creation failed:", err);
       setErrors({ fullName: "حدث خطأ، حاول مرة أخرى" });

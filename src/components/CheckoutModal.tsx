@@ -139,7 +139,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
       });
 
       onClose();
-      navigate(`/thank-you?order=${order.order_number}${email ? `&email=${encodeURIComponent(email)}` : ""}`);
+      navigate(`/thank-you${email ? `?email=${encodeURIComponent(email)}` : ""}`);
     } catch (err) {
       console.error("Order creation failed:", err);
       setErrors({ address: "حدث خطأ أثناء إنشاء الطلب، حاول مرة أخرى" });
