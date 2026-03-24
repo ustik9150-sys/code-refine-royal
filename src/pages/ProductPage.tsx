@@ -30,7 +30,7 @@ const ProductPage = () => {
       <StoreHeader />
       <main className="flex-1">
         <div className="container">
-          <ProductDetails productId={id} />
+          <ProductDetails productSlug={slug} />
         </div>
         <TestimonialsSection />
       </main>

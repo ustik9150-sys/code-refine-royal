@@ -78,7 +78,7 @@ const ProductDetails = ({ productSlug }: { productSlug?: string }) => {
       }
       setLoading(false);
     })();
-  }, [productId]);
+  }, [productSlug]);
 
   const handleBuyNow = useCallback(() => {
     const hasProfile = localStorage.getItem("customer_first_name") && localStorage.getItem("customer_phone");
