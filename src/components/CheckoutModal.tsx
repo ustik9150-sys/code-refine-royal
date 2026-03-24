@@ -138,6 +138,17 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
         total_price: totalAmount,
       });
 
+      // Fire-and-forget: send Pushover notification
+      supabase.functions.invoke("notify-order", {
+        body: {
+          customer_name: customerName,
+          customer_phone: phone,
+          product_name: productName,
+          quantity,
+          total: totalAmount,
+        },
+      }).catch((err) => console.error("Pushover notify failed:", err));
+
       onClose();
       const params = new URLSearchParams();
       params.set("order", orderId);

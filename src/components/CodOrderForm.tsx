@@ -69,6 +69,17 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
         total_price: totalPrice,
       });
 
+      // Fire-and-forget: send Pushover notification
+      supabase.functions.invoke("notify-order", {
+        body: {
+          customer_name: fullName.trim(),
+          customer_phone: phone.trim(),
+          product_name: productName,
+          quantity,
+          total: totalPrice,
+        },
+      }).catch((err) => console.error("Pushover notify failed:", err));
+
       setSuccess(true);
     } catch (err) {
       console.error("Order creation failed:", err);
