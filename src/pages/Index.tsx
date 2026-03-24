@@ -187,7 +187,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
             <Heart className={`w-4 h-4 transition-colors ${liked ? "fill-red-500 text-red-500" : "text-foreground/60"}`} />
           </button>
           <Link
-            to={`/product/${product.id}`}
+            to={productLink}
             className="w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:shadow-md transition-all"
           >
             <Eye className="w-4 h-4 text-foreground/60" />
