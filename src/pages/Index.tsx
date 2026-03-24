@@ -196,7 +196,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
       </div>
 
       <div className="text-center space-y-1.5 px-1">
-        <Link to={`/product/${product.id}`}>
+        <Link to={productLink}>
           <h3 className="text-sm font-bold text-foreground hover:text-primary transition-colors line-clamp-1">
             {product.name_ar}
           </h3>
