@@ -108,46 +108,33 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
 
       const unitPrice = totalAmount / quantity;
 
-      const orderId = crypto.randomUUID();
-      const { error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          id: orderId,
+      const { data, error } = await supabase.functions.invoke("create-order", {
+        body: {
           customer_name: customerName,
           customer_phone: phone,
           customer_email: email || null,
           city: shippingAddress.trim(),
           address: shippingAddress.trim(),
-          payment_method: "cod" as const,
-          shipping_method: "standard" as const,
+          payment_method: "cod",
+          shipping_method: "standard",
           subtotal: totalAmount,
           shipping_cost: 0,
           total: totalAmount,
           user_id: userId,
-        });
-
-      if (orderError) throw orderError;
-
-      // Insert order item
-      await supabase.from("order_items").insert({
-        order_id: orderId,
-        product_id: productId || null,
-        product_name: productName,
-        quantity,
-        unit_price: unitPrice,
-        total_price: totalAmount,
+          items: [{
+            product_id: productId || null,
+            product_name: productName,
+            quantity,
+            unit_price: unitPrice,
+            total_price: totalAmount,
+          }],
+        },
       });
 
-      // Fire-and-forget: send Pushover notification
-      supabase.functions.invoke("notify-order", {
-        body: {
-          customer_name: customerName,
-          customer_phone: phone,
-          product_name: productName,
-          quantity,
-          total: totalAmount,
-        },
-      }).catch((err) => console.error("Pushover notify failed:", err));
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Order creation failed");
+
+      const orderId = data.order_id;
 
       onClose();
       const params = new URLSearchParams();
