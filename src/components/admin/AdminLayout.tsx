@@ -25,6 +25,7 @@ import {
   Table2,
   Truck,
 } from "lucide-react";
+import Aurora from "@/components/Aurora";
 
 const navItems = [
   { to: "/admin/analytics", icon: BarChart3, label: "الإحصائيات" },
