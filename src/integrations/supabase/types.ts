@@ -272,6 +272,7 @@ export type Database = {
           name_en: string | null
           price: number
           sku: string | null
+          slug: string | null
           status: string
           tags: string[] | null
           updated_at: string
@@ -292,6 +293,7 @@ export type Database = {
           name_en?: string | null
           price?: number
           sku?: string | null
+          slug?: string | null
           status?: string
           tags?: string[] | null
           updated_at?: string
@@ -312,6 +314,7 @@ export type Database = {
           name_en?: string | null
           price?: number
           sku?: string | null
+          slug?: string | null
           status?: string
           tags?: string[] | null
           updated_at?: string

@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 type Product = {
   id: string;
+  slug: string | null;
   name_ar: string;
   description_ar: string | null;
   price: number;
@@ -37,7 +38,7 @@ const Index = () => {
     const fetchData = async () => {
       const { data: productsData } = await supabase
         .from("products")
-        .select("id, name_ar, description_ar, price, compare_at_price, inventory, currency_enabled, currency_code, hidden_from_home, product_images(url, is_main)")
+        .select("id, slug, name_ar, description_ar, price, compare_at_price, inventory, currency_enabled, currency_code, hidden_from_home, product_images(url, is_main)")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
@@ -153,6 +154,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
   const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
   const description = product.description_ar?.replace(/<[^>]*>/g, "").slice(0, 60) || "";
   const currencySymbol = getProductCurrencySymbol(product, systemCurrency);
+  const productLink = `/product/${product.slug || product.id}`;
 
   return (
     <motion.div
@@ -162,7 +164,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
       className="group"
     >
       <div className="relative aspect-square bg-muted/30 rounded-2xl overflow-hidden mb-3">
-        <Link to={`/product/${product.id}`}>
+        <Link to={productLink}>
           {thumb ? (
             <img
               src={thumb}
@@ -185,7 +187,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
             <Heart className={`w-4 h-4 transition-colors ${liked ? "fill-red-500 text-red-500" : "text-foreground/60"}`} />
           </button>
           <Link
-            to={`/product/${product.id}`}
+            to={productLink}
             className="w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:shadow-md transition-all"
           >
             <Eye className="w-4 h-4 text-foreground/60" />
@@ -194,7 +196,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
       </div>
 
       <div className="text-center space-y-1.5 px-1">
-        <Link to={`/product/${product.id}`}>
+        <Link to={productLink}>
           <h3 className="text-sm font-bold text-foreground hover:text-primary transition-colors line-clamp-1">
             {product.name_ar}
           </h3>
@@ -219,7 +221,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
       </div>
 
       <Link
-        to={`/product/${product.id}`}
+        to={productLink}
         className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-opacity"
       >
         <Plus className="w-4 h-4" />

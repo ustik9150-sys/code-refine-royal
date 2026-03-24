@@ -185,6 +185,7 @@ export default function AdminProductEdit() {
   const [currencyEnabled, setCurrencyEnabled] = useState(false);
   const [currencyCode, setCurrencyCode] = useState("SAR");
   const [hiddenFromHome, setHiddenFromHome] = useState(false);
+  const [slug, setSlug] = useState("");
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -216,6 +217,7 @@ export default function AdminProductEdit() {
       setCurrencyEnabled((product as any).currency_enabled || false);
       setCurrencyCode((product as any).currency_code || "SAR");
       setHiddenFromHome((product as any).hidden_from_home || false);
+      setSlug((product as any).slug || "");
 
       const { data: imgs } = await supabase
         .from("product_images")
@@ -256,6 +258,7 @@ export default function AdminProductEdit() {
       currency_enabled: currencyEnabled,
       currency_code: currencyEnabled ? currencyCode : null,
       hidden_from_home: hiddenFromHome,
+      slug: slug.trim() || null,
     };
 
     try {
@@ -448,6 +451,25 @@ export default function AdminProductEdit() {
                 placeholder="مثال: كريم مرطب طبيعي"
               />
               {errors.nameAr && <p className="text-destructive text-xs mt-1">{errors.nameAr}</p>}
+            </div>
+
+            <div>
+              <Label className="text-xs flex items-center gap-1.5">
+                رابط المنتج (Slug)
+              </Label>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs text-muted-foreground whitespace-nowrap" dir="ltr">/product/</span>
+                <Input
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value.replace(/[^a-zA-Z0-9\u0600-\u06FF-_]/g, "-").toLowerCase())}
+                  dir="ltr"
+                  className="rounded-xl admin-input flex-1"
+                  placeholder="my-product-name"
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                اتركه فارغاً لاستخدام الرابط التلقائي. يقبل حروف إنجليزية وأرقام وشرطات.
+              </p>
             </div>
 
             <div>
