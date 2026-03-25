@@ -84,8 +84,10 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", {
 const isNew = (d: string) => Date.now() - new Date(d).getTime() < 30 * 60 * 1000;
 
 // --- Stat Card ---
-function StatCard({ icon: Icon, label, value, suffix, gradient, delay }: {
-  icon: React.ElementType; label: string; value: number; suffix?: string; gradient: string; delay: number;
+function StatCard({ icon: Icon, label, value, suffix, currencyCode, currencySymbolText, gradient, delay }: {
+  icon: React.ElementType; label: string; value: number; suffix?: string;
+  currencyCode?: string; currencySymbolText?: string;
+  gradient: string; delay: number;
 }) {
   return (
     <motion.div
@@ -101,7 +103,12 @@ function StatCard({ icon: Icon, label, value, suffix, gradient, delay }: {
         </div>
         <div>
           <p className="text-xs text-muted-foreground">{label}</p>
-          <p className="text-xl font-bold text-foreground">{value.toLocaleString("en-US")}{suffix}</p>
+          <p className="text-xl font-bold text-foreground inline-flex items-center gap-1">
+            {value.toLocaleString("en-US")}{suffix}
+            {currencyCode && currencySymbolText && (
+              <CurrencySymbol code={currencyCode} symbol={currencySymbolText} iconSize="h-4 w-4" />
+            )}
+          </p>
         </div>
       </div>
     </motion.div>
