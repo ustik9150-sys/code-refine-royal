@@ -60,8 +60,9 @@ function AnimatedCounter({ target, duration = 1500, prefix = "", suffix = "" }: 
 }
 
 // --- Stat Card ---
-function StatCard({ icon: Icon, label, value, prefix, suffix, gradient, delay }: {
+function StatCard({ icon: Icon, label, value, prefix, suffix, currencyCode, currencySymbolText, gradient, delay }: {
   icon: React.ElementType; label: string; value: number; prefix?: string; suffix?: string;
+  currencyCode?: string; currencySymbolText?: string;
   gradient: string; delay: number;
 }) {
   return (
@@ -84,8 +85,11 @@ function StatCard({ icon: Icon, label, value, prefix, suffix, gradient, delay }:
         </div>
       </div>
       <p className="text-sm text-muted-foreground mb-1">{label}</p>
-      <p className="text-2xl font-bold text-foreground">
+      <p className="text-2xl font-bold text-foreground inline-flex items-center gap-1">
         <AnimatedCounter target={value} prefix={prefix} suffix={suffix} />
+        {currencyCode && currencySymbolText && (
+          <CurrencySymbol code={currencyCode} symbol={currencySymbolText} iconSize="h-5 w-5" />
+        )}
       </p>
     </motion.div>
   );
