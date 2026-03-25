@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getProductCurrencySymbol } from "@/lib/format-price";
+import { getFlagUrl } from "@/lib/currency-flags";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
 import TestimonialsSection from "@/components/TestimonialsSection";
