@@ -217,7 +217,6 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
 // === MAIN ===
 export default function AdminProducts() {
   const { currency } = useCurrency();
-  const cs = currency.symbol;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
