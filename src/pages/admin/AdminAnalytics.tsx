@@ -393,7 +393,7 @@ export default function AdminAnalytics() {
             const countryStatsArr: CountryStats[] = Object.entries(grouped)
               .map(([country, data]) => {
                 const currencyConfig = CURRENCIES.find(c => c.code === data.currencyCode);
-                const currencyCodeForFlag = COUNTRY_TO_CURRENCY[country] || data.currencyCode;
+                const currencyCodeForFlag = COUNTRY_TO_CURRENCY[country] || null;
                 return {
                   country,
                   countryAr: COUNTRY_NAME_AR[country] || country,
