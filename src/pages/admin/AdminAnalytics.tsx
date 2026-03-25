@@ -224,6 +224,15 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
   "Morocco": "MAD",
   "Turkey": "TRY",
   "Mauritania": "MRU",
+  "Tunisia": "TND",
+  "Jordan": "JOD",
+  "Iraq": "IQD",
+  "Libya": "LYD",
+  "Sudan": "SDG",
+  "Algeria": "DZD",
+  "Lebanon": "LBP",
+  "Yemen": "YER",
+  "Syria": "SYP",
 };
 
 interface CountryStats {
