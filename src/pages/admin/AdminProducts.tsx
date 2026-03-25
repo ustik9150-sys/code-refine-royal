@@ -96,7 +96,12 @@ function ProductCard({ product, index, systemCurrency, onEdit, onDelete, onDupli
         )}
 
         {/* Status badge */}
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex items-center gap-1.5">
+          {flagUrl && (
+            <div className="w-7 h-5 rounded-[3px] overflow-hidden shadow-sm border border-border/30">
+              <img src={flagUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+            </div>
+          )}
           <Badge className={`text-[10px] font-semibold border ${
             product.status === "active"
               ? "bg-emerald-50 text-emerald-700 border-emerald-200"
