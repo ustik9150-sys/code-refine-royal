@@ -440,6 +440,25 @@ export default function AdminAnalytics() {
           gradient="hsl(200 80% 55%), hsl(220 70% 60%)" delay={0.25} />
       </div>
 
+      {/* Country Stats - shown when orders from multiple countries */}
+      {isMultiCountry && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.28 }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Globe className="w-5 h-5 text-accent" />
+            <h2 className="text-lg font-semibold text-foreground">إحصائيات حسب الدولة</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {countryStats.map((stat, i) => (
+              <CountryStatsCard key={stat.country} stat={stat} index={i} />
+            ))}
+          </div>
+        </motion.div>
+      )
+
       {/* Live Visitors + Recent Orders */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <LiveVisitorsCard delay={0.3} />
