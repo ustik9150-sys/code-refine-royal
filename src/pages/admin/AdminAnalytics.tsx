@@ -473,15 +473,43 @@ export default function AdminAnalytics() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.28 }}
         >
-          <div className="flex items-center gap-2 mb-3">
-            <Globe className="w-5 h-5 text-accent" />
-            <h2 className="text-lg font-semibold text-foreground">إحصائيات حسب الدولة</h2>
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-accent" />
+              <h2 className="text-lg font-semibold text-foreground">إحصائيات حسب الدولة</h2>
+            </div>
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60 border border-border/40">
+              {([
+                { key: "today", label: "اليوم" },
+                { key: "7days", label: "7 أيام" },
+                { key: "30days", label: "30 يوم" },
+                { key: "all", label: "الكل" },
+              ] as const).map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setCountryTimePeriod(key)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    countryTimePeriod === key
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {countryStats.map((stat, i) => (
-              <CountryStatsCard key={stat.country} stat={stat} index={i} />
-            ))}
-          </div>
+          {countryStats.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {countryStats.map((stat, i) => (
+                <CountryStatsCard key={stat.country} stat={stat} index={i} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground text-sm">
+              لا توجد طلبات في هذه الفترة
+            </div>
+          )}
         </motion.div>
       )}
 
