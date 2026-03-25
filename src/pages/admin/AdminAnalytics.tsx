@@ -300,8 +300,9 @@ function CountryStatsCard({ stat, index }: { stat: CountryStats; index: number }
         </div>
         <div>
           <p className="text-xs text-muted-foreground mb-1">الإيرادات</p>
-          <p className="text-xl font-bold text-foreground">
-            <AnimatedCounter target={stat.totalRevenue} suffix={` ${stat.currencySymbol}`} />
+          <p className="text-xl font-bold text-foreground inline-flex items-center gap-1">
+            <AnimatedCounter target={stat.totalRevenue} />
+            <CurrencySymbol code={stat.currencyCode} symbol={stat.currencySymbol} iconSize="h-4 w-4" />
           </p>
         </div>
       </div>
