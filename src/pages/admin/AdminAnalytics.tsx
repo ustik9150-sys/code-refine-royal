@@ -307,6 +307,8 @@ export default function AdminAnalytics() {
   const [dailyData, setDailyData] = useState<{ day: string; orders: number; revenue: number }[]>([]);
   const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
   const [isMultiCountry, setIsMultiCountry] = useState(false);
+  const [countryTimePeriod, setCountryTimePeriod] = useState<"today" | "7days" | "30days" | "all">("today");
+  const [allOrdersRaw, setAllOrdersRaw] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -321,7 +323,7 @@ export default function AdminAnalytics() {
           supabase.from("orders").select("total").gte("created_at", today),
           supabase.from("orders").select("total, created_at").gte("created_at", weekStart),
           supabase.from("orders").select("customer_name, city, created_at").order("created_at", { ascending: false }).limit(5),
-          supabase.from("orders").select("ip_country, total, order_items(product_id, products(currency_code, currency_enabled))"),
+          supabase.from("orders").select("ip_country, total, created_at, order_items(product_id, products(currency_code, currency_enabled))"),
         ]);
 
         const totalOrders = countRes.count || 0;
@@ -356,62 +358,9 @@ export default function AdminAnalytics() {
           })));
         }
 
-        // Country stats grouping
+        // Store raw orders for country filtering
         if (allOrdersRes.data) {
-          const grouped: Record<string, { totalOrders: number; totalRevenue: number; currencyCode: string }> = {};
-
-          for (const order of allOrdersRes.data) {
-            const country = order.ip_country || "غير محدد";
-
-            // Determine currency: check product's currency first, then country mapping, then system default
-            let orderCurrency = currency.code;
-            const items = (order as any).order_items;
-            if (items && items.length > 0) {
-              const product = items[0].products;
-              if (product?.currency_enabled && product.currency_code) {
-                orderCurrency = product.currency_code;
-              }
-            }
-            // If no product-level currency, use country-based mapping
-            if (orderCurrency === currency.code && COUNTRY_TO_CURRENCY[country]) {
-              // Only override if not the default country
-              // Actually keep system currency as the order was placed in that currency
-            }
-
-            if (!grouped[country]) {
-              grouped[country] = { totalOrders: 0, totalRevenue: 0, currencyCode: orderCurrency };
-            }
-            grouped[country].totalOrders += 1;
-            grouped[country].totalRevenue += order.total || 0;
-          }
-
-          const countries = Object.keys(grouped);
-          const hasMultiple = countries.length > 1 || (countries.length === 1 && countries[0] !== "Saudi Arabia" && countries[0] !== "غير محدد");
-
-          if (hasMultiple) {
-            const totalAllOrders = Object.values(grouped).reduce((s, g) => s + g.totalOrders, 0);
-            const countryStatsArr: CountryStats[] = Object.entries(grouped)
-              .map(([country, data]) => {
-                const currencyConfig = CURRENCIES.find(c => c.code === data.currencyCode);
-                const currencyCodeForFlag = COUNTRY_TO_CURRENCY[country] || null;
-                return {
-                  country,
-                  countryAr: COUNTRY_NAME_AR[country] || country,
-                  totalOrders: data.totalOrders,
-                  totalRevenue: data.totalRevenue,
-                  currencySymbol: currencyConfig?.symbol || currency.symbol,
-                  currencyCode: data.currencyCode,
-                  flagUrl: getFlagUrl(currencyCodeForFlag),
-                  percentage: totalAllOrders > 0 ? (data.totalOrders / totalAllOrders) * 100 : 0,
-                };
-              })
-              .sort((a, b) => b.totalOrders - a.totalOrders);
-
-            setCountryStats(countryStatsArr);
-            setIsMultiCountry(true);
-          } else {
-            setIsMultiCountry(false);
-          }
+          setAllOrdersRaw(allOrdersRes.data);
         }
       } catch {
         // keep empty state
@@ -422,6 +371,74 @@ export default function AdminAnalytics() {
 
     fetchAll();
   }, [currency]);
+
+  // Recompute country stats when time period or raw data changes
+  useEffect(() => {
+    if (!allOrdersRaw.length) return;
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const last7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const last30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const filtered = allOrdersRaw.filter((order: any) => {
+      if (countryTimePeriod === "all") return true;
+      const orderDate = new Date(order.created_at);
+      if (countryTimePeriod === "today") return orderDate >= startOfToday;
+      if (countryTimePeriod === "7days") return orderDate >= last7;
+      if (countryTimePeriod === "30days") return orderDate >= last30;
+      return true;
+    });
+
+    const grouped: Record<string, { totalOrders: number; totalRevenue: number; currencyCode: string }> = {};
+
+    for (const order of filtered) {
+      const country = (order as any).ip_country || "غير محدد";
+      let orderCurrency = currency.code;
+      const items = (order as any).order_items;
+      if (items && items.length > 0) {
+        const product = items[0].products;
+        if (product?.currency_enabled && product.currency_code) {
+          orderCurrency = product.currency_code;
+        }
+      }
+
+      if (!grouped[country]) {
+        grouped[country] = { totalOrders: 0, totalRevenue: 0, currencyCode: orderCurrency };
+      }
+      grouped[country].totalOrders += 1;
+      grouped[country].totalRevenue += (order as any).total || 0;
+    }
+
+    const countries = Object.keys(grouped);
+    const hasMultiple = countries.length > 1 || (countries.length === 1 && countries[0] !== "Saudi Arabia" && countries[0] !== "غير محدد");
+
+    if (hasMultiple) {
+      const totalAllOrders = Object.values(grouped).reduce((s, g) => s + g.totalOrders, 0);
+      const countryStatsArr: CountryStats[] = Object.entries(grouped)
+        .map(([country, data]) => {
+          const currencyConfig = CURRENCIES.find(c => c.code === data.currencyCode);
+          const currencyCodeForFlag = COUNTRY_TO_CURRENCY[country] || null;
+          return {
+            country,
+            countryAr: COUNTRY_NAME_AR[country] || country,
+            totalOrders: data.totalOrders,
+            totalRevenue: data.totalRevenue,
+            currencySymbol: currencyConfig?.symbol || currency.symbol,
+            currencyCode: data.currencyCode,
+            flagUrl: getFlagUrl(currencyCodeForFlag),
+            percentage: totalAllOrders > 0 ? (data.totalOrders / totalAllOrders) * 100 : 0,
+          };
+        })
+        .sort((a, b) => b.totalOrders - a.totalOrders);
+
+      setCountryStats(countryStatsArr);
+      setIsMultiCountry(true);
+    } else {
+      setCountryStats([]);
+      setIsMultiCountry(hasMultiple);
+    }
+  }, [allOrdersRaw, countryTimePeriod, currency]);
 
   if (loading) return <AnalyticsSkeleton />;
 
@@ -456,15 +473,43 @@ export default function AdminAnalytics() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.28 }}
         >
-          <div className="flex items-center gap-2 mb-3">
-            <Globe className="w-5 h-5 text-accent" />
-            <h2 className="text-lg font-semibold text-foreground">إحصائيات حسب الدولة</h2>
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-accent" />
+              <h2 className="text-lg font-semibold text-foreground">إحصائيات حسب الدولة</h2>
+            </div>
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60 border border-border/40">
+              {([
+                { key: "today", label: "اليوم" },
+                { key: "7days", label: "7 أيام" },
+                { key: "30days", label: "30 يوم" },
+                { key: "all", label: "الكل" },
+              ] as const).map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setCountryTimePeriod(key)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    countryTimePeriod === key
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {countryStats.map((stat, i) => (
-              <CountryStatsCard key={stat.country} stat={stat} index={i} />
-            ))}
-          </div>
+          {countryStats.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {countryStats.map((stat, i) => (
+                <CountryStatsCard key={stat.country} stat={stat} index={i} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground text-sm">
+              لا توجد طلبات في هذه الفترة
+            </div>
+          )}
         </motion.div>
       )}
 
