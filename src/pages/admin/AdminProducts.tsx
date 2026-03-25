@@ -62,16 +62,17 @@ function StatCard({ icon: Icon, label, value, suffix, gradient, delay }: {
 }
 
 // --- Product Card ---
-function ProductCard({ product, index, onEdit, onDelete, onDuplicate, onView, onCopyLink }: {
+function ProductCard({ product, index, systemCurrency, onEdit, onDelete, onDuplicate, onView, onCopyLink }: {
   product: Product; index: number;
+  systemCurrency: import("@/hooks/useCurrency").CurrencyConfig;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onDuplicate: (p: Product) => void;
   onView: (id: string) => void;
   onCopyLink: (id: string, name: string) => void;
 }) {
-  const { currency } = useCurrency();
-  const cs = currency.symbol;
+  const cs = getProductCurrencySymbol(product, systemCurrency);
+  const flagUrl = getFlagUrl(product.currency_enabled ? product.currency_code : systemCurrency.code);
   const thumb = product.images.find(i => i.is_main)?.url || product.images[0]?.url || null;
   const inStock = product.inventory > 0;
 
