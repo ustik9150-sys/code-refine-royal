@@ -358,62 +358,9 @@ export default function AdminAnalytics() {
           })));
         }
 
-        // Country stats grouping
+        // Store raw orders for country filtering
         if (allOrdersRes.data) {
-          const grouped: Record<string, { totalOrders: number; totalRevenue: number; currencyCode: string }> = {};
-
-          for (const order of allOrdersRes.data) {
-            const country = order.ip_country || "غير محدد";
-
-            // Determine currency: check product's currency first, then country mapping, then system default
-            let orderCurrency = currency.code;
-            const items = (order as any).order_items;
-            if (items && items.length > 0) {
-              const product = items[0].products;
-              if (product?.currency_enabled && product.currency_code) {
-                orderCurrency = product.currency_code;
-              }
-            }
-            // If no product-level currency, use country-based mapping
-            if (orderCurrency === currency.code && COUNTRY_TO_CURRENCY[country]) {
-              // Only override if not the default country
-              // Actually keep system currency as the order was placed in that currency
-            }
-
-            if (!grouped[country]) {
-              grouped[country] = { totalOrders: 0, totalRevenue: 0, currencyCode: orderCurrency };
-            }
-            grouped[country].totalOrders += 1;
-            grouped[country].totalRevenue += order.total || 0;
-          }
-
-          const countries = Object.keys(grouped);
-          const hasMultiple = countries.length > 1 || (countries.length === 1 && countries[0] !== "Saudi Arabia" && countries[0] !== "غير محدد");
-
-          if (hasMultiple) {
-            const totalAllOrders = Object.values(grouped).reduce((s, g) => s + g.totalOrders, 0);
-            const countryStatsArr: CountryStats[] = Object.entries(grouped)
-              .map(([country, data]) => {
-                const currencyConfig = CURRENCIES.find(c => c.code === data.currencyCode);
-                const currencyCodeForFlag = COUNTRY_TO_CURRENCY[country] || null;
-                return {
-                  country,
-                  countryAr: COUNTRY_NAME_AR[country] || country,
-                  totalOrders: data.totalOrders,
-                  totalRevenue: data.totalRevenue,
-                  currencySymbol: currencyConfig?.symbol || currency.symbol,
-                  currencyCode: data.currencyCode,
-                  flagUrl: getFlagUrl(currencyCodeForFlag),
-                  percentage: totalAllOrders > 0 ? (data.totalOrders / totalAllOrders) * 100 : 0,
-                };
-              })
-              .sort((a, b) => b.totalOrders - a.totalOrders);
-
-            setCountryStats(countryStatsArr);
-            setIsMultiCountry(true);
-          } else {
-            setIsMultiCountry(false);
-          }
+          setAllOrdersRaw(allOrdersRes.data);
         }
       } catch {
         // keep empty state
