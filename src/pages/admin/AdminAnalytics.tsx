@@ -495,25 +495,66 @@ export default function AdminAnalytics() {
               <Globe className="w-5 h-5 text-accent" />
               <h2 className="text-lg font-semibold text-foreground">إحصائيات حسب الدولة</h2>
             </div>
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60 border border-border/40">
-              {([
-                { key: "today", label: "اليوم" },
-                { key: "7days", label: "7 أيام" },
-                { key: "30days", label: "30 يوم" },
-                { key: "all", label: "الكل" },
-              ] as const).map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setCountryTimePeriod(key)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
-                    countryTimePeriod === key
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60 border border-border/40">
+                {([
+                  { key: "today", label: "اليوم" },
+                  { key: "7days", label: "7 أيام" },
+                  { key: "30days", label: "30 يوم" },
+                  { key: "all", label: "الكل" },
+                ] as const).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setCountryTimePeriod(key)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+                      countryTimePeriod === key
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "h-8 text-xs gap-1.5 rounded-lg border-border/40",
+                      countryTimePeriod === "custom" && "bg-background shadow-sm border-accent/40 text-foreground",
+                      countryTimePeriod !== "custom" && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="w-3.5 h-3.5" />
+                    {countryTimePeriod === "custom" && customDateRange.from ? (
+                      customDateRange.to ? (
+                        <span>
+                          {format(customDateRange.from, "d MMM", { locale: ar })} - {format(customDateRange.to, "d MMM", { locale: ar })}
+                        </span>
+                      ) : (
+                        format(customDateRange.from, "d MMM yyyy", { locale: ar })
+                      )
+                    ) : (
+                      "تاريخ مخصص"
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="range"
+                    selected={customDateRange.from ? { from: customDateRange.from, to: customDateRange.to } : undefined}
+                    onSelect={(range) => {
+                      setCustomDateRange({ from: range?.from, to: range?.to });
+                      if (range?.from) setCountryTimePeriod("custom");
+                    }}
+                    numberOfMonths={1}
+                    className={cn("p-3 pointer-events-auto")}
+                    disabled={(date) => date > new Date()}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           {countryStats.length > 0 ? (
