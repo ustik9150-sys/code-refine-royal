@@ -16,6 +16,8 @@ import {
   Plus, Search, Edit, Package, Trash2, Eye, Copy, Link2,
   ShoppingCart, AlertTriangle, DollarSign, TrendingUp, ExternalLink,
 } from "lucide-react";
+import { getProductCurrencySymbol } from "@/lib/format-price";
+import { getFlagUrl } from "@/lib/currency-flags";
 
 type Product = {
   id: string;
@@ -29,6 +31,8 @@ type Product = {
   description_ar: string | null;
   updated_at: string;
   created_at: string;
+  currency_enabled?: boolean;
+  currency_code?: string | null;
   images: { url: string; is_main: boolean }[];
 };
 
@@ -58,16 +62,17 @@ function StatCard({ icon: Icon, label, value, suffix, gradient, delay }: {
 }
 
 // --- Product Card ---
-function ProductCard({ product, index, onEdit, onDelete, onDuplicate, onView, onCopyLink }: {
+function ProductCard({ product, index, systemCurrency, onEdit, onDelete, onDuplicate, onView, onCopyLink }: {
   product: Product; index: number;
+  systemCurrency: import("@/hooks/useCurrency").CurrencyConfig;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onDuplicate: (p: Product) => void;
   onView: (id: string) => void;
   onCopyLink: (id: string, name: string) => void;
 }) {
-  const { currency } = useCurrency();
-  const cs = currency.symbol;
+  const cs = getProductCurrencySymbol(product, systemCurrency);
+  const flagUrl = getFlagUrl(product.currency_enabled ? product.currency_code : systemCurrency.code);
   const thumb = product.images.find(i => i.is_main)?.url || product.images[0]?.url || null;
   const inStock = product.inventory > 0;
 
@@ -91,7 +96,12 @@ function ProductCard({ product, index, onEdit, onDelete, onDuplicate, onView, on
         )}
 
         {/* Status badge */}
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex items-center gap-1.5">
+          {flagUrl && (
+            <div className="w-7 h-5 rounded-[3px] overflow-hidden shadow-sm border border-border/30">
+              <img src={flagUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+            </div>
+          )}
           <Badge className={`text-[10px] font-semibold border ${
             product.status === "active"
               ? "bg-emerald-50 text-emerald-700 border-emerald-200"
@@ -207,7 +217,6 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
 // === MAIN ===
 export default function AdminProducts() {
   const { currency } = useCurrency();
-  const cs = currency.symbol;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -323,7 +332,7 @@ export default function AdminProducts() {
             gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.1} />
           <StatCard icon={AlertTriangle} label="نفذ المخزون" value={stats.outOfStock}
             gradient="hsl(0 70% 55%), hsl(20 80% 50%)" delay={0.15} />
-          <StatCard icon={DollarSign} label="إجمالي القيمة" value={products.reduce((s, p) => s + p.price * p.inventory, 0).toLocaleString("en-US")} suffix={` ${cs}`}
+          <StatCard icon={DollarSign} label="إجمالي القيمة" value={products.filter(p => !p.currency_enabled).reduce((s, p) => s + p.price * p.inventory, 0).toLocaleString("en-US")} suffix={` ${currency.symbol}`}
             gradient="hsl(200 80% 55%), hsl(220 70% 60%)" delay={0.2} />
         </div>
       )}
@@ -398,6 +407,7 @@ export default function AdminProducts() {
                 key={product.id}
                 product={product}
                 index={i}
+                systemCurrency={currency}
                 onEdit={(id) => navigate(`/admin/products/${id}`)}
                 onDelete={(id) => setDeleteTarget(id)}
                 onDuplicate={handleDuplicate}
