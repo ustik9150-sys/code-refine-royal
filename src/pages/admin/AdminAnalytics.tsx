@@ -455,7 +455,7 @@ export default function AdminAnalytics() {
       setCountryStats([]);
       setIsMultiCountry(hasMultiple);
     }
-  }, [allOrdersRaw, countryTimePeriod, currency]);
+  }, [allOrdersRaw, countryTimePeriod, customDateRange, currency]);
 
   if (loading) return <AnalyticsSkeleton />;
 
