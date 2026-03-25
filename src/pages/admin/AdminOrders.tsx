@@ -233,7 +233,7 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">المجموع</p>
-                  <p className="font-bold">{order.total.toLocaleString("en-US")} {cs}</p>
+                  <p className="font-bold inline-flex items-center gap-1">{order.total.toLocaleString("en-US")} <CurrencySymbol code={currency.code} symbol={cs} iconSize="h-3.5 w-3.5" /></p>
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">الموقع (IP)</p>
