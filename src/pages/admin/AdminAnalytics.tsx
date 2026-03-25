@@ -307,6 +307,8 @@ export default function AdminAnalytics() {
   const [dailyData, setDailyData] = useState<{ day: string; orders: number; revenue: number }[]>([]);
   const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
   const [isMultiCountry, setIsMultiCountry] = useState(false);
+  const [countryTimePeriod, setCountryTimePeriod] = useState<"today" | "7days" | "30days" | "all">("today");
+  const [allOrdersRaw, setAllOrdersRaw] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
