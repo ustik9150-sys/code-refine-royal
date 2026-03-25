@@ -372,6 +372,74 @@ export default function AdminAnalytics() {
     fetchAll();
   }, [currency]);
 
+  // Recompute country stats when time period or raw data changes
+  useEffect(() => {
+    if (!allOrdersRaw.length) return;
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const last7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const last30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const filtered = allOrdersRaw.filter((order: any) => {
+      if (countryTimePeriod === "all") return true;
+      const orderDate = new Date(order.created_at);
+      if (countryTimePeriod === "today") return orderDate >= startOfToday;
+      if (countryTimePeriod === "7days") return orderDate >= last7;
+      if (countryTimePeriod === "30days") return orderDate >= last30;
+      return true;
+    });
+
+    const grouped: Record<string, { totalOrders: number; totalRevenue: number; currencyCode: string }> = {};
+
+    for (const order of filtered) {
+      const country = (order as any).ip_country || "غير محدد";
+      let orderCurrency = currency.code;
+      const items = (order as any).order_items;
+      if (items && items.length > 0) {
+        const product = items[0].products;
+        if (product?.currency_enabled && product.currency_code) {
+          orderCurrency = product.currency_code;
+        }
+      }
+
+      if (!grouped[country]) {
+        grouped[country] = { totalOrders: 0, totalRevenue: 0, currencyCode: orderCurrency };
+      }
+      grouped[country].totalOrders += 1;
+      grouped[country].totalRevenue += (order as any).total || 0;
+    }
+
+    const countries = Object.keys(grouped);
+    const hasMultiple = countries.length > 1 || (countries.length === 1 && countries[0] !== "Saudi Arabia" && countries[0] !== "غير محدد");
+
+    if (hasMultiple) {
+      const totalAllOrders = Object.values(grouped).reduce((s, g) => s + g.totalOrders, 0);
+      const countryStatsArr: CountryStats[] = Object.entries(grouped)
+        .map(([country, data]) => {
+          const currencyConfig = CURRENCIES.find(c => c.code === data.currencyCode);
+          const currencyCodeForFlag = COUNTRY_TO_CURRENCY[country] || null;
+          return {
+            country,
+            countryAr: COUNTRY_NAME_AR[country] || country,
+            totalOrders: data.totalOrders,
+            totalRevenue: data.totalRevenue,
+            currencySymbol: currencyConfig?.symbol || currency.symbol,
+            currencyCode: data.currencyCode,
+            flagUrl: getFlagUrl(currencyCodeForFlag),
+            percentage: totalAllOrders > 0 ? (data.totalOrders / totalAllOrders) * 100 : 0,
+          };
+        })
+        .sort((a, b) => b.totalOrders - a.totalOrders);
+
+      setCountryStats(countryStatsArr);
+      setIsMultiCountry(true);
+    } else {
+      setCountryStats([]);
+      setIsMultiCountry(hasMultiple);
+    }
+  }, [allOrdersRaw, countryTimePeriod, currency]);
+
   if (loading) return <AnalyticsSkeleton />;
 
   return (
