@@ -1,10 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency, CURRENCIES } from "@/hooks/useCurrency";
 import { getFlagUrl } from "@/lib/currency-flags";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import {
   ShoppingCart,
   DollarSign,
@@ -14,6 +20,7 @@ import {
   MapPin,
   Clock,
   Globe,
+  CalendarIcon,
 } from "lucide-react";
 import {
   LineChart,
