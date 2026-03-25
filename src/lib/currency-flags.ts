@@ -13,6 +13,15 @@ const CURRENCY_TO_COUNTRY: Record<string, string> = {
   MAD: "ma",
   TRY: "tr",
   MRU: "mr",
+  TND: "tn",
+  JOD: "jo",
+  IQD: "iq",
+  LYD: "ly",
+  SDG: "sd",
+  DZD: "dz",
+  LBP: "lb",
+  YER: "ye",
+  SYP: "sy",
 };
 
 /**

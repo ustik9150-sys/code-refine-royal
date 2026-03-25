@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useCurrency } from "@/hooks/useCurrency";
+import { useCurrency, CURRENCIES } from "@/hooks/useCurrency";
+import { getFlagUrl } from "@/lib/currency-flags";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ShoppingCart,
@@ -12,6 +13,7 @@ import {
   Users,
   MapPin,
   Clock,
+  Globe,
 } from "lucide-react";
 import {
   LineChart,
@@ -183,6 +185,67 @@ function OrderRow({ name, city, time, index }: { name: string; city: string; tim
 // --- Day names helper ---
 const dayNames = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
+const COUNTRY_NAME_AR: Record<string, string> = {
+  "Saudi Arabia": "السعودية",
+  "United Arab Emirates": "الإمارات",
+  "Kuwait": "الكويت",
+  "Bahrain": "البحرين",
+  "Qatar": "قطر",
+  "Oman": "عُمان",
+  "Egypt": "مصر",
+  "United States": "أمريكا",
+  "United Kingdom": "بريطانيا",
+  "Morocco": "المغرب",
+  "Turkey": "تركيا",
+  "Mauritania": "موريتانيا",
+  "Tunisia": "تونس",
+  "Jordan": "الأردن",
+  "Iraq": "العراق",
+  "Libya": "ليبيا",
+  "Sudan": "السودان",
+  "Algeria": "الجزائر",
+  "Lebanon": "لبنان",
+  "Yemen": "اليمن",
+  "Palestine": "فلسطين",
+  "Syria": "سوريا",
+};
+
+// Map ip_country to a currency code for display purposes
+const COUNTRY_TO_CURRENCY: Record<string, string> = {
+  "Saudi Arabia": "SAR",
+  "United Arab Emirates": "AED",
+  "Kuwait": "KWD",
+  "Bahrain": "BHD",
+  "Qatar": "QAR",
+  "Oman": "OMR",
+  "Egypt": "EGP",
+  "United States": "USD",
+  "United Kingdom": "GBP",
+  "Morocco": "MAD",
+  "Turkey": "TRY",
+  "Mauritania": "MRU",
+  "Tunisia": "TND",
+  "Jordan": "JOD",
+  "Iraq": "IQD",
+  "Libya": "LYD",
+  "Sudan": "SDG",
+  "Algeria": "DZD",
+  "Lebanon": "LBP",
+  "Yemen": "YER",
+  "Syria": "SYP",
+};
+
+interface CountryStats {
+  country: string;
+  countryAr: string;
+  totalOrders: number;
+  totalRevenue: number;
+  currencySymbol: string;
+  currencyCode: string;
+  flagUrl: string | null;
+  percentage: number;
+}
+
 function getLast7Days(): string[] {
   const days: string[] = [];
   for (let i = 6; i >= 0; i--) {
@@ -193,6 +256,47 @@ function getLast7Days(): string[] {
   return days;
 }
 
+// --- Country Stats Card ---
+function CountryStatsCard({ stat, index }: { stat: CountryStats; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.08 }}
+      className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-5"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2.5">
+          {stat.flagUrl && (
+            <div className="w-8 h-6 rounded-[3px] overflow-hidden shadow-sm border border-border/30 flex-shrink-0">
+              <img src={stat.flagUrl} alt={stat.countryAr} className="w-full h-full object-cover" loading="lazy" />
+            </div>
+          )}
+          <h4 className="font-semibold text-foreground">{stat.countryAr}</h4>
+        </div>
+        <span className="text-xs font-medium px-2 py-1 rounded-full bg-accent/10 text-accent">
+          {stat.percentage.toFixed(1)}%
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mt-3">
+        <div>
+          <p className="text-xs text-muted-foreground mb-1">عدد الطلبات</p>
+          <p className="text-xl font-bold text-foreground">
+            <AnimatedCounter target={stat.totalOrders} />
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground mb-1">الإيرادات</p>
+          <p className="text-xl font-bold text-foreground">
+            <AnimatedCounter target={stat.totalRevenue} suffix={` ${stat.currencySymbol}`} />
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // --- Main Component ---
 export default function AdminAnalytics() {
   const { currency } = useCurrency();
@@ -201,6 +305,8 @@ export default function AdminAnalytics() {
   const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, totalOrders: 0, totalRevenue: 0 });
   const [recentOrders, setRecentOrders] = useState<{ name: string; city: string; time: string }[]>([]);
   const [dailyData, setDailyData] = useState<{ day: string; orders: number; revenue: number }[]>([]);
+  const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
+  const [isMultiCountry, setIsMultiCountry] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -210,12 +316,12 @@ export default function AdminAnalytics() {
         const last7 = getLast7Days();
         const weekStart = last7[0];
 
-        // Fetch all orders from last 7 days + total count in parallel
-        const [countRes, todayRes, weekRes, recentRes] = await Promise.all([
+        const [countRes, todayRes, weekRes, recentRes, allOrdersRes] = await Promise.all([
           supabase.from("orders").select("*", { count: "exact", head: true }),
           supabase.from("orders").select("total").gte("created_at", today),
           supabase.from("orders").select("total, created_at").gte("created_at", weekStart),
           supabase.from("orders").select("customer_name, city, created_at").order("created_at", { ascending: false }).limit(5),
+          supabase.from("orders").select("ip_country, total, order_items(product_id, products(currency_code, currency_enabled))"),
         ]);
 
         const totalOrders = countRes.count || 0;
@@ -225,7 +331,7 @@ export default function AdminAnalytics() {
 
         setStats({ todayOrders, todayRevenue, totalOrders, totalRevenue });
 
-        // Build daily chart data from real orders
+        // Build daily chart data
         const dayMap: Record<string, { orders: number; revenue: number }> = {};
         last7.forEach(d => { dayMap[d] = { orders: 0, revenue: 0 }; });
         weekRes.data?.forEach(o => {
@@ -249,6 +355,64 @@ export default function AdminAnalytics() {
             time: getTimeAgo(o.created_at),
           })));
         }
+
+        // Country stats grouping
+        if (allOrdersRes.data) {
+          const grouped: Record<string, { totalOrders: number; totalRevenue: number; currencyCode: string }> = {};
+
+          for (const order of allOrdersRes.data) {
+            const country = order.ip_country || "غير محدد";
+
+            // Determine currency: check product's currency first, then country mapping, then system default
+            let orderCurrency = currency.code;
+            const items = (order as any).order_items;
+            if (items && items.length > 0) {
+              const product = items[0].products;
+              if (product?.currency_enabled && product.currency_code) {
+                orderCurrency = product.currency_code;
+              }
+            }
+            // If no product-level currency, use country-based mapping
+            if (orderCurrency === currency.code && COUNTRY_TO_CURRENCY[country]) {
+              // Only override if not the default country
+              // Actually keep system currency as the order was placed in that currency
+            }
+
+            if (!grouped[country]) {
+              grouped[country] = { totalOrders: 0, totalRevenue: 0, currencyCode: orderCurrency };
+            }
+            grouped[country].totalOrders += 1;
+            grouped[country].totalRevenue += order.total || 0;
+          }
+
+          const countries = Object.keys(grouped);
+          const hasMultiple = countries.length > 1 || (countries.length === 1 && countries[0] !== "Saudi Arabia" && countries[0] !== "غير محدد");
+
+          if (hasMultiple) {
+            const totalAllOrders = Object.values(grouped).reduce((s, g) => s + g.totalOrders, 0);
+            const countryStatsArr: CountryStats[] = Object.entries(grouped)
+              .map(([country, data]) => {
+                const currencyConfig = CURRENCIES.find(c => c.code === data.currencyCode);
+                const currencyCodeForFlag = COUNTRY_TO_CURRENCY[country] || data.currencyCode;
+                return {
+                  country,
+                  countryAr: COUNTRY_NAME_AR[country] || country,
+                  totalOrders: data.totalOrders,
+                  totalRevenue: data.totalRevenue,
+                  currencySymbol: currencyConfig?.symbol || currency.symbol,
+                  currencyCode: data.currencyCode,
+                  flagUrl: getFlagUrl(currencyCodeForFlag),
+                  percentage: totalAllOrders > 0 ? (data.totalOrders / totalAllOrders) * 100 : 0,
+                };
+              })
+              .sort((a, b) => b.totalOrders - a.totalOrders);
+
+            setCountryStats(countryStatsArr);
+            setIsMultiCountry(true);
+          } else {
+            setIsMultiCountry(false);
+          }
+        }
       } catch {
         // keep empty state
       } finally {
@@ -257,7 +421,7 @@ export default function AdminAnalytics() {
     }
 
     fetchAll();
-  }, []);
+  }, [currency]);
 
   if (loading) return <AnalyticsSkeleton />;
 
@@ -284,6 +448,25 @@ export default function AdminAnalytics() {
         <StatCard icon={BarChart3} label="إجمالي الإيرادات" value={stats.totalRevenue} suffix={cs}
           gradient="hsl(200 80% 55%), hsl(220 70% 60%)" delay={0.25} />
       </div>
+
+      {/* Country Stats - shown when orders from multiple countries */}
+      {isMultiCountry && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.28 }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Globe className="w-5 h-5 text-accent" />
+            <h2 className="text-lg font-semibold text-foreground">إحصائيات حسب الدولة</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {countryStats.map((stat, i) => (
+              <CountryStatsCard key={stat.country} stat={stat} index={i} />
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Live Visitors + Recent Orders */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
