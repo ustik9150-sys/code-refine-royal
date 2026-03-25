@@ -323,7 +323,7 @@ export default function AdminAnalytics() {
           supabase.from("orders").select("total").gte("created_at", today),
           supabase.from("orders").select("total, created_at").gte("created_at", weekStart),
           supabase.from("orders").select("customer_name, city, created_at").order("created_at", { ascending: false }).limit(5),
-          supabase.from("orders").select("ip_country, total, order_items(product_id, products(currency_code, currency_enabled))"),
+          supabase.from("orders").select("ip_country, total, created_at, order_items(product_id, products(currency_code, currency_enabled))"),
         ]);
 
         const totalOrders = countRes.count || 0;
