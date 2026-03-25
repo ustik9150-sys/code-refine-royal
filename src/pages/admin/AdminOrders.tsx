@@ -3,6 +3,7 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/hooks/useCurrency";
+import { CurrencySymbol } from "@/components/admin/CurrencySymbol";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
