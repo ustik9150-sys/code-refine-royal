@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getProductCurrencySymbol } from "@/lib/format-price";
-import { getFlagUrl } from "@/lib/currency-flags";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
 import TestimonialsSection from "@/components/TestimonialsSection";
@@ -155,7 +154,6 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
   const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
   const description = product.description_ar?.replace(/<[^>]*>/g, "").slice(0, 60) || "";
   const currencySymbol = getProductCurrencySymbol(product, systemCurrency);
-  const flagUrl = getFlagUrl(product.currency_enabled ? product.currency_code : systemCurrency.code);
   const productLink = `/product/${product.slug || product.id}`;
 
   return (
@@ -181,13 +179,7 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
           )}
         </Link>
 
-        {/* Flag + Actions */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {flagUrl && (
-            <div className="w-8 h-6 rounded-[3px] overflow-hidden shadow-sm border border-white/30">
-              <img src={flagUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
-            </div>
-          )}
           <button
             onClick={() => setLiked(!liked)}
             className="w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:shadow-md transition-all"
