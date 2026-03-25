@@ -16,6 +16,8 @@ import {
   Plus, Search, Edit, Package, Trash2, Eye, Copy, Link2,
   ShoppingCart, AlertTriangle, DollarSign, TrendingUp, ExternalLink,
 } from "lucide-react";
+import { getProductCurrencySymbol } from "@/lib/format-price";
+import { getFlagUrl } from "@/lib/currency-flags";
 
 type Product = {
   id: string;
@@ -29,6 +31,8 @@ type Product = {
   description_ar: string | null;
   updated_at: string;
   created_at: string;
+  currency_enabled?: boolean;
+  currency_code?: string | null;
   images: { url: string; is_main: boolean }[];
 };
 
