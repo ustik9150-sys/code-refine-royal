@@ -175,7 +175,7 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
 
         {/* Total */}
         <div className="text-left min-w-[80px] hidden sm:block">
-          <p className="text-sm font-bold text-foreground">{order.total.toLocaleString("en-US")} {cs}</p>
+          <p className="text-sm font-bold text-foreground inline-flex items-center gap-1">{order.total.toLocaleString("en-US")} <CurrencySymbol code={currency.code} symbol={cs} iconSize="h-3.5 w-3.5" /></p>
           <p className="text-[10px] text-muted-foreground">{PAYMENT_MAP[order.payment_method] || order.payment_method}</p>
         </div>
 
