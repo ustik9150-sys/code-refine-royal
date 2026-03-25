@@ -157,7 +157,6 @@ function ProductCard({ product, index, systemCurrency }: { product: Product; ind
   const currencySymbol = getProductCurrencySymbol(product, systemCurrency);
   const flagUrl = getFlagUrl(product.currency_enabled ? product.currency_code : systemCurrency.code);
   const productLink = `/product/${product.slug || product.id}`;
-  const productLink = `/product/${product.slug || product.id}`;
 
   return (
     <motion.div
