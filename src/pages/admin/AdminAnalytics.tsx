@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCurrency, CURRENCIES } from "@/hooks/useCurrency";
 import { getFlagUrl } from "@/lib/currency-flags";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CurrencySymbol } from "@/components/admin/CurrencySymbol";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -59,8 +60,9 @@ function AnimatedCounter({ target, duration = 1500, prefix = "", suffix = "" }: 
 }
 
 // --- Stat Card ---
-function StatCard({ icon: Icon, label, value, prefix, suffix, gradient, delay }: {
+function StatCard({ icon: Icon, label, value, prefix, suffix, currencyCode, currencySymbolText, gradient, delay }: {
   icon: React.ElementType; label: string; value: number; prefix?: string; suffix?: string;
+  currencyCode?: string; currencySymbolText?: string;
   gradient: string; delay: number;
 }) {
   return (
@@ -83,8 +85,11 @@ function StatCard({ icon: Icon, label, value, prefix, suffix, gradient, delay }:
         </div>
       </div>
       <p className="text-sm text-muted-foreground mb-1">{label}</p>
-      <p className="text-2xl font-bold text-foreground">
+      <p className="text-2xl font-bold text-foreground inline-flex items-center gap-1">
         <AnimatedCounter target={value} prefix={prefix} suffix={suffix} />
+        {currencyCode && currencySymbolText && (
+          <CurrencySymbol code={currencyCode} symbol={currencySymbolText} iconSize="h-5 w-5" />
+        )}
       </p>
     </motion.div>
   );
@@ -295,8 +300,9 @@ function CountryStatsCard({ stat, index }: { stat: CountryStats; index: number }
         </div>
         <div>
           <p className="text-xs text-muted-foreground mb-1">الإيرادات</p>
-          <p className="text-xl font-bold text-foreground">
-            <AnimatedCounter target={stat.totalRevenue} suffix={` ${stat.currencySymbol}`} />
+          <p className="text-xl font-bold text-foreground inline-flex items-center gap-1">
+            <AnimatedCounter target={stat.totalRevenue} />
+            <CurrencySymbol code={stat.currencyCode} symbol={stat.currencySymbol} iconSize="h-4 w-4" />
           </p>
         </div>
       </div>
@@ -307,7 +313,7 @@ function CountryStatsCard({ stat, index }: { stat: CountryStats; index: number }
 // --- Main Component ---
 export default function AdminAnalytics() {
   const { currency } = useCurrency();
-  const cs = ` ${currency.symbol}`;
+  
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, totalOrders: 0, totalRevenue: 0 });
   const [recentOrders, setRecentOrders] = useState<{ name: string; city: string; time: string }[]>([]);
@@ -475,11 +481,11 @@ export default function AdminAnalytics() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={ShoppingCart} label="طلبات اليوم" value={stats.todayOrders}
           gradient="hsl(250 80% 65%), hsl(280 70% 55%)" delay={0.1} />
-        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} suffix={cs}
+        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} currencyCode={currency.code} currencySymbolText={currency.symbol}
           gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.15} />
         <StatCard icon={TrendingUp} label="إجمالي الطلبات" value={stats.totalOrders}
           gradient="hsl(340 75% 55%), hsl(20 80% 55%)" delay={0.2} />
-        <StatCard icon={BarChart3} label="إجمالي الإيرادات" value={stats.totalRevenue} suffix={cs}
+        <StatCard icon={BarChart3} label="إجمالي الإيرادات" value={stats.totalRevenue} currencyCode={currency.code} currencySymbolText={currency.symbol}
           gradient="hsl(200 80% 55%), hsl(220 70% 60%)" delay={0.25} />
       </div>
 

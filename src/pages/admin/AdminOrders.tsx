@@ -3,6 +3,7 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/hooks/useCurrency";
+import { CurrencySymbol } from "@/components/admin/CurrencySymbol";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -83,8 +84,10 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", {
 const isNew = (d: string) => Date.now() - new Date(d).getTime() < 30 * 60 * 1000;
 
 // --- Stat Card ---
-function StatCard({ icon: Icon, label, value, suffix, gradient, delay }: {
-  icon: React.ElementType; label: string; value: number; suffix?: string; gradient: string; delay: number;
+function StatCard({ icon: Icon, label, value, suffix, currencyCode, currencySymbolText, gradient, delay }: {
+  icon: React.ElementType; label: string; value: number; suffix?: string;
+  currencyCode?: string; currencySymbolText?: string;
+  gradient: string; delay: number;
 }) {
   return (
     <motion.div
@@ -100,7 +103,12 @@ function StatCard({ icon: Icon, label, value, suffix, gradient, delay }: {
         </div>
         <div>
           <p className="text-xs text-muted-foreground">{label}</p>
-          <p className="text-xl font-bold text-foreground">{value.toLocaleString("en-US")}{suffix}</p>
+          <p className="text-xl font-bold text-foreground inline-flex items-center gap-1">
+            {value.toLocaleString("en-US")}{suffix}
+            {currencyCode && currencySymbolText && (
+              <CurrencySymbol code={currencyCode} symbol={currencySymbolText} iconSize="h-4 w-4" />
+            )}
+          </p>
         </div>
       </div>
     </motion.div>
@@ -174,7 +182,7 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
 
         {/* Total */}
         <div className="text-left min-w-[80px] hidden sm:block">
-          <p className="text-sm font-bold text-foreground">{order.total.toLocaleString("en-US")} {cs}</p>
+          <p className="text-sm font-bold text-foreground inline-flex items-center gap-1">{order.total.toLocaleString("en-US")} <CurrencySymbol code={currency.code} symbol={cs} iconSize="h-3.5 w-3.5" /></p>
           <p className="text-[10px] text-muted-foreground">{PAYMENT_MAP[order.payment_method] || order.payment_method}</p>
         </div>
 
@@ -232,7 +240,7 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">المجموع</p>
-                  <p className="font-bold">{order.total.toLocaleString("en-US")} {cs}</p>
+                  <p className="font-bold inline-flex items-center gap-1">{order.total.toLocaleString("en-US")} <CurrencySymbol code={currency.code} symbol={cs} iconSize="h-3.5 w-3.5" /></p>
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">الموقع (IP)</p>
@@ -506,7 +514,7 @@ export default function AdminOrders() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={ShoppingCart} label="طلبات اليوم" value={stats.todayCount}
           gradient="hsl(250 80% 65%), hsl(280 70% 55%)" delay={0.05} />
-        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} suffix={` ${cs}`}
+        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} currencyCode={currency.code} currencySymbolText={cs}
           gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.1} />
         <StatCard icon={Clock} label="قيد الانتظار" value={stats.pending}
           gradient="hsl(40 85% 55%), hsl(30 80% 50%)" delay={0.15} />
@@ -630,7 +638,7 @@ export default function AdminOrders() {
                             <TableRow key={item.id}>
                               <TableCell className="text-sm">{item.product_name}</TableCell>
                               <TableCell className="text-sm">{item.quantity}</TableCell>
-                              <TableCell className="text-sm">{item.total_price} {cs}</TableCell>
+                              <TableCell className="text-sm inline-flex items-center gap-1">{item.total_price} <CurrencySymbol code={currency.code} symbol={cs} iconSize="h-3 w-3" /></TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
