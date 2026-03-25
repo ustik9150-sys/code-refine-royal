@@ -480,11 +480,11 @@ export default function AdminAnalytics() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={ShoppingCart} label="طلبات اليوم" value={stats.todayOrders}
           gradient="hsl(250 80% 65%), hsl(280 70% 55%)" delay={0.1} />
-        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} suffix={cs}
+        <StatCard icon={DollarSign} label="إيرادات اليوم" value={stats.todayRevenue} currencyCode={currency.code} currencySymbolText={currency.symbol}
           gradient="hsl(160 70% 45%), hsl(140 60% 50%)" delay={0.15} />
         <StatCard icon={TrendingUp} label="إجمالي الطلبات" value={stats.totalOrders}
           gradient="hsl(340 75% 55%), hsl(20 80% 55%)" delay={0.2} />
-        <StatCard icon={BarChart3} label="إجمالي الإيرادات" value={stats.totalRevenue} suffix={cs}
+        <StatCard icon={BarChart3} label="إجمالي الإيرادات" value={stats.totalRevenue} currencyCode={currency.code} currencySymbolText={currency.symbol}
           gradient="hsl(200 80% 55%), hsl(220 70% 60%)" delay={0.25} />
       </div>
 
