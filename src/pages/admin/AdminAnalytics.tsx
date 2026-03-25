@@ -395,6 +395,15 @@ export default function AdminAnalytics() {
       if (countryTimePeriod === "today") return orderDate >= startOfToday;
       if (countryTimePeriod === "7days") return orderDate >= last7;
       if (countryTimePeriod === "30days") return orderDate >= last30;
+      if (countryTimePeriod === "custom") {
+        if (customDateRange.from && orderDate < customDateRange.from) return false;
+        if (customDateRange.to) {
+          const endOfDay = new Date(customDateRange.to);
+          endOfDay.setHours(23, 59, 59, 999);
+          if (orderDate > endOfDay) return false;
+        }
+        return !!(customDateRange.from);
+      }
       return true;
     });
 
