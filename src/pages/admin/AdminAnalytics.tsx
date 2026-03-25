@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useCurrency } from "@/hooks/useCurrency";
+import { useCurrency, CURRENCIES } from "@/hooks/useCurrency";
+import { getFlagUrl } from "@/lib/currency-flags";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ShoppingCart,
@@ -12,6 +13,7 @@ import {
   Users,
   MapPin,
   Clock,
+  Globe,
 } from "lucide-react";
 import {
   LineChart,
