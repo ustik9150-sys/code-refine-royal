@@ -408,6 +408,7 @@ export default function AdminProducts() {
                 key={product.id}
                 product={product}
                 index={i}
+                systemCurrency={currency}
                 onEdit={(id) => navigate(`/admin/products/${id}`)}
                 onDelete={(id) => setDeleteTarget(id)}
                 onDuplicate={handleDuplicate}
