@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
@@ -8,6 +8,7 @@ import { useCurrency, CURRENCIES } from "@/hooks/useCurrency";
 import { getFlagUrl } from "@/lib/currency-flags";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CurrencySymbol } from "@/components/admin/CurrencySymbol";
+import { FuturisticFullLoader, FuturisticSkeleton } from "@/components/admin/FuturisticLoader";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -315,6 +316,8 @@ export default function AdminAnalytics() {
   const { currency } = useCurrency();
   
   const [loading, setLoading] = useState(true);
+  const [loaderDone, setLoaderDone] = useState(false);
+  const [showContent, setShowContent] = useState(false);
   const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, totalOrders: 0, totalRevenue: 0 });
   const [recentOrders, setRecentOrders] = useState<{ name: string; city: string; time: string }[]>([]);
   const [dailyData, setDailyData] = useState<{ day: string; orders: number; revenue: number }[]>([]);
@@ -470,7 +473,29 @@ export default function AdminAnalytics() {
     }
   }, [allOrdersRaw, countryTimePeriod, customDateRange, currency]);
 
-  if (loading) return <AnalyticsSkeleton />;
+  const handleLoaderComplete = useCallback(() => {
+    setLoaderDone(true);
+    if (!loading) {
+      setShowContent(true);
+    }
+  }, [loading]);
+
+  // When both loader animation is done and data is loaded, show content
+  useEffect(() => {
+    if (loaderDone && !loading) {
+      setShowContent(true);
+    }
+  }, [loaderDone, loading]);
+
+  // Stage 1: Full-screen futuristic loader
+  if (!loaderDone) {
+    return <FuturisticFullLoader onComplete={handleLoaderComplete} />;
+  }
+
+  // Stage 2: Skeleton UI while data still loading
+  if (!showContent) {
+    return <FuturisticSkeleton />;
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
