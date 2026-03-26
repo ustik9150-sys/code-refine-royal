@@ -328,13 +328,17 @@ export default function AdminAnalytics() {
   useEffect(() => {
     async function fetchAll() {
       try {
-        const today = new Date().toISOString().split("T")[0];
+        // Use Riyadh timezone (UTC+3) for "today" to match country stats
+        const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000;
+        const nowRiyadh = new Date(Date.now() + RIYADH_OFFSET_MS);
+        const startOfTodayRiyadh = new Date(Date.UTC(nowRiyadh.getUTCFullYear(), nowRiyadh.getUTCMonth(), nowRiyadh.getUTCDate()) - RIYADH_OFFSET_MS);
+        const todayISO = startOfTodayRiyadh.toISOString();
         const last7 = getLast7Days();
         const weekStart = last7[0];
 
         const [countRes, todayRes, weekRes, recentRes, allOrdersRes] = await Promise.all([
           supabase.from("orders").select("*", { count: "exact", head: true }),
-          supabase.from("orders").select("total").gte("created_at", today),
+          supabase.from("orders").select("total").gte("created_at", todayISO),
           supabase.from("orders").select("total, created_at").gte("created_at", weekStart),
           supabase.from("orders").select("customer_name, city, created_at").order("created_at", { ascending: false }).limit(5),
           supabase.from("orders").select("ip_country, total, created_at, order_items(product_id, products(currency_code, currency_enabled))"),
