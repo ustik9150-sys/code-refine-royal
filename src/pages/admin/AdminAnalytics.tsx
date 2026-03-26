@@ -316,6 +316,8 @@ export default function AdminAnalytics() {
   const { currency } = useCurrency();
   
   const [loading, setLoading] = useState(true);
+  const [loaderDone, setLoaderDone] = useState(false);
+  const [showContent, setShowContent] = useState(false);
   const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, totalOrders: 0, totalRevenue: 0 });
   const [recentOrders, setRecentOrders] = useState<{ name: string; city: string; time: string }[]>([]);
   const [dailyData, setDailyData] = useState<{ day: string; orders: number; revenue: number }[]>([]);
