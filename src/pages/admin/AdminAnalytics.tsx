@@ -8,6 +8,7 @@ import { useCurrency, CURRENCIES } from "@/hooks/useCurrency";
 import { getFlagUrl } from "@/lib/currency-flags";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CurrencySymbol } from "@/components/admin/CurrencySymbol";
+import { FuturisticFullLoader, FuturisticSkeleton } from "@/components/admin/FuturisticLoader";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
