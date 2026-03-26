@@ -401,7 +401,7 @@ export default function AdminAnalytics() {
     const filtered = allOrdersRaw.filter((order: any) => {
       if (countryTimePeriod === "all") return true;
       const orderDate = new Date(order.created_at);
-      if (countryTimePeriod === "today") return orderDate >= startOfToday;
+      if (countryTimePeriod === "today") return orderDate >= startOfTodayRiyadh;
       if (countryTimePeriod === "7days") return orderDate >= last7;
       if (countryTimePeriod === "30days") return orderDate >= last30;
       if (countryTimePeriod === "custom") {
