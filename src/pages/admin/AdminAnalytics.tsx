@@ -473,7 +473,29 @@ export default function AdminAnalytics() {
     }
   }, [allOrdersRaw, countryTimePeriod, customDateRange, currency]);
 
-  if (loading) return <AnalyticsSkeleton />;
+  const handleLoaderComplete = useCallback(() => {
+    setLoaderDone(true);
+    if (!loading) {
+      setShowContent(true);
+    }
+  }, [loading]);
+
+  // When both loader animation is done and data is loaded, show content
+  useEffect(() => {
+    if (loaderDone && !loading) {
+      setShowContent(true);
+    }
+  }, [loaderDone, loading]);
+
+  // Stage 1: Full-screen futuristic loader
+  if (!loaderDone) {
+    return <FuturisticFullLoader onComplete={handleLoaderComplete} />;
+  }
+
+  // Stage 2: Skeleton UI while data still loading
+  if (!showContent) {
+    return <FuturisticSkeleton />;
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
