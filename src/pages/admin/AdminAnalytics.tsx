@@ -390,15 +390,18 @@ export default function AdminAnalytics() {
   useEffect(() => {
     if (!allOrdersRaw.length) return;
 
-    const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const last7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const last30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    // Use Saudi Arabia timezone (Asia/Riyadh, UTC+3) for accurate "today" filtering
+    const nowUtc = new Date();
+    const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000; // UTC+3
+    const nowRiyadh = new Date(nowUtc.getTime() + RIYADH_OFFSET_MS);
+    const startOfTodayRiyadh = new Date(Date.UTC(nowRiyadh.getUTCFullYear(), nowRiyadh.getUTCMonth(), nowRiyadh.getUTCDate()) - RIYADH_OFFSET_MS);
+    const last7 = new Date(startOfTodayRiyadh.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const last30 = new Date(startOfTodayRiyadh.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     const filtered = allOrdersRaw.filter((order: any) => {
       if (countryTimePeriod === "all") return true;
       const orderDate = new Date(order.created_at);
-      if (countryTimePeriod === "today") return orderDate >= startOfToday;
+      if (countryTimePeriod === "today") return orderDate >= startOfTodayRiyadh;
       if (countryTimePeriod === "7days") return orderDate >= last7;
       if (countryTimePeriod === "30days") return orderDate >= last30;
       if (countryTimePeriod === "custom") {
