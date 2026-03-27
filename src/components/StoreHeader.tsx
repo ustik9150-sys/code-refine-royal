@@ -184,7 +184,7 @@ const StoreHeader = () => {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <button className="text-store-primary hover:text-accent transition-colors" aria-label="بحث">
+            <button className="text-store-primary hover:text-accent transition-colors" aria-label="بحث" onClick={() => setSearchOpen(true)}>
               <Search className="w-5 h-5" />
             </button>
             <button className="text-store-primary hover:text-accent transition-colors" aria-label="تسجيل الدخول">
