@@ -59,16 +59,50 @@ const ThankYou: React.FC = () => {
             </button>
           </div>
 
-          {/* Phone Call Notice */}
-          <div className="bg-accent/10 border border-accent/20 rounded-xl px-5 py-4 max-w-md mx-auto text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center mx-auto">
-              <Phone className="w-5 h-5 text-accent" />
+          {/* Phone Call Notice - Animated */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.6, duration: 0.5, type: "spring", stiffness: 120 }}
+            className="relative max-w-sm mx-auto"
+          >
+            {/* Pulsing ring behind */}
+            <div className="absolute inset-0 rounded-2xl bg-accent/10 animate-[ping_2.5s_ease-in-out_infinite] opacity-30" />
+            
+            <div className="relative overflow-hidden rounded-2xl border-2 border-accent/30 bg-gradient-to-br from-accent/5 via-background to-accent/10 px-5 py-5 text-center shadow-lg">
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                <div className="absolute -inset-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-accent/8 to-transparent skew-x-12" />
+              </div>
+
+              <div className="relative space-y-3">
+                {/* Animated phone icon */}
+                <motion.div
+                  animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
+                  transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 2.5 }}
+                  className="w-14 h-14 rounded-full bg-accent/15 border border-accent/20 flex items-center justify-center mx-auto"
+                >
+                  <PhoneCall className="w-6 h-6 text-accent" />
+                </motion.div>
+
+                <h3 className="text-base font-black text-foreground">
+                  📱 انتبه لهاتفك!
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  سيتصل بك فريقنا قريبًا <strong className="text-foreground">لتأكيد طلبك</strong> والإجابة على أي استفسارات لديك
+                </p>
+                
+                {/* Step indicators */}
+                <div className="flex items-center justify-center gap-3 pt-2">
+                  <StepDot step={1} label="تأكيد الطلب" delay={1} />
+                  <div className="w-6 h-px bg-border" />
+                  <StepDot step={2} label="تجهيز الشحن" delay={1.4} />
+                  <div className="w-6 h-px bg-border" />
+                  <StepDot step={3} label="التوصيل" delay={1.8} />
+                </div>
+              </div>
             </div>
-            <p className="text-sm font-bold text-foreground">يرجى الانتباه لهاتفك 📱</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              سيتصل بك فريق مركز الاتصال الخاص بنا قريبًا لتأكيد طلبك والإجابة على استفساراتك
-            </p>
-          </div>
+          </motion.div>
 
           <button
             onClick={() => navigate("/")}
