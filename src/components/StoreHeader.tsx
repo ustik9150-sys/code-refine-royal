@@ -133,7 +133,7 @@ const StoreHeader = () => {
             <img src={logo} alt="ساكريكس | SAQRIX" className="h-12" />
           </a>
           <div className="flex items-center gap-3">
-            <button className="text-store-primary" aria-label="بحث">
+            <button className="text-store-primary" aria-label="بحث" onClick={() => setSearchOpen(true)}>
               <Search className="w-5 h-5" />
             </button>
             <button className="text-store-primary relative" aria-label="سلة التسوق">
