@@ -1,6 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { FileText, Mail, Phone } from "lucide-react";
+import { FileText, Mail, Phone, PhoneCall } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import celebrationSvg from "@/assets/celebration.svg";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
