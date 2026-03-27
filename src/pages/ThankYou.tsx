@@ -147,5 +147,20 @@ const ThankYou: React.FC = () => {
     </div>
   );
 };
+function StepDot({ step, label, delay }: { step: number; label: string; delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay, type: "spring", stiffness: 200 }}
+      className="flex flex-col items-center gap-1"
+    >
+      <div className="w-7 h-7 rounded-full bg-accent/15 border border-accent/25 flex items-center justify-center text-[10px] font-bold text-accent">
+        {step}
+      </div>
+      <span className="text-[10px] text-muted-foreground whitespace-nowrap">{label}</span>
+    </motion.div>
+  );
+}
 
 export default ThankYou;
