@@ -167,3 +167,12 @@
 .animate-marquee {
   animation: marquee 25s linear infinite;
 }
+
+/* Product card shadows */
+.product-card-shadow {
+  box-shadow: 0 1px 3px hsl(var(--foreground) / 0.04), 0 4px 12px hsl(var(--foreground) / 0.03);
+}
+.product-card-shadow-hover,
+.group:hover .product-card-shadow {
+  box-shadow: 0 4px 16px hsl(var(--foreground) / 0.08), 0 12px 32px hsl(var(--foreground) / 0.06);
+}
