@@ -13,50 +13,20 @@ type SearchProduct = {
   images: { url: string; is_main: boolean }[];
 };
 
+interface FooterLink {
+  id: string;
+  label: string;
+  href: string;
+  enabled: boolean;
+}
 
-const menuItems = [
-  { label: "عروض رمضان المبارك", href: "#" },
-  {
-    label: "العطور",
-    href: "#",
-    children: [
-      { label: "عطور 75 مل", href: "#" },
-      { label: "عطور 100 مل", href: "#" },
-      { label: "عطور 150 مل", href: "#" },
-      { label: "عطور 200 مل", href: "#" },
-      { label: "جميع العطور", href: "#" },
-    ],
-  },
-  { label: "منتجات أقل من 100 ريال", href: "#" },
-  { label: "جديدنا", href: "#" },
-  {
-    label: "مجموعات مميزة",
-    href: "#",
-    children: [
-      { label: "مجموعة الدايموند", href: "#" },
-      { label: "مجموعة التوباكو", href: "#" },
-      { label: "مجموعة المسك", href: "#" },
-      { label: "مجموعة سمر", href: "#" },
-      { label: "مجموعة دوز", href: "#" },
-      { label: "مجموعة ليذر", href: "#" },
-      { label: "مجموعة مون", href: "#" },
-      { label: "مجموعة إرث", href: "#" },
-      { label: "مجموعة سيجنتشر", href: "#" },
-      { label: "للسفر والإهداء", href: "#" },
-    ],
-  },
-  { label: "زيوت عطرية", href: "#" },
-  {
-    label: "بخور ومباخر",
-    href: "#",
-    children: [
-      { label: "البخور", href: "#" },
-      { label: "مباخر", href: "#" },
-    ],
-  },
-  { label: "عطور منزلية", href: "#" },
-  { label: "توزيعات", href: "#" },
-  { label: "هدايا", href: "#" },
+const defaultLinks: FooterLink[] = [
+  { id: "1", label: "من نحن", href: "/about", enabled: true },
+  { id: "2", label: "سياسة الخصوصية", href: "/privacy", enabled: true },
+  { id: "3", label: "سياسة الاستبدال والاسترجاع و التوصيل", href: "/return-policy", enabled: true },
+  { id: "4", label: "البنود والقوانين", href: "/terms", enabled: true },
+  { id: "5", label: "الاسئلة الشائعه", href: "/faq", enabled: true },
+  { id: "6", label: "اتصل بنا", href: "/contact", enabled: true },
 ];
 
 const StoreHeader = () => {
@@ -67,6 +37,27 @@ const StoreHeader = () => {
   const [searchResults, setSearchResults] = useState<SearchProduct[]>([]);
   const [searching, setSearching] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [menuItems, setMenuItems] = useState<{ label: string; href: string }[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "footer_links")
+        .maybeSingle();
+      if (data?.value) {
+        const v = data.value as any;
+        if (Array.isArray(v.links)) {
+          setMenuItems(v.links.filter((l: FooterLink) => l.enabled && l.label).map((l: FooterLink) => ({ label: l.label, href: l.href })));
+        } else {
+          setMenuItems(defaultLinks.filter(l => l.enabled).map(l => ({ label: l.label, href: l.href })));
+        }
+      } else {
+        setMenuItems(defaultLinks.filter(l => l.enabled).map(l => ({ label: l.label, href: l.href })));
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     if (searchOpen) {
@@ -154,30 +145,13 @@ const StoreHeader = () => {
             <nav>
               <ul className="flex items-center gap-5 text-sm">
                 {menuItems.map((item) => (
-                  <li key={item.label} className="relative group">
-                    <a
-                      href={item.href}
-                      className="text-store-primary hover:text-accent transition-colors py-4 inline-flex items-center gap-1"
+                  <li key={item.label}>
+                    <Link
+                      to={item.href}
+                      className="text-store-primary hover:text-accent transition-colors py-4 inline-flex items-center"
                     >
-                      <span>{item.label}</span>
-                      {item.children && <ChevronDown className="w-3 h-3" />}
-                    </a>
-                    {item.children && (
-                      <div className="absolute top-full right-0 bg-background border border-border rounded-md shadow-lg w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                        <ul className="py-2">
-                          {item.children.map((child) => (
-                            <li key={child.label}>
-                              <a
-                                href={child.href}
-                                className="block px-4 py-2 text-sm text-store-primary hover:bg-secondary transition-colors"
-                              >
-                                {child.label}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                      {item.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -204,32 +178,9 @@ const StoreHeader = () => {
           <ul className="container py-4">
             {menuItems.map((item) => (
               <li key={item.label} className="border-b border-border">
-                {item.children ? (
-                  <>
-                    <button
-                      onClick={() => setOpenSubmenu(openSubmenu === item.label ? null : item.label)}
-                      className="w-full flex items-center justify-between py-3 text-sm font-bold text-store-primary"
-                    >
-                      <span>{item.label}</span>
-                      <ChevronDown className={`w-4 h-4 transition-transform ${openSubmenu === item.label ? "rotate-180" : ""}`} />
-                    </button>
-                    {openSubmenu === item.label && (
-                      <ul className="pr-4 pb-2">
-                        {item.children.map((child) => (
-                          <li key={child.label}>
-                            <a href={child.href} className="block py-2 text-sm text-store-secondary">
-                              {child.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </>
-                ) : (
-                  <a href={item.href} className="block py-3 text-sm font-bold text-store-primary">
-                    {item.label}
-                  </a>
-                )}
+                <Link to={item.href} onClick={() => setMobileMenuOpen(false)} className="block py-3 text-sm font-bold text-store-primary">
+                  {item.label}
+                </Link>
               </li>
             ))}
           </ul>
