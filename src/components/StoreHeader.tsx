@@ -13,50 +13,20 @@ type SearchProduct = {
   images: { url: string; is_main: boolean }[];
 };
 
+interface FooterLink {
+  id: string;
+  label: string;
+  href: string;
+  enabled: boolean;
+}
 
-const menuItems = [
-  { label: "عروض رمضان المبارك", href: "#" },
-  {
-    label: "العطور",
-    href: "#",
-    children: [
-      { label: "عطور 75 مل", href: "#" },
-      { label: "عطور 100 مل", href: "#" },
-      { label: "عطور 150 مل", href: "#" },
-      { label: "عطور 200 مل", href: "#" },
-      { label: "جميع العطور", href: "#" },
-    ],
-  },
-  { label: "منتجات أقل من 100 ريال", href: "#" },
-  { label: "جديدنا", href: "#" },
-  {
-    label: "مجموعات مميزة",
-    href: "#",
-    children: [
-      { label: "مجموعة الدايموند", href: "#" },
-      { label: "مجموعة التوباكو", href: "#" },
-      { label: "مجموعة المسك", href: "#" },
-      { label: "مجموعة سمر", href: "#" },
-      { label: "مجموعة دوز", href: "#" },
-      { label: "مجموعة ليذر", href: "#" },
-      { label: "مجموعة مون", href: "#" },
-      { label: "مجموعة إرث", href: "#" },
-      { label: "مجموعة سيجنتشر", href: "#" },
-      { label: "للسفر والإهداء", href: "#" },
-    ],
-  },
-  { label: "زيوت عطرية", href: "#" },
-  {
-    label: "بخور ومباخر",
-    href: "#",
-    children: [
-      { label: "البخور", href: "#" },
-      { label: "مباخر", href: "#" },
-    ],
-  },
-  { label: "عطور منزلية", href: "#" },
-  { label: "توزيعات", href: "#" },
-  { label: "هدايا", href: "#" },
+const defaultLinks: FooterLink[] = [
+  { id: "1", label: "من نحن", href: "/about", enabled: true },
+  { id: "2", label: "سياسة الخصوصية", href: "/privacy", enabled: true },
+  { id: "3", label: "سياسة الاستبدال والاسترجاع و التوصيل", href: "/return-policy", enabled: true },
+  { id: "4", label: "البنود والقوانين", href: "/terms", enabled: true },
+  { id: "5", label: "الاسئلة الشائعه", href: "/faq", enabled: true },
+  { id: "6", label: "اتصل بنا", href: "/contact", enabled: true },
 ];
 
 const StoreHeader = () => {
