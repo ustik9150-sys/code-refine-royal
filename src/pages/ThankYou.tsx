@@ -58,6 +58,17 @@ const ThankYou: React.FC = () => {
             </button>
           </div>
 
+          {/* Phone Call Notice */}
+          <div className="bg-accent/10 border border-accent/20 rounded-xl px-5 py-4 max-w-md mx-auto text-center space-y-2">
+            <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center mx-auto">
+              <Phone className="w-5 h-5 text-accent" />
+            </div>
+            <p className="text-sm font-bold text-foreground">يرجى الانتباه لهاتفك 📱</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              سيتصل بك فريق مركز الاتصال الخاص بنا قريبًا لتأكيد طلبك والإجابة على استفساراتك
+            </p>
+          </div>
+
           <button
             onClick={() => navigate("/")}
             className="inline-block bg-foreground text-background px-8 py-3 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
