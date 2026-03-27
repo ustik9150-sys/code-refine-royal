@@ -1,6 +1,18 @@
-import { useState } from "react";
-import { Search, User, ShoppingCart, Menu, X, ChevronDown, Globe } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Search, User, ShoppingCart, Menu, X, ChevronDown, Globe, Package } from "lucide-react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { AnimatePresence, motion } from "framer-motion";
 import logo from "@/assets/logo.png";
+
+type SearchProduct = {
+  id: string;
+  slug: string | null;
+  name_ar: string;
+  price: number;
+  images: { url: string; is_main: boolean }[];
+};
+
 
 const menuItems = [
   { label: "عروض رمضان المبارك", href: "#" },
