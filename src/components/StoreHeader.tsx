@@ -178,32 +178,9 @@ const StoreHeader = () => {
           <ul className="container py-4">
             {menuItems.map((item) => (
               <li key={item.label} className="border-b border-border">
-                {item.children ? (
-                  <>
-                    <button
-                      onClick={() => setOpenSubmenu(openSubmenu === item.label ? null : item.label)}
-                      className="w-full flex items-center justify-between py-3 text-sm font-bold text-store-primary"
-                    >
-                      <span>{item.label}</span>
-                      <ChevronDown className={`w-4 h-4 transition-transform ${openSubmenu === item.label ? "rotate-180" : ""}`} />
-                    </button>
-                    {openSubmenu === item.label && (
-                      <ul className="pr-4 pb-2">
-                        {item.children.map((child) => (
-                          <li key={child.label}>
-                            <a href={child.href} className="block py-2 text-sm text-store-secondary">
-                              {child.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </>
-                ) : (
-                  <a href={item.href} className="block py-3 text-sm font-bold text-store-primary">
-                    {item.label}
-                  </a>
-                )}
+                <Link to={item.href} onClick={() => setMobileMenuOpen(false)} className="block py-3 text-sm font-bold text-store-primary">
+                  {item.label}
+                </Link>
               </li>
             ))}
           </ul>
