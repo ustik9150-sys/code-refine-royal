@@ -145,30 +145,13 @@ const StoreHeader = () => {
             <nav>
               <ul className="flex items-center gap-5 text-sm">
                 {menuItems.map((item) => (
-                  <li key={item.label} className="relative group">
-                    <a
-                      href={item.href}
-                      className="text-store-primary hover:text-accent transition-colors py-4 inline-flex items-center gap-1"
+                  <li key={item.label}>
+                    <Link
+                      to={item.href}
+                      className="text-store-primary hover:text-accent transition-colors py-4 inline-flex items-center"
                     >
-                      <span>{item.label}</span>
-                      {item.children && <ChevronDown className="w-3 h-3" />}
-                    </a>
-                    {item.children && (
-                      <div className="absolute top-full right-0 bg-background border border-border rounded-md shadow-lg w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                        <ul className="py-2">
-                          {item.children.map((child) => (
-                            <li key={child.label}>
-                              <a
-                                href={child.href}
-                                className="block px-4 py-2 text-sm text-store-primary hover:bg-secondary transition-colors"
-                              >
-                                {child.label}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                      {item.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
