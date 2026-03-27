@@ -99,9 +99,9 @@ const StoreHeader = () => {
             <span>العربية</span>
             <ChevronDown className="w-3 h-3" />
           </button>
-          <div className="text-store-secondary text-xs">
+          <Link to="/contact" className="text-store-secondary text-xs hover:text-store-primary transition-colors">
             تواصل معنا
-          </div>
+          </Link>
         </div>
       </div>
 
