@@ -235,6 +235,83 @@ const StoreHeader = () => {
           </ul>
         </div>
       )}
+
+      {/* Search Overlay */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] bg-foreground/50 backdrop-blur-sm"
+            onClick={() => setSearchOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+              className="bg-background w-full max-w-2xl mx-auto mt-20 rounded-2xl shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+                <Search className="w-5 h-5 text-muted-foreground shrink-0" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="ابحث عن منتج..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 bg-transparent text-foreground text-base outline-none placeholder:text-muted-foreground"
+                  dir="rtl"
+                />
+                <button onClick={() => setSearchOpen(false)} className="text-muted-foreground hover:text-foreground">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="max-h-[60vh] overflow-y-auto">
+                {searching && (
+                  <div className="py-8 text-center text-muted-foreground text-sm">جاري البحث...</div>
+                )}
+                {!searching && searchQuery.trim() && searchResults.length === 0 && (
+                  <div className="py-8 text-center text-muted-foreground text-sm flex flex-col items-center gap-2">
+                    <Package className="w-10 h-10 text-muted-foreground/30" />
+                    لا توجد نتائج
+                  </div>
+                )}
+                {searchResults.map((product) => {
+                  const thumb = product.images.find(i => i.is_main)?.url || product.images[0]?.url;
+                  const link = `/product/${product.slug || product.id}`;
+                  return (
+                    <Link
+                      key={product.id}
+                      to={link}
+                      onClick={() => setSearchOpen(false)}
+                      className="flex items-center gap-4 px-5 py-3 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="w-14 h-14 rounded-xl bg-muted/30 overflow-hidden shrink-0">
+                        {thumb ? (
+                          <img src={thumb} alt={product.name_ar} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="w-6 h-6 text-muted-foreground/30" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 text-right">
+                        <p className="text-sm font-bold text-foreground">{product.name_ar}</p>
+                        <p className="text-sm text-muted-foreground">{product.price.toLocaleString("en-US")} ر.س</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
