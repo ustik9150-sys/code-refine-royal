@@ -62,6 +62,41 @@ const menuItems = [
 const StoreHeader = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchProduct[]>([]);
+  const [searching, setSearching] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    } else {
+      setSearchQuery("");
+      setSearchResults([]);
+    }
+  }, [searchOpen]);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      setSearching(true);
+      const { data } = await supabase
+        .from("products")
+        .select("id, slug, name_ar, price, product_images(url, is_main)")
+        .eq("status", "active")
+        .ilike("name_ar", `%${searchQuery}%`)
+        .limit(8);
+      if (data) {
+        setSearchResults(data.map((p: any) => ({ ...p, images: p.product_images || [] })));
+      }
+      setSearching(false);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
 
   return (
     <header className="bg-background sticky top-0 z-50 shadow-sm">
