@@ -37,6 +37,27 @@ const StoreHeader = () => {
   const [searchResults, setSearchResults] = useState<SearchProduct[]>([]);
   const [searching, setSearching] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [menuItems, setMenuItems] = useState<{ label: string; href: string }[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "footer_links")
+        .maybeSingle();
+      if (data?.value) {
+        const v = data.value as any;
+        if (Array.isArray(v.links)) {
+          setMenuItems(v.links.filter((l: FooterLink) => l.enabled && l.label).map((l: FooterLink) => ({ label: l.label, href: l.href })));
+        } else {
+          setMenuItems(defaultLinks.filter(l => l.enabled).map(l => ({ label: l.label, href: l.href })));
+        }
+      } else {
+        setMenuItems(defaultLinks.filter(l => l.enabled).map(l => ({ label: l.label, href: l.href })));
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     if (searchOpen) {
