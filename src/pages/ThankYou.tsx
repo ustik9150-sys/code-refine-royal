@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import celebrationSvg from "@/assets/celebration.svg";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
+import { supabase } from "@/integrations/supabase/client";
 
 const generateTrackingCode = (orderId: string): string => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -27,9 +28,67 @@ const ThankYou: React.FC = () => {
   const trackingCode = rawOrder ? generateTrackingCode(rawOrder) : "N/A";
   const email = searchParams.get("email") || "";
 
+  const total = searchParams.get("total") || "";
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    fireConversionEvents();
   }, []);
+
+  const fireConversionEvents = async () => {
+    try {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "tracking")
+        .maybeSingle();
+
+      if (!data) return;
+      const v = data.value as any;
+      const totalNum = parseFloat(total) || 0;
+
+      // Snapchat PURCHASE event
+      if (v?.snapchat_pixel_id && v?.snapchat_enabled && (window as any).snaptr) {
+        (window as any).snaptr('track', 'PURCHASE', {
+          price: totalNum,
+          currency: 'SAR',
+          transaction_id: rawOrder,
+        });
+        console.log("Snapchat PURCHASE event fired");
+      }
+
+      // Facebook Purchase event
+      if (v?.facebook_pixel_id && (v?.facebook_enabled || v?.pixel_enabled) && (window as any).fbq) {
+        (window as any).fbq('track', 'Purchase', {
+          value: totalNum,
+          currency: 'SAR',
+        });
+        console.log("Facebook Purchase event fired");
+      }
+
+      // TikTok CompletePayment event
+      if (v?.tiktok_pixel_id && v?.tiktok_enabled && (window as any).ttq) {
+        (window as any).ttq.track('CompletePayment', {
+          value: totalNum,
+          currency: 'SAR',
+        });
+        console.log("TikTok CompletePayment event fired");
+      }
+
+      // Google Ads conversion
+      if (v?.google_ads_id && v?.google_ads_enabled && v?.google_ads_conversion_label && (window as any).gtag) {
+        (window as any).gtag('event', 'conversion', {
+          send_to: `${v.google_ads_id}/${v.google_ads_conversion_label}`,
+          value: totalNum,
+          currency: 'SAR',
+          transaction_id: rawOrder,
+        });
+        console.log("Google Ads conversion event fired");
+      }
+    } catch (err) {
+      console.error("Conversion tracking error:", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col" dir="rtl">
