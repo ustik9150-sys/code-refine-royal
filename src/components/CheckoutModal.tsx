@@ -140,6 +140,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ open, onClose, totalAmoun
       const params = new URLSearchParams();
       params.set("order", orderId);
       if (email) params.set("email", encodeURIComponent(email));
+      params.set("total", String(totalAmount));
       navigate(`/thank-you?${params.toString()}`);
     } catch (err) {
       console.error("Order creation failed:", err);
