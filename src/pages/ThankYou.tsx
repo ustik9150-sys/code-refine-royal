@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import celebrationSvg from "@/assets/celebration.svg";
 import StoreHeader from "@/components/StoreHeader";
 import StoreFooter from "@/components/StoreFooter";
+import { supabase } from "@/integrations/supabase/client";
 
 const generateTrackingCode = (orderId: string): string => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
