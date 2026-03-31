@@ -57,15 +57,13 @@ export default function MobileBottomNav() {
         <NavItem to="/admin/settings" icon={User} label="الحساب" />
       </div>
 
-      {/* Dark mode override */}
       <style>{`
-        @media (prefers-color-scheme: dark) {
-          .mobile-bottom-nav-glass {
-            background: rgba(20, 20, 25, 0.75) !important;
-          }
+        .mobile-bottom-nav-glass {
+          background: rgba(255, 255, 255, 0.82);
         }
         .dark .mobile-bottom-nav-glass {
-          background: rgba(20, 20, 25, 0.75) !important;
+          background: rgba(20, 20, 25, 0.75);
+          box-shadow: 0 10px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08) inset;
         }
       `}</style>
     </nav>
