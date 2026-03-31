@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useProductDraft, ProductDraftData } from "@/hooks/useProductDraft";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,10 +14,10 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, Save, Upload, X, GripVertical, Star, Trash2, Package,
-  ImagePlus, Loader2, Eye, Tag,
+  ImagePlus, Loader2, Eye, Tag, CloudOff, Check, Cloud, RotateCcw,
 } from "lucide-react";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
