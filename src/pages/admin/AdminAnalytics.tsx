@@ -312,96 +312,85 @@ function CountryStatsCard({ stat, index }: { stat: CountryStats; index: number }
   );
 }
 
+// --- Fetch function ---
+async function fetchAnalyticsData(currencyCode: string) {
+  const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000;
+  const nowRiyadh = new Date(Date.now() + RIYADH_OFFSET_MS);
+  const startOfTodayRiyadh = new Date(Date.UTC(nowRiyadh.getUTCFullYear(), nowRiyadh.getUTCMonth(), nowRiyadh.getUTCDate()) - RIYADH_OFFSET_MS);
+  const todayISO = startOfTodayRiyadh.toISOString();
+  const last7 = getLast7Days();
+  const weekStart = last7[0];
+
+  const [countRes, todayRes, weekRes, recentRes, allOrdersRes] = await Promise.all([
+    supabase.from("orders").select("*", { count: "exact", head: true }),
+    supabase.from("orders").select("total").gte("created_at", todayISO).limit(10000),
+    supabase.from("orders").select("total, created_at").gte("created_at", weekStart).limit(10000),
+    supabase.from("orders").select("customer_name, city, created_at").order("created_at", { ascending: false }).limit(5),
+    supabase.from("orders").select("ip_country, total, created_at, order_items(product_id, products(currency_code, currency_enabled))").limit(10000),
+  ]);
+
+  const totalOrders = countRes.count || 0;
+  const todayOrders = todayRes.data?.length || 0;
+  const todayRevenue = todayRes.data?.reduce((s, o) => s + (o.total || 0), 0) || 0;
+  const totalRevenue = allOrdersRes.data?.reduce((s: number, o: any) => s + (o.total || 0), 0) || 0;
+
+  const dayMap: Record<string, { orders: number; revenue: number }> = {};
+  last7.forEach(d => { dayMap[d] = { orders: 0, revenue: 0 }; });
+  weekRes.data?.forEach(o => {
+    const dateKey = o.created_at.split("T")[0];
+    if (dayMap[dateKey]) {
+      dayMap[dateKey].orders++;
+      dayMap[dateKey].revenue += o.total || 0;
+    }
+  });
+  const dailyData = last7.map(d => ({
+    day: dayNames[new Date(d).getDay()],
+    orders: dayMap[d].orders,
+    revenue: dayMap[d].revenue,
+  }));
+
+  const recentOrders = recentRes.data?.map(o => ({
+    name: o.customer_name,
+    city: o.city || "غير محدد",
+    time: getTimeAgo(o.created_at),
+  })) || [];
+
+  return {
+    stats: { todayOrders, todayRevenue, totalOrders, totalRevenue },
+    dailyData,
+    recentOrders,
+    allOrdersRaw: allOrdersRes.data || [],
+  };
+}
+
 // --- Main Component ---
 export default function AdminAnalytics() {
   const { currency } = useCurrency();
-  
-  const [loading, setLoading] = useState(true);
-  const [loaderDone, setLoaderDone] = useState(false);
-  const [showContent, setShowContent] = useState(false);
-  const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, totalOrders: 0, totalRevenue: 0 });
-  const [recentOrders, setRecentOrders] = useState<{ name: string; city: string; time: string }[]>([]);
-  const [dailyData, setDailyData] = useState<{ day: string; orders: number; revenue: number }[]>([]);
-  const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
-  const [isMultiCountry, setIsMultiCountry] = useState(false);
-  const [countryTimePeriod, setCountryTimePeriod] = useState<"today" | "7days" | "30days" | "all" | "custom">("today");
-  const [customDateRange, setCustomDateRange] = useState<{ from?: Date; to?: Date }>({});
-  const [allOrdersRaw, setAllOrdersRaw] = useState<any[]>([]);
   const { toast } = useToast();
 
-  useEffect(() => {
-    async function fetchAll() {
-      try {
-        // Use Riyadh timezone (UTC+3) for "today" to match country stats
-        const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000;
-        const nowRiyadh = new Date(Date.now() + RIYADH_OFFSET_MS);
-        const startOfTodayRiyadh = new Date(Date.UTC(nowRiyadh.getUTCFullYear(), nowRiyadh.getUTCMonth(), nowRiyadh.getUTCDate()) - RIYADH_OFFSET_MS);
-        const todayISO = startOfTodayRiyadh.toISOString();
-        const last7 = getLast7Days();
-        const weekStart = last7[0];
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ["admin-analytics", currency.code],
+    queryFn: () => fetchAnalyticsData(currency.code),
+    staleTime: 1000 * 60 * 2, // 2 minutes before refetch
+    gcTime: 1000 * 60 * 30, // keep in cache 30 min
+    refetchOnWindowFocus: true,
+  });
 
-        const [countRes, todayRes, weekRes, recentRes, allOrdersRes] = await Promise.all([
-          supabase.from("orders").select("*", { count: "exact", head: true }),
-          supabase.from("orders").select("total").gte("created_at", todayISO).limit(10000),
-          supabase.from("orders").select("total, created_at").gte("created_at", weekStart).limit(10000),
-          supabase.from("orders").select("customer_name, city, created_at").order("created_at", { ascending: false }).limit(5),
-          supabase.from("orders").select("ip_country, total, created_at, order_items(product_id, products(currency_code, currency_enabled))").limit(10000),
-        ]);
+  const hasData = !!data;
+  const stats = data?.stats || { todayOrders: 0, todayRevenue: 0, totalOrders: 0, totalRevenue: 0 };
+  const recentOrders = data?.recentOrders || [];
+  const dailyData = data?.dailyData || [];
+  const allOrdersRaw = data?.allOrdersRaw || [];
 
-        const totalOrders = countRes.count || 0;
-        const todayOrders = todayRes.data?.length || 0;
-        const todayRevenue = todayRes.data?.reduce((s, o) => s + (o.total || 0), 0) || 0;
-        // Total revenue from ALL orders (not just this week)
-        const totalRevenue = allOrdersRes.data?.reduce((s: number, o: any) => s + (o.total || 0), 0) || 0;
+  const [countryTimePeriod, setCountryTimePeriod] = useState<"today" | "7days" | "30days" | "all" | "custom">("today");
+  const [customDateRange, setCustomDateRange] = useState<{ from?: Date; to?: Date }>({});
 
-        setStats({ todayOrders, todayRevenue, totalOrders, totalRevenue });
+  // Compute country stats
+  const { countryStats, isMultiCountry } = useMemo(() => {
+    if (!allOrdersRaw.length) return { countryStats: [] as CountryStats[], isMultiCountry: false };
 
-        // Build daily chart data
-        const dayMap: Record<string, { orders: number; revenue: number }> = {};
-        last7.forEach(d => { dayMap[d] = { orders: 0, revenue: 0 }; });
-        weekRes.data?.forEach(o => {
-          const dateKey = o.created_at.split("T")[0];
-          if (dayMap[dateKey]) {
-            dayMap[dateKey].orders++;
-            dayMap[dateKey].revenue += o.total || 0;
-          }
-        });
-        setDailyData(last7.map(d => ({
-          day: dayNames[new Date(d).getDay()],
-          orders: dayMap[d].orders,
-          revenue: dayMap[d].revenue,
-        })));
-
-        // Recent orders
-        if (recentRes.data && recentRes.data.length > 0) {
-          setRecentOrders(recentRes.data.map(o => ({
-            name: o.customer_name,
-            city: o.city || "غير محدد",
-            time: getTimeAgo(o.created_at),
-          })));
-        }
-
-        // Store raw orders for country filtering
-        if (allOrdersRes.data) {
-          setAllOrdersRaw(allOrdersRes.data);
-        }
-      } catch {
-        // keep empty state
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchAll();
-  }, [currency]);
-
-  // Recompute country stats when time period or raw data changes
-  useEffect(() => {
-    if (!allOrdersRaw.length) return;
-
-    // Use Saudi Arabia timezone (Asia/Riyadh, UTC+3) for accurate "today" filtering
     const nowUtc = new Date();
-    const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000; // UTC+3
+    const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000;
     const nowRiyadh = new Date(nowUtc.getTime() + RIYADH_OFFSET_MS);
     const startOfTodayRiyadh = new Date(Date.UTC(nowRiyadh.getUTCFullYear(), nowRiyadh.getUTCMonth(), nowRiyadh.getUTCDate()) - RIYADH_OFFSET_MS);
     const last7 = new Date(startOfTodayRiyadh.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -426,7 +415,6 @@ export default function AdminAnalytics() {
     });
 
     const grouped: Record<string, { totalOrders: number; totalRevenue: number; currencyCode: string }> = {};
-
     for (const order of filtered) {
       const country = (order as any).ip_country || "غير محدد";
       let orderCurrency = currency.code;
@@ -437,7 +425,6 @@ export default function AdminAnalytics() {
           orderCurrency = product.currency_code;
         }
       }
-
       if (!grouped[country]) {
         grouped[country] = { totalOrders: 0, totalRevenue: 0, currencyCode: orderCurrency };
       }
@@ -451,51 +438,39 @@ export default function AdminAnalytics() {
     if (hasMultiple) {
       const totalAllOrders = Object.values(grouped).reduce((s, g) => s + g.totalOrders, 0);
       const countryStatsArr: CountryStats[] = Object.entries(grouped)
-        .map(([country, data]) => {
-          const currencyConfig = CURRENCIES.find(c => c.code === data.currencyCode);
+        .map(([country, d]) => {
+          const currencyConfig = CURRENCIES.find(c => c.code === d.currencyCode);
           const currencyCodeForFlag = COUNTRY_TO_CURRENCY[country] || null;
           return {
             country,
             countryAr: COUNTRY_NAME_AR[country] || country,
-            totalOrders: data.totalOrders,
-            totalRevenue: data.totalRevenue,
+            totalOrders: d.totalOrders,
+            totalRevenue: d.totalRevenue,
             currencySymbol: currencyConfig?.symbol || currency.symbol,
-            currencyCode: data.currencyCode,
+            currencyCode: d.currencyCode,
             flagUrl: getFlagUrl(currencyCodeForFlag),
-            percentage: totalAllOrders > 0 ? (data.totalOrders / totalAllOrders) * 100 : 0,
+            percentage: totalAllOrders > 0 ? (d.totalOrders / totalAllOrders) * 100 : 0,
           };
         })
         .sort((a, b) => b.totalOrders - a.totalOrders);
-
-      setCountryStats(countryStatsArr);
-      setIsMultiCountry(true);
-    } else {
-      setCountryStats([]);
-      setIsMultiCountry(hasMultiple);
+      return { countryStats: countryStatsArr, isMultiCountry: true };
     }
+    return { countryStats: [] as CountryStats[], isMultiCountry: hasMultiple };
   }, [allOrdersRaw, countryTimePeriod, customDateRange, currency]);
+
+  // First-ever load: show full loader only when no cached data
+  const [loaderDone, setLoaderDone] = useState(false);
+  const showFullLoader = isLoading && !hasData && !loaderDone;
 
   const handleLoaderComplete = useCallback(() => {
     setLoaderDone(true);
-    if (!loading) {
-      setShowContent(true);
-    }
-  }, [loading]);
+  }, []);
 
-  // When both loader animation is done and data is loaded, show content
-  useEffect(() => {
-    if (loaderDone && !loading) {
-      setShowContent(true);
-    }
-  }, [loaderDone, loading]);
-
-  // Stage 1: Full-screen futuristic loader
-  if (!loaderDone) {
+  if (showFullLoader && !loaderDone) {
     return <FuturisticFullLoader onComplete={handleLoaderComplete} />;
   }
 
-  // Stage 2: Skeleton UI while data still loading
-  if (!showContent) {
+  if (isLoading && !hasData) {
     return <FuturisticSkeleton />;
   }
 
