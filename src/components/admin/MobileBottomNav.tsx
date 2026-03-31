@@ -24,9 +24,8 @@ export default function MobileBottomNav() {
       dir="rtl"
     >
       <div
-        className="relative flex items-center justify-around rounded-[22px] px-2 py-1.5"
+        className="mobile-bottom-nav-glass relative flex items-center justify-around rounded-[22px] px-2 py-1.5"
         style={{
-          background: "rgba(255, 255, 255, 0.82)",
           backdropFilter: "blur(18px) saturate(180%)",
           WebkitBackdropFilter: "blur(18px) saturate(180%)",
           boxShadow:
