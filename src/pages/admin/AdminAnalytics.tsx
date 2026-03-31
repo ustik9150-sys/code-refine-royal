@@ -350,7 +350,8 @@ export default function AdminAnalytics() {
         const totalOrders = countRes.count || 0;
         const todayOrders = todayRes.data?.length || 0;
         const todayRevenue = todayRes.data?.reduce((s, o) => s + (o.total || 0), 0) || 0;
-        const totalRevenue = weekRes.data?.reduce((s, o) => s + (o.total || 0), 0) || 0;
+        // Total revenue from ALL orders (not just this week)
+        const totalRevenue = allOrdersRes.data?.reduce((s: number, o: any) => s + (o.total || 0), 0) || 0;
 
         setStats({ todayOrders, todayRevenue, totalOrders, totalRevenue });
 
