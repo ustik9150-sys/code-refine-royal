@@ -480,6 +480,34 @@ export default function AdminProductEdit() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-24">
+      {/* Draft Recovery Dialog */}
+      <AlertDialog open={showDraftRecovery} onOpenChange={setShowDraftRecovery}>
+        <AlertDialogContent dir="rtl" className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-right flex items-center gap-2">
+              <RotateCcw className="w-5 h-5 text-primary" />
+              تم العثور على بيانات غير محفوظة
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              لديك مسودة محفوظة سابقاً لهذا المنتج. هل تريد استعادتها؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2">
+            <AlertDialogCancel className="mt-0" onClick={() => { clearDraft(); setShowDraftRecovery(false); }}>
+              تجاهل
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              const draft = getDraft();
+              if (draft) applyDraft(draft);
+              setShowDraftRecovery(false);
+              toast({ title: "✅ تم استعادة المسودة" });
+            }} className="bg-primary text-primary-foreground">
+              استعادة
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -489,7 +517,7 @@ export default function AdminProductEdit() {
         <Button variant="ghost" size="icon" onClick={() => navigate("/admin/products")} className="rounded-xl">
           <ArrowRight className="w-5 h-5" />
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-bold text-foreground">
             {isNew ? "منتج جديد" : "تعديل المنتج"}
           </h1>
@@ -497,6 +525,26 @@ export default function AdminProductEdit() {
             {isNew ? "أضف منتج جديد لمتجرك" : "عدّل تفاصيل المنتج"}
           </p>
         </div>
+        {/* Save Status Indicator */}
+        <AnimatePresence mode="wait">
+          {saveStatus !== "idle" && (
+            <motion.div
+              key={saveStatus}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${
+                saveStatus === "saving" ? "bg-muted text-muted-foreground border-border" :
+                saveStatus === "saved" ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800" :
+                "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-800"
+              }`}
+            >
+              {saveStatus === "saving" && <><Cloud className="w-3.5 h-3.5 animate-pulse" /> جاري الحفظ...</>}
+              {saveStatus === "saved" && <><Check className="w-3.5 h-3.5" /> تم الحفظ</>}
+              {saveStatus === "unsaved" && <><CloudOff className="w-3.5 h-3.5" /> لم يُحفظ</>}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Two Column Layout */}
