@@ -26,7 +26,14 @@ import AdminPages from "./pages/admin/AdminPages";
 import AdminGoogleSheets from "./pages/admin/AdminGoogleSheets";
 import AdminCodNetwork from "./pages/admin/AdminCodNetwork";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
