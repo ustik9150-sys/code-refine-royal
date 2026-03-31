@@ -367,12 +367,15 @@ async function fetchAnalyticsData(currencyCode: string) {
 export default function AdminAnalytics() {
   const { currency } = useCurrency();
   const { toast } = useToast();
+  const [loaderDone, setLoaderDone] = useState(false);
+  const [countryTimePeriod, setCountryTimePeriod] = useState<"today" | "7days" | "30days" | "all" | "custom">("today");
+  const [customDateRange, setCustomDateRange] = useState<{ from?: Date; to?: Date }>({});
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["admin-analytics", currency.code],
     queryFn: () => fetchAnalyticsData(currency.code),
-    staleTime: 1000 * 60 * 2, // 2 minutes before refetch
-    gcTime: 1000 * 60 * 30, // keep in cache 30 min
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: true,
   });
 
@@ -382,10 +385,6 @@ export default function AdminAnalytics() {
   const dailyData = data?.dailyData || [];
   const allOrdersRaw = data?.allOrdersRaw || [];
 
-  const [countryTimePeriod, setCountryTimePeriod] = useState<"today" | "7days" | "30days" | "all" | "custom">("today");
-  const [customDateRange, setCustomDateRange] = useState<{ from?: Date; to?: Date }>({});
-
-  // Compute country stats
   const { countryStats, isMultiCountry } = useMemo(() => {
     if (!allOrdersRaw.length) return { countryStats: [] as CountryStats[], isMultiCountry: false };
 
@@ -393,15 +392,15 @@ export default function AdminAnalytics() {
     const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000;
     const nowRiyadh = new Date(nowUtc.getTime() + RIYADH_OFFSET_MS);
     const startOfTodayRiyadh = new Date(Date.UTC(nowRiyadh.getUTCFullYear(), nowRiyadh.getUTCMonth(), nowRiyadh.getUTCDate()) - RIYADH_OFFSET_MS);
-    const last7 = new Date(startOfTodayRiyadh.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const last30 = new Date(startOfTodayRiyadh.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const last7d = new Date(startOfTodayRiyadh.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const last30d = new Date(startOfTodayRiyadh.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     const filtered = allOrdersRaw.filter((order: any) => {
       if (countryTimePeriod === "all") return true;
       const orderDate = new Date(order.created_at);
       if (countryTimePeriod === "today") return orderDate >= startOfTodayRiyadh;
-      if (countryTimePeriod === "7days") return orderDate >= last7;
-      if (countryTimePeriod === "30days") return orderDate >= last30;
+      if (countryTimePeriod === "7days") return orderDate >= last7d;
+      if (countryTimePeriod === "30days") return orderDate >= last30d;
       if (countryTimePeriod === "custom") {
         if (customDateRange.from && orderDate < customDateRange.from) return false;
         if (customDateRange.to) {
@@ -437,7 +436,7 @@ export default function AdminAnalytics() {
 
     if (hasMultiple) {
       const totalAllOrders = Object.values(grouped).reduce((s, g) => s + g.totalOrders, 0);
-      const countryStatsArr: CountryStats[] = Object.entries(grouped)
+      const arr: CountryStats[] = Object.entries(grouped)
         .map(([country, d]) => {
           const currencyConfig = CURRENCIES.find(c => c.code === d.currencyCode);
           const currencyCodeForFlag = COUNTRY_TO_CURRENCY[country] || null;
@@ -453,20 +452,17 @@ export default function AdminAnalytics() {
           };
         })
         .sort((a, b) => b.totalOrders - a.totalOrders);
-      return { countryStats: countryStatsArr, isMultiCountry: true };
+      return { countryStats: arr, isMultiCountry: true };
     }
     return { countryStats: [] as CountryStats[], isMultiCountry: hasMultiple };
   }, [allOrdersRaw, countryTimePeriod, customDateRange, currency]);
-
-  // First-ever load: show full loader only when no cached data
-  const [loaderDone, setLoaderDone] = useState(false);
-  const showFullLoader = isLoading && !hasData && !loaderDone;
 
   const handleLoaderComplete = useCallback(() => {
     setLoaderDone(true);
   }, []);
 
-  if (showFullLoader && !loaderDone) {
+  // First-ever load only: show full loader when no cached data
+  if (isLoading && !hasData && !loaderDone) {
     return <FuturisticFullLoader onComplete={handleLoaderComplete} />;
   }
 
