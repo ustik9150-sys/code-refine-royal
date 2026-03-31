@@ -341,16 +341,17 @@ export default function AdminAnalytics() {
 
         const [countRes, todayRes, weekRes, recentRes, allOrdersRes] = await Promise.all([
           supabase.from("orders").select("*", { count: "exact", head: true }),
-          supabase.from("orders").select("total").gte("created_at", todayISO),
-          supabase.from("orders").select("total, created_at").gte("created_at", weekStart),
+          supabase.from("orders").select("total").gte("created_at", todayISO).limit(10000),
+          supabase.from("orders").select("total, created_at").gte("created_at", weekStart).limit(10000),
           supabase.from("orders").select("customer_name, city, created_at").order("created_at", { ascending: false }).limit(5),
-          supabase.from("orders").select("ip_country, total, created_at, order_items(product_id, products(currency_code, currency_enabled))"),
+          supabase.from("orders").select("ip_country, total, created_at, order_items(product_id, products(currency_code, currency_enabled))").limit(10000),
         ]);
 
         const totalOrders = countRes.count || 0;
         const todayOrders = todayRes.data?.length || 0;
         const todayRevenue = todayRes.data?.reduce((s, o) => s + (o.total || 0), 0) || 0;
-        const totalRevenue = weekRes.data?.reduce((s, o) => s + (o.total || 0), 0) || 0;
+        // Total revenue from ALL orders (not just this week)
+        const totalRevenue = allOrdersRes.data?.reduce((s: number, o: any) => s + (o.total || 0), 0) || 0;
 
         setStats({ todayOrders, todayRevenue, totalOrders, totalRevenue });
 
