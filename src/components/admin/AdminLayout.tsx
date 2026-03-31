@@ -25,6 +25,7 @@ import {
   Table2,
   Truck,
 } from "lucide-react";
+import MobileBottomNav from "./MobileBottomNav";
 
 const navItems = [
   { to: "/admin/analytics", icon: BarChart3, label: "الإحصائيات" },
@@ -536,10 +537,13 @@ export default function AdminLayout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-8 overflow-auto">
+        <main className="flex-1 p-4 lg:p-8 overflow-auto pb-28 md:pb-8">
           <Outlet />
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }
