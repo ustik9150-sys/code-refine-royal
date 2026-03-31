@@ -356,7 +356,8 @@ export default function AdminOrders() {
     const { data, error } = await supabase
       .from("orders")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(10000);
     if (error) {
       toast({ title: "خطأ", description: "فشل تحميل الطلبات", variant: "destructive" });
     } else {
