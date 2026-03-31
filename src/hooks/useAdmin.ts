@@ -1,33 +1,54 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+
+type CheckAdminOptions = {
+  blockUi?: boolean;
+  preserveStateOnError?: boolean;
+};
 
 export function useAdmin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const retryRef = useRef(0);
+  const hasResolvedInitialStateRef = useRef(false);
+  const currentUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
-    const checkAdmin = async (uid: string | null) => {
+    const applySignedOutState = () => {
+      currentUserIdRef.current = null;
+
+      if (!mounted) return;
+
+      setIsAdmin(false);
+      setIsAuthenticated(false);
+      setUserId(null);
+      setLoading(false);
+      hasResolvedInitialStateRef.current = true;
+    };
+
+    const checkAdmin = async (
+      uid: string | null,
+      options: CheckAdminOptions = {},
+    ) => {
+      const {
+        blockUi = !hasResolvedInitialStateRef.current,
+        preserveStateOnError = hasResolvedInitialStateRef.current,
+      } = options;
+
       if (!uid) {
-        if (mounted) {
-          setIsAdmin(false);
-          setIsAuthenticated(false);
-          setUserId(null);
-          setLoading(false);
-        }
+        applySignedOutState();
         return;
       }
 
       if (mounted) {
         setIsAuthenticated(true);
         setUserId(uid);
+        if (blockUi) setLoading(true);
       }
 
-      // Query with retry for cases where token just refreshed
       let attempts = 0;
       const maxAttempts = 3;
 
@@ -40,42 +61,62 @@ export function useAdmin() {
           .maybeSingle();
 
         if (!error) {
+          currentUserIdRef.current = uid;
+
           if (mounted) {
             setIsAdmin(!!data);
+            setIsAuthenticated(true);
+            setUserId(uid);
             setLoading(false);
+            hasResolvedInitialStateRef.current = true;
           }
           return;
         }
 
-        // If permission/auth error, wait and retry
         attempts++;
         if (attempts < maxAttempts) {
-          await new Promise((r) => setTimeout(r, 500 * attempts));
-          // Refresh session before retrying
+          await new Promise((resolve) => setTimeout(resolve, 500 * attempts));
           await supabase.auth.getSession();
         }
       }
 
-      // All retries failed — still set state
-      if (mounted) {
+      if (!mounted) return;
+
+      if (!preserveStateOnError) {
         setIsAdmin(false);
-        setLoading(false);
       }
+      setLoading(false);
+      hasResolvedInitialStateRef.current = true;
     };
 
-    // IMPORTANT: Set up listener BEFORE getSession to avoid missing events
+    const handleAuthStateChange = (event: string, nextUserId: string | null) => {
+      if (event === "SIGNED_OUT") {
+        applySignedOutState();
+        return;
+      }
+
+      const isSameUser = currentUserIdRef.current === nextUserId;
+      const isBackgroundRefreshEvent =
+        event === "TOKEN_REFRESHED" || event === "USER_UPDATED";
+
+      void checkAdmin(nextUserId, {
+        blockUi:
+          !hasResolvedInitialStateRef.current ||
+          (!isSameUser && !isBackgroundRefreshEvent),
+        preserveStateOnError:
+          (isSameUser && hasResolvedInitialStateRef.current) ||
+          isBackgroundRefreshEvent,
+      });
+    };
+
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (mounted) setLoading(true);
-      checkAdmin(session?.user?.id ?? null);
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      handleAuthStateChange(event, session?.user?.id ?? null);
     });
 
-    // Then check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (mounted) {
-        checkAdmin(session?.user?.id ?? null);
-      }
+      handleAuthStateChange("INITIAL_SESSION", session?.user?.id ?? null);
     });
 
     return () => {
@@ -86,3 +127,4 @@ export function useAdmin() {
 
   return { isAdmin, loading, userId, isAuthenticated };
 }
+
