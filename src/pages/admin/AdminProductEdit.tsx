@@ -371,6 +371,7 @@ export default function AdminProductEdit() {
       }
 
       toast({ title: isNew ? "✅ تم إنشاء المنتج بنجاح" : "✅ تم حفظ التغييرات" });
+      clearDraft();
       if (isNew) navigate(`/admin/products/${productId}`);
     } catch (err: any) {
       toast({ title: "خطأ", description: err.message, variant: "destructive" });
