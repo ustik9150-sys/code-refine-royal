@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useProductDraft, ProductDraftData } from "@/hooks/useProductDraft";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,10 +14,10 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, Save, Upload, X, GripVertical, Star, Trash2, Package,
-  ImagePlus, Loader2, Eye, Tag,
+  ImagePlus, Loader2, Eye, Tag, CloudOff, Check, Cloud, RotateCcw,
 } from "lucide-react";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
@@ -168,6 +169,7 @@ export default function AdminProductEdit() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showDraftRecovery, setShowDraftRecovery] = useState(false);
 
   // Form state
   const [nameAr, setNameAr] = useState("");
@@ -190,13 +192,56 @@ export default function AdminProductEdit() {
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Draft system
+  const { saveStatus, hasDraft, getDraft, clearDraft, debouncedSave, setInitialData } = useProductDraft(id);
+
+  const getCurrentFormData = useCallback((): ProductDraftData => ({
+    nameAr, descAr, price, compareAt, inventory, sku, category,
+    isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug,
+  }), [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug]);
+
+  // Auto-save draft on form changes
+  useEffect(() => {
+    debouncedSave(getCurrentFormData());
+  }, [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, debouncedSave, getCurrentFormData]);
+
+  const applyDraft = useCallback((draft: ProductDraftData) => {
+    setNameAr(draft.nameAr);
+    setDescAr(draft.descAr);
+    setPrice(draft.price);
+    setCompareAt(draft.compareAt);
+    setInventory(draft.inventory);
+    setSku(draft.sku);
+    setCategory(draft.category);
+    setIsActive(draft.isActive);
+    setTags(draft.tags);
+    setCurrencyEnabled(draft.currencyEnabled);
+    setCurrencyCode(draft.currencyCode);
+    setHiddenFromHome(draft.hiddenFromHome);
+    setSlug(draft.slug);
+  }, []);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   useEffect(() => {
-    if (isNew) return;
+    if (isNew) {
+      const initialData: ProductDraftData = {
+        nameAr: "", descAr: "", price: "", compareAt: "", inventory: "0",
+        sku: "", category: "", isActive: false, tags: [], currencyEnabled: false,
+        currencyCode: "SAR", hiddenFromHome: false, slug: "",
+      };
+      setInitialData(initialData);
+      
+      // Check for existing draft
+      const draft = getDraft();
+      if (draft) {
+        setShowDraftRecovery(true);
+      }
+      return;
+    }
     (async () => {
       const { data: product } = await supabase
         .from("products")
@@ -218,6 +263,30 @@ export default function AdminProductEdit() {
       setCurrencyCode((product as any).currency_code || "SAR");
       setHiddenFromHome((product as any).hidden_from_home || false);
       setSlug((product as any).slug || "");
+
+      // Set initial data for change detection
+      const initialData: ProductDraftData = {
+        nameAr: product.name_ar,
+        descAr: product.description_ar || "",
+        price: String(product.price),
+        compareAt: product.compare_at_price ? String(product.compare_at_price) : "",
+        inventory: String(product.inventory),
+        sku: product.sku || "",
+        category: product.category || "",
+        isActive: product.status === "active",
+        tags: product.tags || [],
+        currencyEnabled: (product as any).currency_enabled || false,
+        currencyCode: (product as any).currency_code || "SAR",
+        hiddenFromHome: (product as any).hidden_from_home || false,
+        slug: (product as any).slug || "",
+      };
+      setInitialData(initialData);
+
+      // Check for existing draft
+      const draft = getDraft();
+      if (draft) {
+        setShowDraftRecovery(true);
+      }
 
       const { data: imgs } = await supabase
         .from("product_images")
@@ -302,6 +371,7 @@ export default function AdminProductEdit() {
       }
 
       toast({ title: isNew ? "✅ تم إنشاء المنتج بنجاح" : "✅ تم حفظ التغييرات" });
+      clearDraft();
       if (isNew) navigate(`/admin/products/${productId}`);
     } catch (err: any) {
       toast({ title: "خطأ", description: err.message, variant: "destructive" });
@@ -410,6 +480,34 @@ export default function AdminProductEdit() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-24">
+      {/* Draft Recovery Dialog */}
+      <AlertDialog open={showDraftRecovery} onOpenChange={setShowDraftRecovery}>
+        <AlertDialogContent dir="rtl" className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-right flex items-center gap-2">
+              <RotateCcw className="w-5 h-5 text-primary" />
+              تم العثور على بيانات غير محفوظة
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              لديك مسودة محفوظة سابقاً لهذا المنتج. هل تريد استعادتها؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2">
+            <AlertDialogCancel className="mt-0" onClick={() => { clearDraft(); setShowDraftRecovery(false); }}>
+              تجاهل
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              const draft = getDraft();
+              if (draft) applyDraft(draft);
+              setShowDraftRecovery(false);
+              toast({ title: "✅ تم استعادة المسودة" });
+            }} className="bg-primary text-primary-foreground">
+              استعادة
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -419,7 +517,7 @@ export default function AdminProductEdit() {
         <Button variant="ghost" size="icon" onClick={() => navigate("/admin/products")} className="rounded-xl">
           <ArrowRight className="w-5 h-5" />
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-bold text-foreground">
             {isNew ? "منتج جديد" : "تعديل المنتج"}
           </h1>
@@ -427,6 +525,26 @@ export default function AdminProductEdit() {
             {isNew ? "أضف منتج جديد لمتجرك" : "عدّل تفاصيل المنتج"}
           </p>
         </div>
+        {/* Save Status Indicator */}
+        <AnimatePresence mode="wait">
+          {saveStatus !== "idle" && (
+            <motion.div
+              key={saveStatus}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${
+                saveStatus === "saving" ? "bg-muted text-muted-foreground border-border" :
+                saveStatus === "saved" ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800" :
+                "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-800"
+              }`}
+            >
+              {saveStatus === "saving" && <><Cloud className="w-3.5 h-3.5 animate-pulse" /> جاري الحفظ...</>}
+              {saveStatus === "saved" && <><Check className="w-3.5 h-3.5" /> تم الحفظ</>}
+              {saveStatus === "unsaved" && <><CloudOff className="w-3.5 h-3.5" /> لم يُحفظ</>}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Two Column Layout */}
