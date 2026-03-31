@@ -169,6 +169,7 @@ export default function AdminProductEdit() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showDraftRecovery, setShowDraftRecovery] = useState(false);
 
   // Form state
   const [nameAr, setNameAr] = useState("");
@@ -191,13 +192,56 @@ export default function AdminProductEdit() {
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Draft system
+  const { saveStatus, hasDraft, getDraft, clearDraft, debouncedSave, setInitialData } = useProductDraft(id);
+
+  const getCurrentFormData = useCallback((): ProductDraftData => ({
+    nameAr, descAr, price, compareAt, inventory, sku, category,
+    isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug,
+  }), [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug]);
+
+  // Auto-save draft on form changes
+  useEffect(() => {
+    debouncedSave(getCurrentFormData());
+  }, [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, debouncedSave, getCurrentFormData]);
+
+  const applyDraft = useCallback((draft: ProductDraftData) => {
+    setNameAr(draft.nameAr);
+    setDescAr(draft.descAr);
+    setPrice(draft.price);
+    setCompareAt(draft.compareAt);
+    setInventory(draft.inventory);
+    setSku(draft.sku);
+    setCategory(draft.category);
+    setIsActive(draft.isActive);
+    setTags(draft.tags);
+    setCurrencyEnabled(draft.currencyEnabled);
+    setCurrencyCode(draft.currencyCode);
+    setHiddenFromHome(draft.hiddenFromHome);
+    setSlug(draft.slug);
+  }, []);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   useEffect(() => {
-    if (isNew) return;
+    if (isNew) {
+      const initialData: ProductDraftData = {
+        nameAr: "", descAr: "", price: "", compareAt: "", inventory: "0",
+        sku: "", category: "", isActive: false, tags: [], currencyEnabled: false,
+        currencyCode: "SAR", hiddenFromHome: false, slug: "",
+      };
+      setInitialData(initialData);
+      
+      // Check for existing draft
+      const draft = getDraft();
+      if (draft) {
+        setShowDraftRecovery(true);
+      }
+      return;
+    }
     (async () => {
       const { data: product } = await supabase
         .from("products")
@@ -219,6 +263,30 @@ export default function AdminProductEdit() {
       setCurrencyCode((product as any).currency_code || "SAR");
       setHiddenFromHome((product as any).hidden_from_home || false);
       setSlug((product as any).slug || "");
+
+      // Set initial data for change detection
+      const initialData: ProductDraftData = {
+        nameAr: product.name_ar,
+        descAr: product.description_ar || "",
+        price: String(product.price),
+        compareAt: product.compare_at_price ? String(product.compare_at_price) : "",
+        inventory: String(product.inventory),
+        sku: product.sku || "",
+        category: product.category || "",
+        isActive: product.status === "active",
+        tags: product.tags || [],
+        currencyEnabled: (product as any).currency_enabled || false,
+        currencyCode: (product as any).currency_code || "SAR",
+        hiddenFromHome: (product as any).hidden_from_home || false,
+        slug: (product as any).slug || "",
+      };
+      setInitialData(initialData);
+
+      // Check for existing draft
+      const draft = getDraft();
+      if (draft) {
+        setShowDraftRecovery(true);
+      }
 
       const { data: imgs } = await supabase
         .from("product_images")
