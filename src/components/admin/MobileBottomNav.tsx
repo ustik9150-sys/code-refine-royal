@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -8,32 +9,31 @@ import {
   Home,
 } from "lucide-react";
 
-const navItems = [
-  { to: "/admin/analytics", icon: BarChart3, label: "الرئيسية" },
-  { to: "/admin/orders", icon: ShoppingCart, label: "الطلبات" },
-  { to: "/admin/products", icon: Home, label: "الإحصائيات", isCenter: true },
-  { to: "/admin/settings", icon: User, label: "الحساب" },
-];
-
 export default function MobileBottomNav() {
   const navigate = useNavigate();
 
-  return (
+  return createPortal(
     <nav
-      className="fixed bottom-2.5 left-2.5 right-2.5 z-[999] md:hidden"
+      className="fixed z-[9999] md:hidden"
+      style={{
+        bottom: 15,
+        left: 10,
+        right: 10,
+      }}
       dir="rtl"
     >
       <div
-        className="mobile-bottom-nav-glass relative flex items-center justify-around rounded-[22px] px-2 py-1.5"
+        className="mobile-bottom-nav-glass relative flex items-center justify-around rounded-[22px] px-2 py-2"
         style={{
-          backdropFilter: "blur(18px) saturate(180%)",
-          WebkitBackdropFilter: "blur(18px) saturate(180%)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          border: "1px solid rgba(255,255,255,0.2)",
           boxShadow:
-            "0 10px 40px rgba(0,0,0,0.10), 0 0 0 1px rgba(255,255,255,0.45) inset",
+            "0 10px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.15) inset",
         }}
       >
         {/* Right two items */}
-        <NavItem to="/admin/analytics" icon={BarChart3} label="الرئيسية" />
+        <NavItem to="/admin/analytics" icon={Home} label="الرئيسية" />
         <NavItem to="/admin/orders" icon={ShoppingCart} label="الطلبات" />
 
         {/* Center floating FAB */}
@@ -41,32 +41,36 @@ export default function MobileBottomNav() {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => navigate("/admin/products/new")}
-            className="absolute -top-7 w-[56px] h-[56px] rounded-full flex items-center justify-center shadow-lg"
+            className="absolute -top-8 w-[58px] h-[58px] rounded-full flex items-center justify-center"
             style={{
               background: "linear-gradient(135deg, #00c853, #00e676)",
-              boxShadow: "0 8px 24px rgba(0, 200, 83, 0.4)",
+              boxShadow: "0 8px 25px rgba(0, 200, 83, 0.5)",
             }}
           >
             <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
           </motion.button>
-          <span className="text-[10px] text-muted-foreground mt-6 font-medium">إضافة</span>
+          <span className="text-[10px] mt-7 font-medium" style={{ color: "#8a8a8a" }}>
+            إضافة
+          </span>
         </div>
 
         {/* Left two items */}
-        <NavItem to="/admin/analytics" icon={BarChart3} label="الإحصائيات" isStats />
+        <NavItem to="/admin/products" icon={BarChart3} label="المنتجات" />
         <NavItem to="/admin/settings" icon={User} label="الحساب" />
       </div>
 
       <style>{`
         .mobile-bottom-nav-glass {
-          background: rgba(255, 255, 255, 0.82);
+          background: rgba(255, 255, 255, 0.9);
         }
         .dark .mobile-bottom-nav-glass {
-          background: rgba(20, 20, 25, 0.75);
-          box-shadow: 0 10px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08) inset;
+          background: rgba(15, 15, 20, 0.85);
+          border-color: rgba(255,255,255,0.08);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06) inset;
         }
       `}</style>
-    </nav>
+    </nav>,
+    document.body
   );
 }
 
@@ -74,46 +78,37 @@ function NavItem({
   to,
   icon: Icon,
   label,
-  isStats,
 }: {
   to: string;
   icon: React.ComponentType<any>;
   label: string;
-  isStats?: boolean;
 }) {
   return (
     <NavLink
       to={to}
-      end={isStats ? false : undefined}
       className="flex flex-col items-center gap-0.5 py-1.5 px-2 min-w-[52px]"
     >
       {({ isActive }) => (
         <motion.div
-          whileTap={{ scale: 0.9 }}
-          className="flex flex-col items-center gap-0.5"
+          whileTap={{ scale: 0.95 }}
+          className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-all duration-250"
+          style={
+            isActive
+              ? { background: "rgba(0, 200, 83, 0.1)" }
+              : {}
+          }
         >
           <Icon
-            className={`w-[22px] h-[22px] transition-colors duration-200 ${
-              isActive
-                ? "text-foreground"
-                : "text-muted-foreground"
-            }`}
-            strokeWidth={isActive ? 2.2 : 1.6}
+            className="w-[22px] h-[22px] transition-colors duration-200"
+            style={{ color: isActive ? "#00c853" : "#8a8a8a" }}
+            strokeWidth={2}
           />
           <span
-            className={`text-[10px] font-medium transition-colors duration-200 ${
-              isActive ? "text-foreground" : "text-muted-foreground"
-            }`}
+            className="text-[10px] font-semibold transition-colors duration-200"
+            style={{ color: isActive ? "#00c853" : "#8a8a8a" }}
           >
             {label}
           </span>
-          {isActive && (
-            <motion.div
-              layoutId="mobile-nav-dot"
-              className="w-1 h-1 rounded-full bg-foreground"
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            />
-          )}
         </motion.div>
       )}
     </NavLink>
