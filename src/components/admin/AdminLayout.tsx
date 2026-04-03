@@ -43,6 +43,7 @@ function AdminLogin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -75,52 +76,216 @@ function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" dir="rtl"
-      style={{ background: "linear-gradient(135deg, hsl(228 24% 10%) 0%, hsl(250 30% 18%) 50%, hsl(340 30% 15%) 100%)" }}>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" dir="rtl"
+      style={{ background: "linear-gradient(145deg, hsl(228 30% 8%) 0%, hsl(250 35% 14%) 40%, hsl(280 25% 12%) 70%, hsl(228 30% 8%) 100%)" }}>
+      
+      {/* Ambient glow orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-32 -right-32 w-96 h-96 rounded-full"
+          style={{ background: "radial-gradient(circle, hsl(250 80% 65% / 0.3), transparent 70%)" }}
+        />
+        <motion.div
+          animate={{ scale: [1.2, 1, 1.2], opacity: [0.1, 0.2, 0.1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute -bottom-48 -left-48 w-[500px] h-[500px] rounded-full"
+          style={{ background: "radial-gradient(circle, hsl(340 75% 55% / 0.2), transparent 70%)" }}
+        />
+        <motion.div
+          animate={{ scale: [1, 1.15, 1], opacity: [0.08, 0.15, 0.08] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
+          style={{ background: "radial-gradient(circle, hsl(220 60% 50% / 0.15), transparent 70%)" }}
+        />
+      </div>
+
+      {/* Subtle grid pattern */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="bg-card/95 backdrop-blur-xl rounded-3xl border border-border/50 p-8 w-full max-w-sm space-y-6"
-        style={{ boxShadow: "0 25px 60px -12px rgba(0,0,0,0.4)" }}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-full max-w-[400px]"
       >
-        <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto admin-icon-box">
-            <Lock className="w-7 h-7" />
+        {/* Card */}
+        <div className="relative rounded-[28px] overflow-hidden"
+          style={{
+            background: "linear-gradient(170deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            boxShadow: "0 40px 80px -20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset, 0 0 120px -40px hsl(250 80% 65% / 0.1)",
+            backdropFilter: "blur(40px)",
+          }}>
+          
+          {/* Top accent line */}
+          <div className="h-[2px] w-full" style={{ background: "linear-gradient(90deg, transparent, hsl(250 80% 65%), hsl(340 75% 55%), transparent)" }} />
+          
+          <div className="p-8 pt-10 pb-10">
+            {/* Logo / Icon */}
+            <motion.div 
+              className="flex justify-center mb-8"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="relative">
+                <div className="w-[72px] h-[72px] rounded-[20px] flex items-center justify-center relative"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(250 80% 65% / 0.2), hsl(340 75% 55% / 0.15))",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    boxShadow: "0 8px 32px hsl(250 80% 65% / 0.2), inset 0 1px 0 rgba(255,255,255,0.1)",
+                  }}>
+                  <Lock className="w-8 h-8 text-white/80" />
+                </div>
+                {/* Glow behind icon */}
+                <div className="absolute inset-0 -z-10 blur-2xl opacity-40 rounded-full"
+                  style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(340 75% 55%))" }} />
+              </div>
+            </motion.div>
+
+            {/* Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="text-center mb-8"
+            >
+              <h1 className="text-[22px] font-bold text-white mb-2 tracking-tight">لوحة التحكم</h1>
+              <p className="text-[13px] text-white/40 leading-relaxed">
+                {resetMode ? "أدخل بريدك لإعادة تعيين كلمة المرور" : "سجل دخولك للمتابعة"}
+              </p>
+            </motion.div>
+
+            {/* Form */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              {resetMode ? (
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-medium text-white/50 uppercase tracking-wider px-1">البريد الإلكتروني</label>
+                    <div className="relative">
+                      <input type="email" placeholder="your@email.com" value={email}
+                        onChange={(e) => setEmail(e.target.value)} dir="ltr"
+                        className="w-full h-12 rounded-xl px-4 text-[14px] text-white placeholder:text-white/20 focus:outline-none transition-all duration-300"
+                        style={{
+                          background: "rgba(255,255,255,0.06)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+                        }}
+                        onFocus={(e) => { e.target.style.borderColor = "hsl(250 80% 65% / 0.5)"; e.target.style.boxShadow = "0 0 0 3px hsl(250 80% 65% / 0.1), inset 0 1px 0 rgba(255,255,255,0.03)"; }}
+                        onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.03)"; }}
+                      />
+                    </div>
+                  </div>
+                  <button type="submit" disabled={loading}
+                    className="w-full h-12 rounded-xl font-semibold text-[14px] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                    style={{
+                      background: "linear-gradient(135deg, hsl(250 80% 60%), hsl(280 70% 55%), hsl(340 75% 55%))",
+                      boxShadow: "0 8px 24px -4px hsl(250 80% 60% / 0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
+                    }}>
+                    <span className="relative z-10">{loading ? "جاري الإرسال..." : "إرسال رابط إعادة التعيين"}</span>
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(280 70% 60%), hsl(340 75% 60%))" }} />
+                  </button>
+                  <button type="button" onClick={() => setResetMode(false)}
+                    className="w-full text-[13px] text-white/35 hover:text-white/60 transition-colors py-2">
+                    العودة لتسجيل الدخول
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-medium text-white/50 uppercase tracking-wider px-1">البريد الإلكتروني</label>
+                    <input type="email" placeholder="your@email.com" value={email}
+                      onChange={(e) => setEmail(e.target.value)} dir="ltr"
+                      className="w-full h-12 rounded-xl px-4 text-[14px] text-white placeholder:text-white/20 focus:outline-none transition-all duration-300"
+                      style={{
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+                      }}
+                      onFocus={(e) => { e.target.style.borderColor = "hsl(250 80% 65% / 0.5)"; e.target.style.boxShadow = "0 0 0 3px hsl(250 80% 65% / 0.1), inset 0 1px 0 rgba(255,255,255,0.03)"; }}
+                      onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.03)"; }}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-medium text-white/50 uppercase tracking-wider px-1">كلمة المرور</label>
+                    <div className="relative">
+                      <input type={showPassword ? "text" : "password"} placeholder="••••••••" value={password}
+                        onChange={(e) => setPassword(e.target.value)} dir="ltr"
+                        className="w-full h-12 rounded-xl px-4 pl-12 text-[14px] text-white placeholder:text-white/20 focus:outline-none transition-all duration-300"
+                        style={{
+                          background: "rgba(255,255,255,0.06)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+                        }}
+                        onFocus={(e) => { e.target.style.borderColor = "hsl(250 80% 65% / 0.5)"; e.target.style.boxShadow = "0 0 0 3px hsl(250 80% 65% / 0.1), inset 0 1px 0 rgba(255,255,255,0.03)"; }}
+                        onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.03)"; }}
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
+                        {showPassword ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                          </svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Forgot password link */}
+                  <div className="flex justify-start">
+                    <button type="button" onClick={() => setResetMode(true)}
+                      className="text-[12px] text-white/30 hover:text-white/55 transition-colors">
+                      نسيت كلمة المرور؟
+                    </button>
+                  </div>
+
+                  <button type="submit" disabled={loading}
+                    className="w-full h-12 rounded-xl font-semibold text-[14px] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                    style={{
+                      background: "linear-gradient(135deg, hsl(250 80% 60%), hsl(280 70% 55%), hsl(340 75% 55%))",
+                      boxShadow: "0 8px 24px -4px hsl(250 80% 60% / 0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
+                    }}>
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      {loading ? (
+                        <>
+                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                          جاري الدخول...
+                        </>
+                      ) : "تسجيل الدخول"}
+                    </span>
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(280 70% 60%), hsl(340 75% 60%))" }} />
+                  </button>
+                </form>
+              )}
+            </motion.div>
           </div>
-          <h1 className="text-xl font-bold text-foreground mt-4">لوحة التحكم</h1>
-          <p className="text-sm text-muted-foreground">
-            {resetMode ? "أدخل بريدك لإعادة تعيين كلمة المرور" : "سجل دخولك للمتابعة"}
-          </p>
         </div>
 
-        {resetMode ? (
-          <form onSubmit={handleResetPassword} className="space-y-4">
-            <Input type="email" placeholder="البريد الإلكتروني" value={email}
-              onChange={(e) => setEmail(e.target.value)} dir="ltr" className="admin-input text-center" />
-            <button type="submit" className="admin-gradient-btn w-full" disabled={loading}>
-              {loading ? "جاري الإرسال..." : "إرسال رابط إعادة التعيين"}
-            </button>
-            <button type="button" onClick={() => setResetMode(false)}
-              className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
-              العودة لتسجيل الدخول
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleLogin} className="space-y-4">
-            <Input type="email" placeholder="البريد الإلكتروني" value={email}
-              onChange={(e) => setEmail(e.target.value)} dir="ltr" className="admin-input text-center" />
-            <Input type="password" placeholder="كلمة المرور" value={password}
-              onChange={(e) => setPassword(e.target.value)} dir="ltr" className="admin-input text-center" />
-            <button type="submit" className="admin-gradient-btn w-full" disabled={loading}>
-              {loading ? "جاري الدخول..." : "تسجيل الدخول"}
-            </button>
-            <button type="button" onClick={() => setResetMode(true)}
-              className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
-              نسيت كلمة المرور؟
-            </button>
-          </form>
-        )}
+        {/* Bottom subtle branding */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="text-center text-[11px] text-white/15 mt-6"
+        >
+          Powered by CodForm
+        </motion.p>
       </motion.div>
     </div>
   );
