@@ -77,159 +77,123 @@ function AdminLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" dir="rtl"
-      style={{ background: "linear-gradient(145deg, hsl(228 30% 8%) 0%, hsl(250 35% 14%) 40%, hsl(280 25% 12%) 70%, hsl(228 30% 8%) 100%)" }}>
+      style={{ background: "linear-gradient(160deg, #0a0a0f 0%, #111827 50%, #0f172a 100%)" }}>
       
       {/* Ambient glow orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
+          animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-32 -right-32 w-96 h-96 rounded-full"
-          style={{ background: "radial-gradient(circle, hsl(250 80% 65% / 0.3), transparent 70%)" }}
+          className="absolute -top-40 -right-40 w-[450px] h-[450px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(99,102,241,0.35), transparent 65%)" }}
         />
         <motion.div
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.1, 0.2, 0.1] }}
+          animate={{ scale: [1.1, 1, 1.1], opacity: [0.2, 0.35, 0.2] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute -bottom-48 -left-48 w-[500px] h-[500px] rounded-full"
-          style={{ background: "radial-gradient(circle, hsl(340 75% 55% / 0.2), transparent 70%)" }}
-        />
-        <motion.div
-          animate={{ scale: [1, 1.15, 1], opacity: [0.08, 0.15, 0.08] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 4 }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
-          style={{ background: "radial-gradient(circle, hsl(220 60% 50% / 0.15), transparent 70%)" }}
+          className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(139,92,246,0.25), transparent 65%)" }}
         />
       </div>
 
-      {/* Subtle grid pattern */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
-        style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+      {/* Noise texture */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.015]"
+        style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E\")" }} />
 
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-full max-w-[400px]"
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-full max-w-[420px]"
       >
         {/* Card */}
-        <div className="relative rounded-[28px] overflow-hidden"
+        <div className="relative rounded-3xl overflow-hidden"
           style={{
-            background: "linear-gradient(170deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            boxShadow: "0 40px 80px -20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset, 0 0 120px -40px hsl(250 80% 65% / 0.1)",
-            backdropFilter: "blur(40px)",
+            background: "linear-gradient(175deg, rgba(30,30,50,0.95) 0%, rgba(15,15,30,0.98) 100%)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 0 80px -20px rgba(99,102,241,0.15), 0 25px 60px -15px rgba(0,0,0,0.6)",
           }}>
           
-          {/* Top accent line */}
-          <div className="h-[2px] w-full" style={{ background: "linear-gradient(90deg, transparent, hsl(250 80% 65%), hsl(340 75% 55%), transparent)" }} />
+          {/* Top accent bar */}
+          <div className="h-[3px] w-full" style={{ background: "linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7)" }} />
           
-          <div className="p-8 pt-10 pb-10">
-            {/* Logo / Icon */}
+          <div className="px-8 pt-10 pb-10 sm:px-10">
+            {/* Icon */}
             <motion.div 
-              className="flex justify-center mb-8"
-              initial={{ scale: 0.5, opacity: 0 }}
+              className="flex justify-center mb-7"
+              initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="relative">
-                <div className="w-[72px] h-[72px] rounded-[20px] flex items-center justify-center relative"
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
                   style={{
-                    background: "linear-gradient(135deg, hsl(250 80% 65% / 0.2), hsl(340 75% 55% / 0.15))",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    boxShadow: "0 8px 32px hsl(250 80% 65% / 0.2), inset 0 1px 0 rgba(255,255,255,0.1)",
+                    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                    boxShadow: "0 12px 40px -8px rgba(99,102,241,0.5)",
                   }}>
-                  <Lock className="w-8 h-8 text-white/80" />
+                  <Lock className="w-7 h-7 text-white" />
                 </div>
-                {/* Glow behind icon */}
-                <div className="absolute inset-0 -z-10 blur-2xl opacity-40 rounded-full"
-                  style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(340 75% 55%))" }} />
               </div>
             </motion.div>
 
             {/* Title */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
+              transition={{ delay: 0.25, duration: 0.5 }}
               className="text-center mb-8"
             >
-              <h1 className="text-[22px] font-bold text-white mb-2 tracking-tight">لوحة التحكم</h1>
-              <p className="text-[13px] text-white/40 leading-relaxed">
+              <h1 className="text-2xl font-bold text-white mb-1.5">لوحة التحكم</h1>
+              <p className="text-sm text-gray-400">
                 {resetMode ? "أدخل بريدك لإعادة تعيين كلمة المرور" : "سجل دخولك للمتابعة"}
               </p>
             </motion.div>
 
             {/* Form */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
+              transition={{ delay: 0.35, duration: 0.5 }}
             >
               {resetMode ? (
-                <form onSubmit={handleResetPassword} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-medium text-white/50 uppercase tracking-wider px-1">البريد الإلكتروني</label>
-                    <div className="relative">
-                      <input type="email" placeholder="your@email.com" value={email}
-                        onChange={(e) => setEmail(e.target.value)} dir="ltr"
-                        className="w-full h-12 rounded-xl px-4 text-[14px] text-white placeholder:text-white/20 focus:outline-none transition-all duration-300"
-                        style={{
-                          background: "rgba(255,255,255,0.06)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
-                        }}
-                        onFocus={(e) => { e.target.style.borderColor = "hsl(250 80% 65% / 0.5)"; e.target.style.boxShadow = "0 0 0 3px hsl(250 80% 65% / 0.1), inset 0 1px 0 rgba(255,255,255,0.03)"; }}
-                        onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.03)"; }}
-                      />
-                    </div>
+                <form onSubmit={handleResetPassword} className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-gray-400 px-0.5">البريد الإلكتروني</label>
+                    <input type="email" placeholder="your@email.com" value={email}
+                      onChange={(e) => setEmail(e.target.value)} dir="ltr"
+                      className="w-full h-12 rounded-xl px-4 text-sm text-white bg-white/[0.07] border border-white/[0.1] placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                    />
                   </div>
                   <button type="submit" disabled={loading}
-                    className="w-full h-12 rounded-xl font-semibold text-[14px] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                    className="w-full h-12 rounded-xl font-semibold text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
                     style={{
-                      background: "linear-gradient(135deg, hsl(250 80% 60%), hsl(280 70% 55%), hsl(340 75% 55%))",
-                      boxShadow: "0 8px 24px -4px hsl(250 80% 60% / 0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
+                      background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                      boxShadow: "0 6px 20px -4px rgba(99,102,241,0.5)",
                     }}>
-                    <span className="relative z-10">{loading ? "جاري الإرسال..." : "إرسال رابط إعادة التعيين"}</span>
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(280 70% 60%), hsl(340 75% 60%))" }} />
+                    {loading ? "جاري الإرسال..." : "إرسال رابط إعادة التعيين"}
                   </button>
                   <button type="button" onClick={() => setResetMode(false)}
-                    className="w-full text-[13px] text-white/35 hover:text-white/60 transition-colors py-2">
+                    className="w-full text-sm text-gray-500 hover:text-gray-300 transition-colors py-1">
                     العودة لتسجيل الدخول
                   </button>
                 </form>
               ) : (
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-medium text-white/50 uppercase tracking-wider px-1">البريد الإلكتروني</label>
+                <form onSubmit={handleLogin} className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-gray-400 px-0.5">البريد الإلكتروني</label>
                     <input type="email" placeholder="your@email.com" value={email}
                       onChange={(e) => setEmail(e.target.value)} dir="ltr"
-                      className="w-full h-12 rounded-xl px-4 text-[14px] text-white placeholder:text-white/20 focus:outline-none transition-all duration-300"
-                      style={{
-                        background: "rgba(255,255,255,0.06)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
-                      }}
-                      onFocus={(e) => { e.target.style.borderColor = "hsl(250 80% 65% / 0.5)"; e.target.style.boxShadow = "0 0 0 3px hsl(250 80% 65% / 0.1), inset 0 1px 0 rgba(255,255,255,0.03)"; }}
-                      onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.03)"; }}
+                      className="w-full h-12 rounded-xl px-4 text-sm text-white bg-white/[0.07] border border-white/[0.1] placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-medium text-white/50 uppercase tracking-wider px-1">كلمة المرور</label>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-gray-400 px-0.5">كلمة المرور</label>
                     <div className="relative">
                       <input type={showPassword ? "text" : "password"} placeholder="••••••••" value={password}
                         onChange={(e) => setPassword(e.target.value)} dir="ltr"
-                        className="w-full h-12 rounded-xl px-4 pl-12 text-[14px] text-white placeholder:text-white/20 focus:outline-none transition-all duration-300"
-                        style={{
-                          background: "rgba(255,255,255,0.06)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
-                        }}
-                        onFocus={(e) => { e.target.style.borderColor = "hsl(250 80% 65% / 0.5)"; e.target.style.boxShadow = "0 0 0 3px hsl(250 80% 65% / 0.1), inset 0 1px 0 rgba(255,255,255,0.03)"; }}
-                        onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.03)"; }}
+                        className="w-full h-12 rounded-xl px-4 pl-12 text-sm text-white bg-white/[0.07] border border-white/[0.1] placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
                       />
                       <button type="button" onClick={() => setShowPassword(!showPassword)}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
+                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
                         {showPassword ? (
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
@@ -245,21 +209,20 @@ function AdminLogin() {
                     </div>
                   </div>
                   
-                  {/* Forgot password link */}
                   <div className="flex justify-start">
                     <button type="button" onClick={() => setResetMode(true)}
-                      className="text-[12px] text-white/30 hover:text-white/55 transition-colors">
+                      className="text-xs text-indigo-400/70 hover:text-indigo-300 transition-colors">
                       نسيت كلمة المرور؟
                     </button>
                   </div>
 
                   <button type="submit" disabled={loading}
-                    className="w-full h-12 rounded-xl font-semibold text-[14px] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                    className="w-full h-12 rounded-xl font-semibold text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
                     style={{
-                      background: "linear-gradient(135deg, hsl(250 80% 60%), hsl(280 70% 55%), hsl(340 75% 55%))",
-                      boxShadow: "0 8px 24px -4px hsl(250 80% 60% / 0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
+                      background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                      boxShadow: "0 6px 20px -4px rgba(99,102,241,0.5)",
                     }}>
-                    <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span className="flex items-center justify-center gap-2">
                       {loading ? (
                         <>
                           <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -268,8 +231,6 @@ function AdminLogin() {
                         </>
                       ) : "تسجيل الدخول"}
                     </span>
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(280 70% 60%), hsl(340 75% 60%))" }} />
                   </button>
                 </form>
               )}
@@ -277,12 +238,12 @@ function AdminLogin() {
           </div>
         </div>
 
-        {/* Bottom subtle branding */}
+        {/* Bottom branding */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="text-center text-[11px] text-white/15 mt-6"
+          transition={{ delay: 0.7 }}
+          className="text-center text-[11px] text-gray-600 mt-6"
         >
           Powered by CodForm
         </motion.p>
