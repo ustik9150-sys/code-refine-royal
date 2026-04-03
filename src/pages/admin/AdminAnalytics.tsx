@@ -477,9 +477,27 @@ export default function AdminAnalytics() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
+        className="relative overflow-hidden rounded-2xl border border-border/40 bg-card/80 backdrop-blur-sm p-6"
       >
-        <h1 className="text-2xl font-bold text-foreground">📊 إحصائيات المتجر</h1>
-        <p className="text-sm text-muted-foreground mt-1">نظرة عامة على أداء متجرك</p>
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ background: "radial-gradient(ellipse at 70% 20%, hsl(250 80% 65%), transparent 60%)" }} />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, hsl(250 80% 65%), hsl(280 70% 55%))", boxShadow: "0 4px 16px hsla(250, 80%, 65%, 0.3)" }}>
+              <BarChart3 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">إحصائيات المتجر</h1>
+              <p className="text-sm text-muted-foreground">نظرة عامة على أداء متجرك</p>
+            </div>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span>تحديث مباشر</span>
+          </div>
+        </div>
       </motion.div>
 
       {/* Stats Grid */}
