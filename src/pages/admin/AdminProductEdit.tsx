@@ -710,6 +710,22 @@ export default function AdminProductEdit() {
                 placeholder="مثال: PRF-001"
               />
             </div>
+
+            <div>
+              <Label className="text-xs">Snapchat Conversion Value</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={snapchatConversionValue}
+                onChange={(e) => setSnapchatConversionValue(e.target.value)}
+                dir="ltr"
+                className="mt-1 rounded-xl admin-input"
+                placeholder="اتركه فارغاً لاستخدام السعر الحقيقي"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                القيمة المخصصة التي تُرسل لـ Snapchat Pixel عند الشراء. إذا تُرك فارغاً يُستخدم السعر الحقيقي.
+              </p>
+            </div>
           </motion.div>
 
           {/* Currency Settings Card */}
