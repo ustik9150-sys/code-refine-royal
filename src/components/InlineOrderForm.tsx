@@ -229,7 +229,9 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
         }).catch((err) => console.error("CodNetwork send failed:", err));
       }
 
-      navigate(`/thank-you?order=${encodeURIComponent(orderId)}&total=${finalPrice}`);
+      const snapValue = snapchatConversionValue != null ? snapchatConversionValue * finalQuantity : null;
+      const snapParam = snapValue != null ? `&snap_value=${snapValue}` : "";
+      navigate(`/thank-you?order=${encodeURIComponent(orderId)}&total=${finalPrice}${snapParam}`);
     } catch (err) {
       console.error("Order creation failed:", err);
       setErrors({ fullName: "حدث خطأ، حاول مرة أخرى" });
