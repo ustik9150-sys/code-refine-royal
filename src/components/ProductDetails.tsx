@@ -211,6 +211,7 @@ const ProductDetails = ({ productSlug }: { productSlug?: string }) => {
             unitPrice={price}
             quantity={quantity}
             currencySymbol={currencySymbol}
+            snapchatConversionValue={(product as any)?.snapchat_conversion_value ?? null}
           />
         </div>
 
