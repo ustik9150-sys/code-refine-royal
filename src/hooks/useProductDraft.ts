@@ -14,6 +14,7 @@ export interface ProductDraftData {
   currencyCode: string;
   hiddenFromHome: boolean;
   slug: string;
+  snapchatConversionValue: string;
 }
 
 type SaveStatus = "idle" | "saving" | "saved" | "unsaved";
