@@ -332,6 +332,7 @@ export default function AdminProductEdit() {
       currency_code: currencyEnabled ? currencyCode : null,
       hidden_from_home: hiddenFromHome,
       slug: slug.trim() || null,
+      snapchat_conversion_value: snapchatConversionValue ? parseFloat(snapchatConversionValue) : null,
     };
 
     try {
