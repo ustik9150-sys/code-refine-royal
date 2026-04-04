@@ -188,6 +188,7 @@ export default function AdminProductEdit() {
   const [currencyCode, setCurrencyCode] = useState("SAR");
   const [hiddenFromHome, setHiddenFromHome] = useState(false);
   const [slug, setSlug] = useState("");
+  const [snapchatConversionValue, setSnapchatConversionValue] = useState("");
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
