@@ -220,6 +220,7 @@ export default function AdminProductEdit() {
     setCurrencyCode(draft.currencyCode);
     setHiddenFromHome(draft.hiddenFromHome);
     setSlug(draft.slug);
+    setSnapchatConversionValue(draft.snapchatConversionValue || "");
   }, []);
 
   const sensors = useSensors(
