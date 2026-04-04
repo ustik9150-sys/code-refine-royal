@@ -30,6 +30,7 @@ interface InlineOrderFormProps {
   unitPrice: number;
   quantity: number;
   currencySymbol?: string;
+  snapchatConversionValue?: number | null;
 }
 
 interface CodFormSettings {
