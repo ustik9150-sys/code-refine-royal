@@ -313,6 +313,26 @@ function CountryStatsCard({ stat, index }: { stat: CountryStats; index: number }
 }
 
 // --- Fetch function ---
+// Paginated fetch: gets ALL rows by fetching in chunks of 1000
+async function fetchAllRows<T = any>(
+  queryBuilder: () => ReturnType<ReturnType<typeof supabase.from>['select']>
+): Promise<T[]> {
+  const PAGE_SIZE = 1000;
+  let allData: T[] = [];
+  let page = 0;
+  while (true) {
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data, error } = await (queryBuilder() as any).range(from, to);
+    if (error) { console.error("Paginated fetch error:", error); break; }
+    if (!data || data.length === 0) break;
+    allData = allData.concat(data as T[]);
+    if (data.length < PAGE_SIZE) break;
+    page++;
+  }
+  return allData;
+}
+
 async function fetchAnalyticsData(currencyCode: string) {
   const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000;
   const nowRiyadh = new Date(Date.now() + RIYADH_OFFSET_MS);
@@ -321,22 +341,22 @@ async function fetchAnalyticsData(currencyCode: string) {
   const last7 = getLast7Days();
   const weekStart = last7[0];
 
-  const [countRes, todayRes, weekRes, recentRes, allOrdersRes] = await Promise.all([
+  const [countRes, todayData, weekData, recentRes, allOrdersData] = await Promise.all([
     supabase.from("orders").select("*", { count: "exact", head: true }),
-    supabase.from("orders").select("total").gte("created_at", todayISO).limit(10000),
-    supabase.from("orders").select("total, created_at").gte("created_at", weekStart).limit(10000),
+    fetchAllRows(() => supabase.from("orders").select("total").gte("created_at", todayISO)),
+    fetchAllRows(() => supabase.from("orders").select("total, created_at").gte("created_at", weekStart)),
     supabase.from("orders").select("customer_name, city, created_at").order("created_at", { ascending: false }).limit(5),
-    supabase.from("orders").select("ip_country, total, created_at, order_items(product_id, products(currency_code, currency_enabled))").limit(10000),
+    fetchAllRows(() => supabase.from("orders").select("ip_country, total, created_at, order_items(product_id, products(currency_code, currency_enabled))")),
   ]);
 
   const totalOrders = countRes.count || 0;
-  const todayOrders = todayRes.data?.length || 0;
-  const todayRevenue = todayRes.data?.reduce((s, o) => s + (o.total || 0), 0) || 0;
-  const totalRevenue = allOrdersRes.data?.reduce((s: number, o: any) => s + (o.total || 0), 0) || 0;
+  const todayOrders = todayData.length;
+  const todayRevenue = todayData.reduce((s: number, o: any) => s + (o.total || 0), 0);
+  const totalRevenue = allOrdersData.reduce((s: number, o: any) => s + (o.total || 0), 0);
 
   const dayMap: Record<string, { orders: number; revenue: number }> = {};
   last7.forEach(d => { dayMap[d] = { orders: 0, revenue: 0 }; });
-  weekRes.data?.forEach(o => {
+  weekData.forEach((o: any) => {
     const dateKey = o.created_at.split("T")[0];
     if (dayMap[dateKey]) {
       dayMap[dateKey].orders++;
@@ -359,7 +379,7 @@ async function fetchAnalyticsData(currencyCode: string) {
     stats: { todayOrders, todayRevenue, totalOrders, totalRevenue },
     dailyData,
     recentOrders,
-    allOrdersRaw: allOrdersRes.data || [],
+    allOrdersRaw: allOrdersData,
   };
 }
 
