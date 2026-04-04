@@ -273,6 +273,7 @@ export type Database = {
           price: number
           sku: string | null
           slug: string | null
+          snapchat_conversion_value: number | null
           status: string
           tags: string[] | null
           updated_at: string
@@ -294,6 +295,7 @@ export type Database = {
           price?: number
           sku?: string | null
           slug?: string | null
+          snapchat_conversion_value?: number | null
           status?: string
           tags?: string[] | null
           updated_at?: string
@@ -315,6 +317,7 @@ export type Database = {
           price?: number
           sku?: string | null
           slug?: string | null
+          snapchat_conversion_value?: number | null
           status?: string
           tags?: string[] | null
           updated_at?: string
