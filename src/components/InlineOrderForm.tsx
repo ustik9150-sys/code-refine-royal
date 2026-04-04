@@ -75,7 +75,7 @@ const DEFAULT_SETTINGS: CodFormSettings = {
   offers: [],
 };
 
-const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quantity, currencySymbol: propCurrencySymbol }: InlineOrderFormProps) => {
+const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quantity, currencySymbol: propCurrencySymbol, snapchatConversionValue }: InlineOrderFormProps) => {
   const navigate = useNavigate();
   const { currency } = useCurrency();
   const displaySymbol = propCurrencySymbol || currency.symbol;
