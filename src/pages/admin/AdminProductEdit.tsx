@@ -265,6 +265,7 @@ export default function AdminProductEdit() {
       setCurrencyCode((product as any).currency_code || "SAR");
       setHiddenFromHome((product as any).hidden_from_home || false);
       setSlug((product as any).slug || "");
+      setSnapchatConversionValue((product as any).snapchat_conversion_value ? String((product as any).snapchat_conversion_value) : "");
 
       // Set initial data for change detection
       const initialData: ProductDraftData = {
@@ -281,6 +282,7 @@ export default function AdminProductEdit() {
         currencyCode: (product as any).currency_code || "SAR",
         hiddenFromHome: (product as any).hidden_from_home || false,
         slug: (product as any).slug || "",
+        snapchatConversionValue: (product as any).snapchat_conversion_value ? String((product as any).snapchat_conversion_value) : "",
       };
       setInitialData(initialData);
 
