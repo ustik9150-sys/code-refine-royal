@@ -233,7 +233,7 @@ export default function AdminProductEdit() {
       const initialData: ProductDraftData = {
         nameAr: "", descAr: "", price: "", compareAt: "", inventory: "0",
         sku: "", category: "", isActive: false, tags: [], currencyEnabled: false,
-        currencyCode: "SAR", hiddenFromHome: false, slug: "",
+        currencyCode: "SAR", hiddenFromHome: false, slug: "", snapchatConversionValue: "",
       };
       setInitialData(initialData);
       
