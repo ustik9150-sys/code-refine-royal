@@ -188,6 +188,7 @@ export default function AdminProductEdit() {
   const [currencyCode, setCurrencyCode] = useState("SAR");
   const [hiddenFromHome, setHiddenFromHome] = useState(false);
   const [slug, setSlug] = useState("");
+  const [snapchatConversionValue, setSnapchatConversionValue] = useState("");
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -197,13 +198,13 @@ export default function AdminProductEdit() {
 
   const getCurrentFormData = useCallback((): ProductDraftData => ({
     nameAr, descAr, price, compareAt, inventory, sku, category,
-    isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug,
-  }), [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug]);
+    isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, snapchatConversionValue,
+  }), [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, snapchatConversionValue]);
 
   // Auto-save draft on form changes
   useEffect(() => {
     debouncedSave(getCurrentFormData());
-  }, [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, debouncedSave, getCurrentFormData]);
+  }, [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, snapchatConversionValue, debouncedSave, getCurrentFormData]);
 
   const applyDraft = useCallback((draft: ProductDraftData) => {
     setNameAr(draft.nameAr);
@@ -219,6 +220,7 @@ export default function AdminProductEdit() {
     setCurrencyCode(draft.currencyCode);
     setHiddenFromHome(draft.hiddenFromHome);
     setSlug(draft.slug);
+    setSnapchatConversionValue(draft.snapchatConversionValue || "");
   }, []);
 
   const sensors = useSensors(
@@ -231,7 +233,7 @@ export default function AdminProductEdit() {
       const initialData: ProductDraftData = {
         nameAr: "", descAr: "", price: "", compareAt: "", inventory: "0",
         sku: "", category: "", isActive: false, tags: [], currencyEnabled: false,
-        currencyCode: "SAR", hiddenFromHome: false, slug: "",
+        currencyCode: "SAR", hiddenFromHome: false, slug: "", snapchatConversionValue: "",
       };
       setInitialData(initialData);
       
@@ -263,6 +265,7 @@ export default function AdminProductEdit() {
       setCurrencyCode((product as any).currency_code || "SAR");
       setHiddenFromHome((product as any).hidden_from_home || false);
       setSlug((product as any).slug || "");
+      setSnapchatConversionValue((product as any).snapchat_conversion_value ? String((product as any).snapchat_conversion_value) : "");
 
       // Set initial data for change detection
       const initialData: ProductDraftData = {
@@ -279,6 +282,7 @@ export default function AdminProductEdit() {
         currencyCode: (product as any).currency_code || "SAR",
         hiddenFromHome: (product as any).hidden_from_home || false,
         slug: (product as any).slug || "",
+        snapchatConversionValue: (product as any).snapchat_conversion_value ? String((product as any).snapchat_conversion_value) : "",
       };
       setInitialData(initialData);
 
@@ -328,6 +332,7 @@ export default function AdminProductEdit() {
       currency_code: currencyEnabled ? currencyCode : null,
       hidden_from_home: hiddenFromHome,
       slug: slug.trim() || null,
+      snapchat_conversion_value: snapchatConversionValue ? parseFloat(snapchatConversionValue) : null,
     };
 
     try {
@@ -704,6 +709,22 @@ export default function AdminProductEdit() {
                 className="mt-1 rounded-xl admin-input"
                 placeholder="مثال: PRF-001"
               />
+            </div>
+
+            <div>
+              <Label className="text-xs">Snapchat Conversion Value</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={snapchatConversionValue}
+                onChange={(e) => setSnapchatConversionValue(e.target.value)}
+                dir="ltr"
+                className="mt-1 rounded-xl admin-input"
+                placeholder="اتركه فارغاً لاستخدام السعر الحقيقي"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                القيمة المخصصة التي تُرسل لـ Snapchat Pixel عند الشراء. إذا تُرك فارغاً يُستخدم السعر الحقيقي.
+              </p>
             </div>
           </motion.div>
 

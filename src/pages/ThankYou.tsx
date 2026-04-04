@@ -29,6 +29,7 @@ const ThankYou: React.FC = () => {
   const email = searchParams.get("email") || "";
 
   const total = searchParams.get("total") || "";
+  const snapValue = searchParams.get("snap_value") || "";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -47,14 +48,15 @@ const ThankYou: React.FC = () => {
       const v = data.value as any;
       const totalNum = parseFloat(total) || 0;
 
-      // Snapchat PURCHASE event
+      // Snapchat PURCHASE event - use custom conversion value if provided
+      const snapchatValue = snapValue ? parseFloat(snapValue) : totalNum;
       if (v?.snapchat_pixel_id && v?.snapchat_enabled && (window as any).snaptr) {
         (window as any).snaptr('track', 'PURCHASE', {
-          price: totalNum,
+          price: snapchatValue,
           currency: 'SAR',
           transaction_id: rawOrder,
         });
-        console.log("Snapchat PURCHASE event fired");
+        console.log("Snapchat PURCHASE event fired with value:", snapchatValue);
       }
 
       // Facebook Purchase event
