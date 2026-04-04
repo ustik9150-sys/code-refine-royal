@@ -29,6 +29,7 @@ const ThankYou: React.FC = () => {
   const email = searchParams.get("email") || "";
 
   const total = searchParams.get("total") || "";
+  const snapValue = searchParams.get("snap_value") || "";
 
   useEffect(() => {
     window.scrollTo(0, 0);
