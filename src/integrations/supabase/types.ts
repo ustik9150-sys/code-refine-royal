@@ -99,6 +99,8 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          cod_network_lead_id: string | null
+          cod_network_status: string | null
           created_at: string
           customer_email: string | null
           customer_name: string
@@ -121,6 +123,8 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          cod_network_lead_id?: string | null
+          cod_network_status?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name: string
@@ -143,6 +147,8 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          cod_network_lead_id?: string | null
+          cod_network_status?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string
