@@ -153,6 +153,15 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
         className="flex items-center gap-3 p-4 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
+        {/* Selection Checkbox */}
+        <div onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            checked={selected}
+            onCheckedChange={(checked) => onSelect(order.id, !!checked)}
+            className="data-[state=checked]:bg-primary"
+          />
+        </div>
+
         {/* Order # + NEW badge */}
         <div className="flex flex-col items-center gap-1 min-w-[48px]">
           <span className="text-xs font-mono font-bold text-foreground">#{order.order_number}</span>
