@@ -31,6 +31,7 @@ interface InlineOrderFormProps {
   quantity: number;
   currencySymbol?: string;
   snapchatConversionValue?: number | null;
+  productCurrencyCode?: string | null;
 }
 
 interface CodFormSettings {
@@ -75,7 +76,7 @@ const DEFAULT_SETTINGS: CodFormSettings = {
   offers: [],
 };
 
-const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quantity, currencySymbol: propCurrencySymbol, snapchatConversionValue }: InlineOrderFormProps) => {
+const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quantity, currencySymbol: propCurrencySymbol, snapchatConversionValue, productCurrencyCode }: InlineOrderFormProps) => {
   const navigate = useNavigate();
   const { currency } = useCurrency();
   const displaySymbol = propCurrencySymbol || currency.symbol;
@@ -207,7 +208,8 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
       if (codNetworkSettings) {
         const codCity = city.trim() || codNetworkSettings.default_city || "N/A";
         const codAddress = city.trim() || "N/A";
-        const codCountry = currencyToCountry(currency.code) || codNetworkSettings.default_country || "KSA";
+        const effectiveCurrencyCode = productCurrencyCode || currency.code;
+        const codCountry = currencyToCountry(effectiveCurrencyCode) || codNetworkSettings.default_country || "KSA";
         supabase.functions.invoke("cod-network-proxy", {
           body: {
             action: "send_order",
