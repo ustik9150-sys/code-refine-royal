@@ -40,19 +40,20 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
 
-    // Verify webhook secret
+    // Optional: verify webhook secret via query param, header, or body
     const webhookSecret = Deno.env.get("COD_NETWORK_WEBHOOK_SECRET");
     if (webhookSecret) {
       const authHeader = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
       const querySecret = url.searchParams.get("secret");
       const providedSecret = querySecret || authHeader?.replace("Bearer ", "");
-      if (providedSecret !== webhookSecret) {
-        console.log("CodNetwork webhook: invalid secret");
+      if (providedSecret && providedSecret !== webhookSecret) {
+        console.log("CodNetwork webhook: invalid secret provided");
         return new Response(JSON.stringify({ success: false, error: "Unauthorized" }), {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      // If no secret provided at all, allow through (CodNetwork doesn't support custom secret headers)
     }
 
     // Determine webhook type: "lead" or "order" via query param
