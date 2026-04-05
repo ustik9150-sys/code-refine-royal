@@ -31,6 +31,7 @@ interface InlineOrderFormProps {
   quantity: number;
   currencySymbol?: string;
   snapchatConversionValue?: number | null;
+  productCurrencyCode?: string | null;
 }
 
 interface CodFormSettings {
