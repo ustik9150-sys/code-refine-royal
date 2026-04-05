@@ -91,6 +91,18 @@ const COD_NETWORK_STATUS_MAP: Record<string, { label: string; color: string }> =
   cancelled: { label: "ملغي", color: "bg-red-100 text-red-700 border-red-200" },
   wrong: { label: "خاطئ", color: "bg-red-100 text-red-700 border-red-200" },
   expired: { label: "منتهي", color: "bg-gray-100 text-gray-500 border-gray-200" },
+  new: { label: "طلب جديد", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  shipped: { label: "تم الشحن", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  returned: { label: "مرتجع", color: "bg-orange-100 text-orange-700 border-orange-200" },
+  on_hold: { label: "معلق", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  scheduled: { label: "مجدول", color: "bg-amber-100 text-amber-700 border-amber-200" },
+};
+
+// Parse "type:status" format from cod_network_status
+const parseCodNetworkStatus = (raw: string | null) => {
+  if (!raw) return null;
+  const status = raw.includes(":") ? raw.split(":")[1] : raw;
+  return COD_NETWORK_STATUS_MAP[status] || { label: status, color: "bg-muted text-muted-foreground border-border" };
 };
 
 const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", {
@@ -292,9 +304,14 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
                 {order.cod_network_status && (
                   <div>
                     <p className="text-[10px] text-muted-foreground mb-0.5">حالة CodNetwork</p>
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${COD_NETWORK_STATUS_MAP[order.cod_network_status]?.color || "bg-muted text-muted-foreground border-border"}`}>
-                      {COD_NETWORK_STATUS_MAP[order.cod_network_status]?.label || order.cod_network_status}
-                    </span>
+                    {(() => {
+                      const parsed = parseCodNetworkStatus(order.cod_network_status);
+                      return parsed ? (
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${parsed.color}`}>
+                          {parsed.label}
+                        </span>
+                      ) : null;
+                    })()}
                   </div>
                 )}
               </div>
