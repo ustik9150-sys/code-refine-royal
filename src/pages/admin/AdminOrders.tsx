@@ -232,10 +232,21 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
           <p className="text-[10px] text-muted-foreground">{PAYMENT_MAP[order.payment_method] || order.payment_method}</p>
         </div>
 
-        {/* Status Badge */}
-        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium ${status.bg} ${status.glow}`}>
-          <span className={`w-2 h-2 rounded-full ${status.dot} ${order.status === "pending" ? "animate-pulse" : ""}`} />
-          {status.label}
+        {/* Status Badges */}
+        <div className="flex flex-col items-end gap-1">
+          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium ${status.bg} ${status.glow}`}>
+            <span className={`w-2 h-2 rounded-full ${status.dot} ${order.status === "pending" ? "animate-pulse" : ""}`} />
+            {status.label}
+          </div>
+          {order.cod_network_status && (() => {
+            const parsed = parseCodNetworkStatus(order.cod_network_status);
+            return parsed ? (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium ${parsed.color}`}>
+                <Send className="w-2.5 h-2.5" />
+                {parsed.label}
+              </span>
+            ) : null;
+          })()}
         </div>
 
         {/* Quick Actions */}
