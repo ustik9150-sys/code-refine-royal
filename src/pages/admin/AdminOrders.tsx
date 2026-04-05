@@ -368,7 +368,25 @@ export default function AdminOrders() {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [internalNotes, setInternalNotes] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [sendingToCod, setSendingToCod] = useState(false);
+  const [codNetworkSettings, setCodNetworkSettings] = useState<{ enabled: boolean; api_token: string; default_country: string; default_city: string } | null>(null);
   const { toast } = useToast();
+
+  // Load CodNetwork settings
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "cod_network")
+        .maybeSingle();
+      if (data?.value) {
+        const v = data.value as any;
+        if (v.enabled && v.api_token) setCodNetworkSettings(v);
+      }
+    })();
+  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
