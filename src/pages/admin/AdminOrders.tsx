@@ -151,13 +151,14 @@ const CURRENCY_COUNTRY_MAP: Record<string, string> = {
 };
 
 // --- Order Card (expandable) ---
-function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, onSelect }: {
+function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, onSelect, selectionMode }: {
   order: Order; index: number;
   onStatusChange: (id: string, status: string) => void;
   onOpen: (o: Order) => void;
   onDelete: (id: string) => void;
   selected: boolean;
   onSelect: (id: string, checked: boolean) => void;
+  selectionMode: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const { currency } = useCurrency();
@@ -172,22 +173,33 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
       transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.4) }}
       layout
       className={`group rounded-2xl border bg-card/90 backdrop-blur-sm transition-all duration-300 hover:shadow-lg ${
+        selected ? "border-primary/50 bg-primary/5 shadow-primary/10 shadow-md" :
         orderIsNew ? "border-blue-300/60 shadow-blue-100/30 shadow-md" : "border-border/50"
       }`}
     >
       {/* Main Row */}
       <div
         className="flex items-center gap-3 p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
+        onClick={() => selectionMode ? onSelect(order.id, !selected) : setExpanded(!expanded)}
       >
-        {/* Selection Checkbox */}
-        <div onClick={(e) => e.stopPropagation()}>
-          <Checkbox
-            checked={selected}
-            onCheckedChange={(checked) => onSelect(order.id, !!checked)}
-            className="data-[state=checked]:bg-primary"
-          />
-        </div>
+        {/* Selection Checkbox - only in selection mode */}
+        <AnimatePresence>
+          {selectionMode && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: "auto", opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Checkbox
+                checked={selected}
+                onCheckedChange={(checked) => onSelect(order.id, !!checked)}
+                className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Order # + NEW badge */}
         <div className="flex flex-col items-center gap-1 min-w-[48px]">
@@ -421,6 +433,7 @@ export default function AdminOrders() {
   const [internalNotes, setInternalNotes] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sendingToCod, setSendingToCod] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
   const [codNetworkSettings, setCodNetworkSettings] = useState<{ enabled: boolean; api_token: string; default_country: string; default_city: string } | null>(null);
   const { toast } = useToast();
 
@@ -737,21 +750,56 @@ export default function AdminOrders() {
         </Select>
       </motion.div>
 
-      {/* Select All for filtered */}
+      {/* Selection Mode Toolbar */}
       {!loading && filtered.length > 0 && (
-        <div className="flex items-center gap-3">
-          <Checkbox
-            checked={filtered.length > 0 && filtered.every(o => selectedIds.has(o.id))}
-            onCheckedChange={(checked) => {
-              if (checked) {
-                setSelectedIds(new Set(filtered.map(o => o.id)));
-              } else {
-                setSelectedIds(new Set());
-              }
-            }}
-          />
-          <span className="text-xs text-muted-foreground">تحديد الكل ({filtered.length})</span>
-        </div>
+        <AnimatePresence>
+          {selectionMode ? (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="flex items-center gap-3 p-3 rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-sm"
+            >
+              <Checkbox
+                checked={filtered.length > 0 && filtered.every(o => selectedIds.has(o.id))}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setSelectedIds(new Set(filtered.map(o => o.id)));
+                  } else {
+                    setSelectedIds(new Set());
+                  }
+                }}
+                className="data-[state=checked]:bg-primary"
+              />
+              <span className="text-xs font-medium text-foreground">
+                {selectedIds.size > 0 ? `تم تحديد ${selectedIds.size}` : `تحديد الكل (${filtered.length})`}
+              </span>
+              <div className="flex-1" />
+              {selectedIds.size > 0 && (
+                <>
+                  <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1.5 h-8" onClick={exportSelectedCSV}>
+                    <Download className="w-3.5 h-3.5" /> تصدير
+                  </Button>
+                  {codNetworkSettings && (
+                    <Button size="sm" className="rounded-xl text-xs gap-1.5 h-8 bg-primary" onClick={sendSelectedToCodNetwork} disabled={sendingToCod}>
+                      {sendingToCod ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                      إرسال لـ CodNetwork
+                    </Button>
+                  )}
+                </>
+              )}
+              <Button size="sm" variant="ghost" className="rounded-xl text-xs h-8 text-muted-foreground" onClick={() => { setSelectionMode(false); setSelectedIds(new Set()); }}>
+                <XCircle className="w-3.5 h-3.5 ml-1" /> إلغاء
+              </Button>
+            </motion.div>
+          ) : (
+            <div className="flex justify-end">
+              <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1.5 h-8" onClick={() => setSelectionMode(true)}>
+                <CheckCircle className="w-3.5 h-3.5" /> تحديد
+              </Button>
+            </div>
+          )}
+        </AnimatePresence>
       )}
 
       {/* Orders List */}
@@ -771,6 +819,7 @@ export default function AdminOrders() {
                 onOpen={openOrder}
                 onDelete={(id) => setDeleteOrderTarget(id)}
                 selected={selectedIds.has(order.id)}
+                selectionMode={selectionMode}
                 onSelect={(id, checked) => {
                   setSelectedIds(prev => {
                     const next = new Set(prev);
@@ -916,48 +965,6 @@ export default function AdminOrders() {
         title="حذف الطلب"
         description="هل أنت متأكد أنك تريد حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء."
       />
-
-      {/* Floating Selection Action Bar */}
-      <AnimatePresence>
-        {selectedIds.size > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 60 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-card border border-border shadow-2xl rounded-2xl px-5 py-3 backdrop-blur-xl"
-          >
-            <span className="text-sm font-semibold text-foreground">{selectedIds.size} طلب محدد</span>
-            <div className="w-px h-6 bg-border" />
-            {codNetworkSettings && (
-              <Button
-                size="sm"
-                className="rounded-xl gap-2"
-                onClick={sendSelectedToCodNetwork}
-                disabled={sendingToCod}
-              >
-                {sendingToCod ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                إرسال إلى CodNetwork
-              </Button>
-            )}
-            <Button
-              size="sm"
-              variant="outline"
-              className="rounded-xl gap-2"
-              onClick={exportSelectedCSV}
-            >
-              <Download className="w-4 h-4" /> تصدير CSV
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="rounded-xl text-xs text-muted-foreground"
-              onClick={() => setSelectedIds(new Set())}
-            >
-              <XCircle className="w-4 h-4" /> إلغاء
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
