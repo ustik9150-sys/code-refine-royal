@@ -171,7 +171,6 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
       initial={{ opacity: 0, y: 12, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.4) }}
-      layout
       className={`group rounded-2xl border bg-card/90 backdrop-blur-sm transition-all duration-300 hover:shadow-lg ${
         selected ? "border-primary/50 bg-primary/5 shadow-primary/10 shadow-md" :
         orderIsNew ? "border-blue-300/60 shadow-blue-100/30 shadow-md" : "border-border/50"
