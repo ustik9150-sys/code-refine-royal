@@ -17,11 +17,12 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Download, Search, Eye, Phone, MessageCircle, CheckCircle, XCircle,
   ShoppingCart, Clock, TrendingUp, DollarSign, ChevronDown, ChevronUp,
-  Package, Trash2, MapPin,
+  Package, Trash2, MapPin, Send, Loader2,
 } from "lucide-react";
 import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
@@ -115,12 +116,21 @@ function StatCard({ icon: Icon, label, value, suffix, currencyCode, currencySymb
   );
 }
 
+// --- Country map for CodNetwork ---
+const CURRENCY_COUNTRY_MAP: Record<string, string> = {
+  SAR: "KSA", AED: "ARE", KWD: "KWT", BHD: "BHR", QAR: "QAT",
+  OMR: "OMN", EGP: "EGY", USD: "USA", EUR: "DEU", GBP: "GBR",
+  MAD: "MAR", TRY: "TUR", MRU: "MRT",
+};
+
 // --- Order Card (expandable) ---
-function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
+function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, onSelect }: {
   order: Order; index: number;
   onStatusChange: (id: string, status: string) => void;
   onOpen: (o: Order) => void;
   onDelete: (id: string) => void;
+  selected: boolean;
+  onSelect: (id: string, checked: boolean) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const { currency } = useCurrency();
@@ -143,6 +153,15 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
         className="flex items-center gap-3 p-4 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
+        {/* Selection Checkbox */}
+        <div onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            checked={selected}
+            onCheckedChange={(checked) => onSelect(order.id, !!checked)}
+            className="data-[state=checked]:bg-primary"
+          />
+        </div>
+
         {/* Order # + NEW badge */}
         <div className="flex flex-col items-center gap-1 min-w-[48px]">
           <span className="text-xs font-mono font-bold text-foreground">#{order.order_number}</span>
@@ -349,7 +368,25 @@ export default function AdminOrders() {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [internalNotes, setInternalNotes] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [sendingToCod, setSendingToCod] = useState(false);
+  const [codNetworkSettings, setCodNetworkSettings] = useState<{ enabled: boolean; api_token: string; default_country: string; default_city: string } | null>(null);
   const { toast } = useToast();
+
+  // Load CodNetwork settings
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "cod_network")
+        .maybeSingle();
+      if (data?.value) {
+        const v = data.value as any;
+        if (v.enabled && v.api_token) setCodNetworkSettings(v);
+      }
+    })();
+  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -474,9 +511,10 @@ export default function AdminOrders() {
     toast({ title: "تم حفظ الملاحظات" });
   };
 
-  const exportCSV = () => {
+  const exportCSV = (ordersList?: Order[]) => {
+    const target = ordersList || filtered;
     const headers = ["رقم الطلب", "العميل", "الجوال", "الموقع", "IP", "المجموع", "الحالة", "الدفع", "التاريخ"];
-    const rows = filtered.map((o) => [
+    const rows = target.map((o) => [
       o.order_number, o.customer_name, o.customer_phone,
       o.ip_city && o.ip_country ? `${o.ip_city} - ${o.ip_country}` : (o.city || ""),
       o.ip_address || "",
@@ -494,6 +532,78 @@ export default function AdminOrders() {
     URL.revokeObjectURL(url);
   };
 
+  const exportSelectedCSV = () => {
+    const selected = orders.filter(o => selectedIds.has(o.id));
+    exportCSV(selected);
+  };
+
+  const sendSelectedToCodNetwork = async () => {
+    if (!codNetworkSettings) {
+      toast({ title: "خطأ", description: "CodNetwork غير مفعل", variant: "destructive" });
+      return;
+    }
+    setSendingToCod(true);
+    const selected = orders.filter(o => selectedIds.has(o.id));
+    let success = 0;
+    let failed = 0;
+
+    for (const order of selected) {
+      try {
+        // Fetch order items
+        const { data: items } = await supabase
+          .from("order_items")
+          .select("product_name, quantity, unit_price, total_price, product_id")
+          .eq("order_id", order.id);
+
+        // Determine country from currency
+        const codCountry = CURRENCY_COUNTRY_MAP[currency.code] || codNetworkSettings.default_country || "KSA";
+        const codCity = order.city?.trim() || codNetworkSettings.default_city || "N/A";
+        const codAddress = order.address?.trim() || order.city?.trim() || "N/A";
+
+        const leadItems = (items || []).map((item: any) => ({
+          sku: "DEFAULT",
+          price: Number(item.total_price),
+          quantity: Number(item.quantity),
+        }));
+
+        if (leadItems.length === 0) {
+          leadItems.push({ sku: "DEFAULT", price: Number(order.total), quantity: 1 });
+        }
+
+        const res = await supabase.functions.invoke("cod-network-proxy", {
+          body: {
+            action: "send_order",
+            api_token: codNetworkSettings.api_token,
+            order_data: {
+              full_name: order.customer_name,
+              phone: order.customer_phone,
+              country: codCountry,
+              address: codAddress,
+              city: codCity,
+              area: codCity,
+              items: leadItems,
+            },
+          },
+        });
+
+        if (res.data?.success) {
+          success++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+
+    setSendingToCod(false);
+    setSelectedIds(new Set());
+    toast({
+      title: "تم الإرسال",
+      description: `${success} طلب تم إرساله بنجاح${failed > 0 ? ` • ${failed} فشل` : ""}`,
+    });
+  };
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
@@ -506,7 +616,7 @@ export default function AdminOrders() {
           <h1 className="text-2xl font-bold text-foreground">🛒 الطلبات</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{orders.length} طلب</p>
         </div>
-        <Button variant="outline" size="sm" onClick={exportCSV} className="rounded-xl gap-2">
+        <Button variant="outline" size="sm" onClick={() => exportCSV()} className="rounded-xl gap-2">
           <Download className="w-4 h-4" /> تصدير CSV
         </Button>
       </motion.div>
@@ -552,6 +662,23 @@ export default function AdminOrders() {
         </Select>
       </motion.div>
 
+      {/* Select All for filtered */}
+      {!loading && filtered.length > 0 && (
+        <div className="flex items-center gap-3">
+          <Checkbox
+            checked={filtered.length > 0 && filtered.every(o => selectedIds.has(o.id))}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                setSelectedIds(new Set(filtered.map(o => o.id)));
+              } else {
+                setSelectedIds(new Set());
+              }
+            }}
+          />
+          <span className="text-xs text-muted-foreground">تحديد الكل ({filtered.length})</span>
+        </div>
+      )}
+
       {/* Orders List */}
       {loading ? (
         <OrdersSkeleton />
@@ -568,6 +695,14 @@ export default function AdminOrders() {
                 onStatusChange={updateStatus}
                 onOpen={openOrder}
                 onDelete={(id) => setDeleteOrderTarget(id)}
+                selected={selectedIds.has(order.id)}
+                onSelect={(id, checked) => {
+                  setSelectedIds(prev => {
+                    const next = new Set(prev);
+                    checked ? next.add(id) : next.delete(id);
+                    return next;
+                  });
+                }}
               />
             ))}
           </AnimatePresence>
@@ -706,6 +841,48 @@ export default function AdminOrders() {
         title="حذف الطلب"
         description="هل أنت متأكد أنك تريد حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء."
       />
+
+      {/* Floating Selection Action Bar */}
+      <AnimatePresence>
+        {selectedIds.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 60 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-card border border-border shadow-2xl rounded-2xl px-5 py-3 backdrop-blur-xl"
+          >
+            <span className="text-sm font-semibold text-foreground">{selectedIds.size} طلب محدد</span>
+            <div className="w-px h-6 bg-border" />
+            {codNetworkSettings && (
+              <Button
+                size="sm"
+                className="rounded-xl gap-2"
+                onClick={sendSelectedToCodNetwork}
+                disabled={sendingToCod}
+              >
+                {sendingToCod ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                إرسال إلى CodNetwork
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-xl gap-2"
+              onClick={exportSelectedCSV}
+            >
+              <Download className="w-4 h-4" /> تصدير CSV
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="rounded-xl text-xs text-muted-foreground"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              <XCircle className="w-4 h-4" /> إلغاء
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
