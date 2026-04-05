@@ -45,6 +45,8 @@ type Order = {
   ip_address: string | null;
   ip_country: string | null;
   ip_city: string | null;
+  cod_network_status: string | null;
+  cod_network_lead_id: string | null;
 };
 
 type OrderItem = {
