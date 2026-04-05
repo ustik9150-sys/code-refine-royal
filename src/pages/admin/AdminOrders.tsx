@@ -503,6 +503,9 @@ export default function AdminOrders() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
+  const PAGE_SIZE_DISPLAY = 50;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE_DISPLAY);
+
   const filtered = useMemo(() => {
     return orders.filter((o) => {
       if (statusFilter !== "all" && o.status !== statusFilter) return false;
@@ -518,6 +521,14 @@ export default function AdminOrders() {
       return true;
     });
   }, [orders, search, statusFilter]);
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE_DISPLAY);
+  }, [search, statusFilter]);
+
+  const visibleOrders = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const hasMore = visibleCount < filtered.length;
 
   // Stats
   const stats = useMemo(() => {
