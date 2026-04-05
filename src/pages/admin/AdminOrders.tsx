@@ -598,18 +598,23 @@ export default function AdminOrders() {
         // Fetch SKUs for products that have product_id
         const productIds = (items || []).map((i: any) => i.product_id).filter(Boolean);
         let skuMap: Record<string, string> = {};
+        let productCurrencyCode: string | null = null;
         if (productIds.length > 0) {
           const { data: products } = await supabase
             .from("products")
-            .select("id, sku")
+            .select("id, sku, currency_enabled, currency_code")
             .in("id", productIds);
           if (products) {
             skuMap = Object.fromEntries(products.map((p: any) => [p.id, p.sku || ""]));
+            // Use first product's currency if it has one
+            const withCurrency = products.find((p: any) => p.currency_enabled && p.currency_code);
+            if (withCurrency) productCurrencyCode = withCurrency.currency_code;
           }
         }
 
-        // Determine country from currency
-        const codCountry = CURRENCY_COUNTRY_MAP[currency.code] || codNetworkSettings.default_country || "KSA";
+        // Determine country and currency from product currency or store currency
+        const effectiveCurrency = productCurrencyCode || currency.code;
+        const codCountry = CURRENCY_COUNTRY_MAP[effectiveCurrency] || codNetworkSettings.default_country || "KSA";
         const codCity = order.city?.trim() || codNetworkSettings.default_city || "N/A";
         const codAddress = order.address?.trim() || order.city?.trim() || "N/A";
 
@@ -634,7 +639,7 @@ export default function AdminOrders() {
               address: codAddress,
               city: codCity,
               area: codCity,
-              currency: currency.code,
+              currency: effectiveCurrency,
               items: leadItems,
             },
           },
