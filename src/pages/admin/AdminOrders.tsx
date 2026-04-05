@@ -45,6 +45,8 @@ type Order = {
   ip_address: string | null;
   ip_country: string | null;
   ip_city: string | null;
+  cod_network_status: string | null;
+  cod_network_lead_id: string | null;
 };
 
 type OrderItem = {
@@ -76,6 +78,19 @@ const PAYMENT_MAP: Record<string, string> = {
   bank_transfer: "تحويل بنكي",
   apple_pay: "Apple Pay",
   card: "بطاقة",
+};
+
+const COD_NETWORK_STATUS_MAP: Record<string, { label: string; color: string }> = {
+  lead: { label: "ليد جديد", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  confirmed: { label: "مؤكد", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  delivered: { label: "تم التسليم", color: "bg-green-100 text-green-700 border-green-200" },
+  return: { label: "مرتجع", color: "bg-orange-100 text-orange-700 border-orange-200" },
+  call_later: { label: "اتصال لاحقاً", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  call_later_scheduled: { label: "مجدول", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  no_reply: { label: "لا رد", color: "bg-gray-100 text-gray-600 border-gray-200" },
+  cancelled: { label: "ملغي", color: "bg-red-100 text-red-700 border-red-200" },
+  wrong: { label: "خاطئ", color: "bg-red-100 text-red-700 border-red-200" },
+  expired: { label: "منتهي", color: "bg-gray-100 text-gray-500 border-gray-200" },
 };
 
 const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", {
@@ -274,6 +289,14 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
                   <p className="text-[10px] text-muted-foreground mb-0.5">العنوان</p>
                   <p className="font-medium">{order.address || "غير محدد"}</p>
                 </div>
+                {order.cod_network_status && (
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-0.5">حالة CodNetwork</p>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${COD_NETWORK_STATUS_MAP[order.cod_network_status]?.color || "bg-muted text-muted-foreground border-border"}`}>
+                      {COD_NETWORK_STATUS_MAP[order.cod_network_status]?.label || order.cod_network_status}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {order.notes && (
@@ -588,6 +611,11 @@ export default function AdminOrders() {
         });
 
         if (res.data?.success) {
+          // Save lead_id if returned
+          const leadId = res.data?.data?.data?.id || res.data?.data?.id;
+          if (leadId) {
+            await supabase.from("orders").update({ cod_network_lead_id: String(leadId) } as any).eq("id", order.id);
+          }
           success++;
         } else {
           failed++;
