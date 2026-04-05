@@ -589,11 +589,24 @@ export default function AdminOrders() {
 
     for (const order of selected) {
       try {
-        // Fetch order items
+        // Fetch order items with product SKU
         const { data: items } = await supabase
           .from("order_items")
           .select("product_name, quantity, unit_price, total_price, product_id")
           .eq("order_id", order.id);
+
+        // Fetch SKUs for products that have product_id
+        const productIds = (items || []).map((i: any) => i.product_id).filter(Boolean);
+        let skuMap: Record<string, string> = {};
+        if (productIds.length > 0) {
+          const { data: products } = await supabase
+            .from("products")
+            .select("id, sku")
+            .in("id", productIds);
+          if (products) {
+            skuMap = Object.fromEntries(products.map((p: any) => [p.id, p.sku || ""]));
+          }
+        }
 
         // Determine country from currency
         const codCountry = CURRENCY_COUNTRY_MAP[currency.code] || codNetworkSettings.default_country || "KSA";
@@ -601,13 +614,13 @@ export default function AdminOrders() {
         const codAddress = order.address?.trim() || order.city?.trim() || "N/A";
 
         const leadItems = (items || []).map((item: any) => ({
-          sku: "DEFAULT",
+          sku: (item.product_id && skuMap[item.product_id]) || item.product_name,
           price: Number(item.total_price),
           quantity: Number(item.quantity),
         }));
 
         if (leadItems.length === 0) {
-          leadItems.push({ sku: "DEFAULT", price: Number(order.total), quantity: 1 });
+          leadItems.push({ sku: "UNKNOWN", price: Number(order.total), quantity: 1 });
         }
 
         const res = await supabase.functions.invoke("cod-network-proxy", {
