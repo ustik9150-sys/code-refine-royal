@@ -500,7 +500,7 @@ export default function AdminOrders() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const PAGE_SIZE_DISPLAY = 50;
+  const PAGE_SIZE_DISPLAY = 10;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE_DISPLAY);
 
   const filtered = useMemo(() => {
