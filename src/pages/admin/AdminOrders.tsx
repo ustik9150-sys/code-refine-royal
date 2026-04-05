@@ -581,6 +581,7 @@ export default function AdminOrders() {
               address: codAddress,
               city: codCity,
               area: codCity,
+              currency: currency.code,
               items: leadItems,
             },
           },
