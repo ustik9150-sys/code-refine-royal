@@ -588,6 +588,11 @@ export default function AdminOrders() {
         });
 
         if (res.data?.success) {
+          // Save lead_id if returned
+          const leadId = res.data?.data?.data?.id || res.data?.data?.id;
+          if (leadId) {
+            await supabase.from("orders").update({ cod_network_lead_id: String(leadId) } as any).eq("id", order.id);
+          }
           success++;
         } else {
           failed++;
