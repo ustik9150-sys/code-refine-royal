@@ -26,6 +26,22 @@ serve(async (req) => {
   }
 
   try {
+    // Verify webhook secret
+    const webhookSecret = Deno.env.get("COD_NETWORK_WEBHOOK_SECRET");
+    if (webhookSecret) {
+      const authHeader = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
+      const url = new URL(req.url);
+      const querySecret = url.searchParams.get("secret");
+      const providedSecret = querySecret || authHeader?.replace("Bearer ", "");
+      if (providedSecret !== webhookSecret) {
+        console.log("CodNetwork webhook: invalid secret");
+        return new Response(JSON.stringify({ success: false, error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const body = await req.json();
     console.log("CodNetwork webhook received:", JSON.stringify(body));
 
