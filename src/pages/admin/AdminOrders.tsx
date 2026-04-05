@@ -589,6 +589,23 @@ export default function AdminOrders() {
         </Select>
       </motion.div>
 
+      {/* Select All for filtered */}
+      {!loading && filtered.length > 0 && (
+        <div className="flex items-center gap-3">
+          <Checkbox
+            checked={filtered.length > 0 && filtered.every(o => selectedIds.has(o.id))}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                setSelectedIds(new Set(filtered.map(o => o.id)));
+              } else {
+                setSelectedIds(new Set());
+              }
+            }}
+          />
+          <span className="text-xs text-muted-foreground">تحديد الكل ({filtered.length})</span>
+        </div>
+      )}
+
       {/* Orders List */}
       {loading ? (
         <OrdersSkeleton />
@@ -605,6 +622,14 @@ export default function AdminOrders() {
                 onStatusChange={updateStatus}
                 onOpen={openOrder}
                 onDelete={(id) => setDeleteOrderTarget(id)}
+                selected={selectedIds.has(order.id)}
+                onSelect={(id, checked) => {
+                  setSelectedIds(prev => {
+                    const next = new Set(prev);
+                    checked ? next.add(id) : next.delete(id);
+                    return next;
+                  });
+                }}
               />
             ))}
           </AnimatePresence>
