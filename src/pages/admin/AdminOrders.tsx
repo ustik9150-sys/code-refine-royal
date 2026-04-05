@@ -17,11 +17,12 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Download, Search, Eye, Phone, MessageCircle, CheckCircle, XCircle,
   ShoppingCart, Clock, TrendingUp, DollarSign, ChevronDown, ChevronUp,
-  Package, Trash2, MapPin,
+  Package, Trash2, MapPin, Send, Loader2,
 } from "lucide-react";
 import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
