@@ -616,7 +616,7 @@ export default function AdminOrders() {
           <h1 className="text-2xl font-bold text-foreground">🛒 الطلبات</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{orders.length} طلب</p>
         </div>
-        <Button variant="outline" size="sm" onClick={exportCSV} className="rounded-xl gap-2">
+        <Button variant="outline" size="sm" onClick={() => exportCSV()} className="rounded-xl gap-2">
           <Download className="w-4 h-4" /> تصدير CSV
         </Button>
       </motion.div>
