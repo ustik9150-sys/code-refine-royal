@@ -6,8 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Map CodNetwork statuses to our order statuses
-const STATUS_MAP: Record<string, string> = {
+// Map CodNetwork lead statuses to our order statuses
+const LEAD_STATUS_MAP: Record<string, string> = {
   lead: "pending",
   confirmed: "confirmed",
   delivered: "delivered",
@@ -20,17 +20,30 @@ const STATUS_MAP: Record<string, string> = {
   expired: "cancelled",
 };
 
+// Map CodNetwork order statuses to our order statuses
+const ORDER_STATUS_MAP: Record<string, string> = {
+  new: "pending",
+  "assigned(order sent to shipping company)": "shipped",
+  shipped: "shipped",
+  delivered: "delivered",
+  returned: "refunded",
+  cancelled: "cancelled",
+  on_hold: "pending",
+  scheduled: "pending",
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const url = new URL(req.url);
+
     // Verify webhook secret
     const webhookSecret = Deno.env.get("COD_NETWORK_WEBHOOK_SECRET");
     if (webhookSecret) {
       const authHeader = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
-      const url = new URL(req.url);
       const querySecret = url.searchParams.get("secret");
       const providedSecret = querySecret || authHeader?.replace("Bearer ", "");
       if (providedSecret !== webhookSecret) {
@@ -42,14 +55,13 @@ serve(async (req) => {
       }
     }
 
+    // Determine webhook type: "lead" or "order" via query param
+    const webhookType = url.searchParams.get("type") || "lead";
+
     const body = await req.json();
-    console.log("CodNetwork webhook received:", JSON.stringify(body));
+    console.log(`CodNetwork webhook [${webhookType}] received:`, JSON.stringify(body));
 
-    // CodNetwork sends: { id, phone, status, customer_name, total_price, ... }
-    const leadId = body.id || body.lead_id;
-    const phone = body.phone;
     const codStatus = body.status;
-
     if (!codStatus) {
       return new Response(JSON.stringify({ success: false, error: "Missing status" }), {
         status: 400,
@@ -62,9 +74,15 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Try to find order by lead_id first, then by phone
+    // Extract identifiers based on webhook type
+    const leadId = body.lead_id || body.id;
+    const phone = body.phone;
+    const reference = body.reference; // order webhooks may include reference
+
+    // Try to find matching order
     let orderId: string | null = null;
 
+    // 1. Match by lead_id
     if (leadId) {
       const { data } = await supabaseAdmin
         .from("orders")
@@ -74,8 +92,8 @@ serve(async (req) => {
       if (data) orderId = data.id;
     }
 
+    // 2. Match by phone (most recent)
     if (!orderId && phone) {
-      // Match by phone - get the most recent order with this phone
       const { data } = await supabaseAdmin
         .from("orders")
         .select("id")
@@ -87,17 +105,19 @@ serve(async (req) => {
     }
 
     if (!orderId) {
-      console.log("CodNetwork webhook: no matching order found for", { leadId, phone });
+      console.log("CodNetwork webhook: no matching order found for", { leadId, phone, reference });
       return new Response(JSON.stringify({ success: false, error: "Order not found" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Update order with CodNetwork status
-    const mappedStatus = STATUS_MAP[codStatus] || null;
+    // Map status based on webhook type
+    const statusMap = webhookType === "order" ? ORDER_STATUS_MAP : LEAD_STATUS_MAP;
+    const mappedStatus = statusMap[codStatus] || null;
+
     const updateData: Record<string, any> = {
-      cod_network_status: codStatus,
+      cod_network_status: `${webhookType}:${codStatus}`,
     };
     if (leadId) updateData.cod_network_lead_id = String(leadId);
     if (mappedStatus) updateData.status = mappedStatus;
@@ -115,7 +135,7 @@ serve(async (req) => {
       });
     }
 
-    console.log(`CodNetwork webhook: updated order ${orderId} → status: ${codStatus} (mapped: ${mappedStatus})`);
+    console.log(`CodNetwork webhook [${webhookType}]: updated order ${orderId} → ${codStatus} (mapped: ${mappedStatus})`);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
