@@ -461,16 +461,28 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(10000);
-    if (error) {
-      toast({ title: "خطأ", description: "فشل تحميل الطلبات", variant: "destructive" });
-    } else {
-      setOrders((data as Order[]) || []);
+    const PAGE_SIZE = 1000;
+    let allOrders: Order[] = [];
+    let from = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(from, from + PAGE_SIZE - 1);
+      if (error) {
+        toast({ title: "خطأ", description: "فشل تحميل الطلبات", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+      allOrders = allOrders.concat((data as Order[]) || []);
+      hasMore = (data?.length || 0) === PAGE_SIZE;
+      from += PAGE_SIZE;
     }
+
+    setOrders(allOrders);
     setLoading(false);
   };
 
