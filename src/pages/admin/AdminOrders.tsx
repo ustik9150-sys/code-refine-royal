@@ -179,7 +179,15 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
       {/* Main Row */}
       <div
         className="flex items-center gap-3 p-4 cursor-pointer"
-        onClick={() => selectionMode ? onSelect(order.id, !selected) : setExpanded(!expanded)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (selectionMode) {
+            onSelect(order.id, !selected);
+          } else {
+            setExpanded(!expanded);
+          }
+        }}
       >
         {/* Selection Checkbox - only in selection mode */}
         <AnimatePresence>
