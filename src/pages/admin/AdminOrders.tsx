@@ -116,12 +116,21 @@ function StatCard({ icon: Icon, label, value, suffix, currencyCode, currencySymb
   );
 }
 
+// --- Country map for CodNetwork ---
+const CURRENCY_COUNTRY_MAP: Record<string, string> = {
+  SAR: "KSA", AED: "ARE", KWD: "KWT", BHD: "BHR", QAR: "QAT",
+  OMR: "OMN", EGP: "EGY", USD: "USA", EUR: "DEU", GBP: "GBR",
+  MAD: "MAR", TRY: "TUR", MRU: "MRT",
+};
+
 // --- Order Card (expandable) ---
-function OrderCard({ order, index, onStatusChange, onOpen, onDelete }: {
+function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, onSelect }: {
   order: Order; index: number;
   onStatusChange: (id: string, status: string) => void;
   onOpen: (o: Order) => void;
   onDelete: (id: string) => void;
+  selected: boolean;
+  onSelect: (id: string, checked: boolean) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const { currency } = useCurrency();
