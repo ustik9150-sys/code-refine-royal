@@ -289,6 +289,14 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
                   <p className="text-[10px] text-muted-foreground mb-0.5">العنوان</p>
                   <p className="font-medium">{order.address || "غير محدد"}</p>
                 </div>
+                {order.cod_network_status && (
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-0.5">حالة CodNetwork</p>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${COD_NETWORK_STATUS_MAP[order.cod_network_status]?.color || "bg-muted text-muted-foreground border-border"}`}>
+                      {COD_NETWORK_STATUS_MAP[order.cod_network_status]?.label || order.cod_network_status}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {order.notes && (
