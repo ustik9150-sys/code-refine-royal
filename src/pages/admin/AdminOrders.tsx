@@ -841,27 +841,36 @@ export default function AdminOrders() {
         <EmptyState />
       ) : (
         <div className="space-y-3">
-          <AnimatePresence>
-            {filtered.map((order, i) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                index={i}
-                onStatusChange={updateStatus}
-                onOpen={openOrder}
-                onDelete={(id) => setDeleteOrderTarget(id)}
-                selected={selectedIds.has(order.id)}
-                selectionMode={selectionMode}
-                onSelect={(id, checked) => {
-                  setSelectedIds(prev => {
-                    const next = new Set(prev);
-                    checked ? next.add(id) : next.delete(id);
-                    return next;
-                  });
-                }}
-              />
-            ))}
-          </AnimatePresence>
+          {visibleOrders.map((order, i) => (
+            <OrderCard
+              key={order.id}
+              order={order}
+              index={i}
+              onStatusChange={updateStatus}
+              onOpen={openOrder}
+              onDelete={(id) => setDeleteOrderTarget(id)}
+              selected={selectedIds.has(order.id)}
+              selectionMode={selectionMode}
+              onSelect={(id, checked) => {
+                setSelectedIds(prev => {
+                  const next = new Set(prev);
+                  checked ? next.add(id) : next.delete(id);
+                  return next;
+                });
+              }}
+            />
+          ))}
+          {hasMore && (
+            <div className="flex justify-center pt-2 pb-4">
+              <Button
+                variant="outline"
+                className="rounded-xl gap-2"
+                onClick={() => setVisibleCount(prev => prev + PAGE_SIZE_DISPLAY)}
+              >
+                عرض المزيد ({filtered.length - visibleCount} متبقي)
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
