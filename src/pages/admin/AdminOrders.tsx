@@ -707,9 +707,11 @@ export default function AdminOrders() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-wrap items-center justify-between gap-4"
       >
-        <div>
+        <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-foreground">🛒 الطلبات</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{orders.length} طلب</p>
+          <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-xs font-medium">
+            {orders.length.toLocaleString("ar-SA")}
+          </Badge>
         </div>
         <Button variant="outline" size="sm" onClick={() => exportCSV()} className="rounded-xl gap-2">
           <Download className="w-4 h-4" /> تصدير CSV
