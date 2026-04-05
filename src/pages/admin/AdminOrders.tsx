@@ -80,6 +80,19 @@ const PAYMENT_MAP: Record<string, string> = {
   card: "بطاقة",
 };
 
+const COD_NETWORK_STATUS_MAP: Record<string, { label: string; color: string }> = {
+  lead: { label: "ليد جديد", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  confirmed: { label: "مؤكد", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  delivered: { label: "تم التسليم", color: "bg-green-100 text-green-700 border-green-200" },
+  return: { label: "مرتجع", color: "bg-orange-100 text-orange-700 border-orange-200" },
+  call_later: { label: "اتصال لاحقاً", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  call_later_scheduled: { label: "مجدول", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  no_reply: { label: "لا رد", color: "bg-gray-100 text-gray-600 border-gray-200" },
+  cancelled: { label: "ملغي", color: "bg-red-100 text-red-700 border-red-200" },
+  wrong: { label: "خاطئ", color: "bg-red-100 text-red-700 border-red-200" },
+  expired: { label: "منتهي", color: "bg-gray-100 text-gray-500 border-gray-200" },
+};
+
 const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", {
   year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
 });
