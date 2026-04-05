@@ -511,9 +511,10 @@ export default function AdminOrders() {
     toast({ title: "تم حفظ الملاحظات" });
   };
 
-  const exportCSV = () => {
+  const exportCSV = (ordersList?: Order[]) => {
+    const target = ordersList || filtered;
     const headers = ["رقم الطلب", "العميل", "الجوال", "الموقع", "IP", "المجموع", "الحالة", "الدفع", "التاريخ"];
-    const rows = filtered.map((o) => [
+    const rows = target.map((o) => [
       o.order_number, o.customer_name, o.customer_phone,
       o.ip_city && o.ip_country ? `${o.ip_city} - ${o.ip_country}` : (o.city || ""),
       o.ip_address || "",
@@ -529,6 +530,78 @@ export default function AdminOrders() {
     a.download = `orders_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const exportSelectedCSV = () => {
+    const selected = orders.filter(o => selectedIds.has(o.id));
+    exportCSV(selected);
+  };
+
+  const sendSelectedToCodNetwork = async () => {
+    if (!codNetworkSettings) {
+      toast({ title: "خطأ", description: "CodNetwork غير مفعل", variant: "destructive" });
+      return;
+    }
+    setSendingToCod(true);
+    const selected = orders.filter(o => selectedIds.has(o.id));
+    let success = 0;
+    let failed = 0;
+
+    for (const order of selected) {
+      try {
+        // Fetch order items
+        const { data: items } = await supabase
+          .from("order_items")
+          .select("product_name, quantity, unit_price, total_price, product_id")
+          .eq("order_id", order.id);
+
+        // Determine country from currency
+        const codCountry = CURRENCY_COUNTRY_MAP[currency.code] || codNetworkSettings.default_country || "KSA";
+        const codCity = order.city?.trim() || codNetworkSettings.default_city || "N/A";
+        const codAddress = order.address?.trim() || order.city?.trim() || "N/A";
+
+        const leadItems = (items || []).map((item: any) => ({
+          sku: "DEFAULT",
+          price: Number(item.total_price),
+          quantity: Number(item.quantity),
+        }));
+
+        if (leadItems.length === 0) {
+          leadItems.push({ sku: "DEFAULT", price: Number(order.total), quantity: 1 });
+        }
+
+        const res = await supabase.functions.invoke("cod-network-proxy", {
+          body: {
+            action: "send_order",
+            api_token: codNetworkSettings.api_token,
+            order_data: {
+              full_name: order.customer_name,
+              phone: order.customer_phone,
+              country: codCountry,
+              address: codAddress,
+              city: codCity,
+              area: codCity,
+              items: leadItems,
+            },
+          },
+        });
+
+        if (res.data?.success) {
+          success++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+
+    setSendingToCod(false);
+    setSelectedIds(new Set());
+    toast({
+      title: "تم الإرسال",
+      description: `${success} طلب تم إرساله بنجاح${failed > 0 ? ` • ${failed} فشل` : ""}`,
+    });
   };
 
   return (
