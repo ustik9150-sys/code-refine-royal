@@ -841,6 +841,48 @@ export default function AdminOrders() {
         title="حذف الطلب"
         description="هل أنت متأكد أنك تريد حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء."
       />
+
+      {/* Floating Selection Action Bar */}
+      <AnimatePresence>
+        {selectedIds.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 60 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-card border border-border shadow-2xl rounded-2xl px-5 py-3 backdrop-blur-xl"
+          >
+            <span className="text-sm font-semibold text-foreground">{selectedIds.size} طلب محدد</span>
+            <div className="w-px h-6 bg-border" />
+            {codNetworkSettings && (
+              <Button
+                size="sm"
+                className="rounded-xl gap-2"
+                onClick={sendSelectedToCodNetwork}
+                disabled={sendingToCod}
+              >
+                {sendingToCod ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                إرسال إلى CodNetwork
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-xl gap-2"
+              onClick={exportSelectedCSV}
+            >
+              <Download className="w-4 h-4" /> تصدير CSV
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="rounded-xl text-xs text-muted-foreground"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              <XCircle className="w-4 h-4" /> إلغاء
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
