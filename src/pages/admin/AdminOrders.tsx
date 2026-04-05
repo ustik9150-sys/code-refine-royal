@@ -709,9 +709,9 @@ export default function AdminOrders() {
       >
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-foreground">🛒 الطلبات</h1>
-          <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-xs font-medium">
-            {orders.length.toLocaleString("ar-SA")}
-          </Badge>
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary ring-1 ring-primary/20">
+            {filtered.length.toLocaleString("en-US")} طلب
+          </span>
         </div>
         <Button variant="outline" size="sm" onClick={() => exportCSV()} className="rounded-xl gap-2">
           <Download className="w-4 h-4" /> تصدير CSV
