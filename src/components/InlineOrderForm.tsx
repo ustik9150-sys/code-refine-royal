@@ -221,6 +221,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
               address: codAddress,
               city: codCity,
               area: codCity,
+              currency: effectiveCurrencyCode,
               items: [{
                 sku: productSku || "DEFAULT",
                 price: Number(finalPrice),
