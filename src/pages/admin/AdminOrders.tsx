@@ -151,13 +151,14 @@ const CURRENCY_COUNTRY_MAP: Record<string, string> = {
 };
 
 // --- Order Card (expandable) ---
-function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, onSelect }: {
+function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, onSelect, selectionMode }: {
   order: Order; index: number;
   onStatusChange: (id: string, status: string) => void;
   onOpen: (o: Order) => void;
   onDelete: (id: string) => void;
   selected: boolean;
   onSelect: (id: string, checked: boolean) => void;
+  selectionMode: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const { currency } = useCurrency();
