@@ -208,7 +208,8 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
       if (codNetworkSettings) {
         const codCity = city.trim() || codNetworkSettings.default_city || "N/A";
         const codAddress = city.trim() || "N/A";
-        const codCountry = currencyToCountry(currency.code) || codNetworkSettings.default_country || "KSA";
+        const effectiveCurrencyCode = productCurrencyCode || currency.code;
+        const codCountry = currencyToCountry(effectiveCurrencyCode) || codNetworkSettings.default_country || "KSA";
         supabase.functions.invoke("cod-network-proxy", {
           body: {
             action: "send_order",
