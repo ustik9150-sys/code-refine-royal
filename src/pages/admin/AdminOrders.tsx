@@ -304,9 +304,14 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
                 {order.cod_network_status && (
                   <div>
                     <p className="text-[10px] text-muted-foreground mb-0.5">حالة CodNetwork</p>
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${COD_NETWORK_STATUS_MAP[order.cod_network_status]?.color || "bg-muted text-muted-foreground border-border"}`}>
-                      {COD_NETWORK_STATUS_MAP[order.cod_network_status]?.label || order.cod_network_status}
-                    </span>
+                    {(() => {
+                      const parsed = parseCodNetworkStatus(order.cod_network_status);
+                      return parsed ? (
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${parsed.color}`}>
+                          {parsed.label}
+                        </span>
+                      ) : null;
+                    })()}
                   </div>
                 )}
               </div>
