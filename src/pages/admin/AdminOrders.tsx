@@ -173,22 +173,33 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
       transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.4) }}
       layout
       className={`group rounded-2xl border bg-card/90 backdrop-blur-sm transition-all duration-300 hover:shadow-lg ${
+        selected ? "border-primary/50 bg-primary/5 shadow-primary/10 shadow-md" :
         orderIsNew ? "border-blue-300/60 shadow-blue-100/30 shadow-md" : "border-border/50"
       }`}
     >
       {/* Main Row */}
       <div
         className="flex items-center gap-3 p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
+        onClick={() => selectionMode ? onSelect(order.id, !selected) : setExpanded(!expanded)}
       >
-        {/* Selection Checkbox */}
-        <div onClick={(e) => e.stopPropagation()}>
-          <Checkbox
-            checked={selected}
-            onCheckedChange={(checked) => onSelect(order.id, !!checked)}
-            className="data-[state=checked]:bg-primary"
-          />
-        </div>
+        {/* Selection Checkbox - only in selection mode */}
+        <AnimatePresence>
+          {selectionMode && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: "auto", opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Checkbox
+                checked={selected}
+                onCheckedChange={(checked) => onSelect(order.id, !!checked)}
+                className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Order # + NEW badge */}
         <div className="flex flex-col items-center gap-1 min-w-[48px]">
