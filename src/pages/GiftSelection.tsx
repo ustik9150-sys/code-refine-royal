@@ -9,8 +9,8 @@ import giftCreamImg from "@/assets/gift-cream.jpg";
 import giftHairOilImg from "@/assets/gift-hair-oil.webp";
 
 const GIFT_OPTIONS = [
-  { sku: "BIOAQUA99", name: "كريم مرطب بخلاصة الخوخ", image: giftCreamImg },
-  { sku: "TTEHRSOIN", name: "زيت أعشاب للشعر", image: giftHairOilImg },
+  { sku: "BIOAQUA99", name: "كريم الخوخ لتبيض و تنعيم البشرة", image: giftCreamImg },
+  { sku: "TTEHRSOIN", name: "زيت اديفاسي لتطويل الشعر", image: giftHairOilImg },
 ];
 
 const TIMEOUT_SECONDS = 120; // 2 minutes
