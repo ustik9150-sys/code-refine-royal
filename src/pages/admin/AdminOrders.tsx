@@ -49,6 +49,7 @@ type Order = {
   ip_city: string | null;
   cod_network_status: string | null;
   cod_network_lead_id: string | null;
+  cod_network_data: any | null;
 };
 
 type OrderItem = {
@@ -578,8 +579,8 @@ export default function AdminOrders() {
     setAuditLogs((logs as AuditLog[]) || []);
 
     // Use stored webhook data instead of API call
-    if ((order as any).cod_network_data) {
-      setCodLeadData((order as any).cod_network_data);
+    if (order.cod_network_data) {
+      setCodLeadData(order.cod_network_data);
     }
   };
 
@@ -685,6 +686,8 @@ export default function AdminOrders() {
         failed++;
       }
     }
+    // Refresh orders list to reflect updates
+    await fetchOrders();
     toast({
       title: `تمت المزامنة: ${updated} من ${toSync.length}`,
       description: failed > 0 ? `فشل ${failed} طلب` : undefined,
