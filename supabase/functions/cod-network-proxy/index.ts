@@ -80,6 +80,17 @@ serve(async (req) => {
       });
     }
 
+    if (action === "get_lead" && body.lead_id) {
+      const res = await fetch(`${COD_NETWORK_API_BASE}/leads/${body.lead_id}`, {
+        method: "GET",
+        headers: authHeaders,
+      });
+      const data = await res.json().catch(() => ({}));
+      return new Response(JSON.stringify({ success: res.ok, status: res.status, data }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "send_order" && order_data) {
       console.log("CodNetwork lead_data:", JSON.stringify(order_data));
       const res = await fetch(`${COD_NETWORK_API_BASE}/leads`, {
