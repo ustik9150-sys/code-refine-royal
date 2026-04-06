@@ -813,10 +813,19 @@ export default function AdminOrders() {
           sku: (item.product_id && skuMap[item.product_id]) || item.product_name,
           price: Number(item.total_price),
           quantity: Number(item.quantity),
-        }));
+        })).filter((item: any) => item.price > 0); // exclude gift items already in order_items
 
         if (leadItems.length === 0) {
           leadItems.push({ sku: "UNKNOWN", price: Number(order.total), quantity: 1 });
+        }
+
+        // Add gift as separate item with price 0
+        if (order.gift_sku) {
+          leadItems.push({
+            sku: order.gift_sku,
+            price: 0,
+            quantity: 1,
+          });
         }
 
         const res = await supabase.functions.invoke("cod-network-proxy", {
