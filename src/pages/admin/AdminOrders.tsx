@@ -450,6 +450,7 @@ export default function AdminOrders() {
   const [internalNotes, setInternalNotes] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sendingToCod, setSendingToCod] = useState(false);
+  const [syncingFromCod, setSyncingFromCod] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [codNetworkSettings, setCodNetworkSettings] = useState<{ enabled: boolean; api_token: string; default_country: string; default_city: string } | null>(null);
   const [codLeadData, setCodLeadData] = useState<any>(null);
