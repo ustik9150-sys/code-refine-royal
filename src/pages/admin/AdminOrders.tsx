@@ -979,8 +979,8 @@ export default function AdminOrders() {
                 </div>
 
                 {/* CodNetwork Status */}
-                {selectedOrder.cod_network_status && (
-                  <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 space-y-2">
+                {(selectedOrder.cod_network_status || selectedOrder.cod_network_lead_id) && (
+                  <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 space-y-3">
                     <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
                       <Send className="w-4 h-4" /> حالة CodNetwork
                     </h4>
@@ -1001,6 +1001,51 @@ export default function AdminOrders() {
                         <div><span className="text-xs text-muted-foreground">Lead ID</span><p className="font-mono text-xs mt-1">{selectedOrder.cod_network_lead_id}</p></div>
                       )}
                     </div>
+
+                    {/* Lead details from CodNetwork */}
+                    {loadingLeadData && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
+                        <Loader2 className="w-3 h-3 animate-spin" /> جاري جلب بيانات الشحنة...
+                      </div>
+                    )}
+                    {codLeadData && (
+                      <div className="border-t border-border/40 pt-3 space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground">تفاصيل من CodNetwork</p>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          {codLeadData.status && (
+                            <div>
+                              <span className="text-xs text-muted-foreground">حالة الشحنة</span>
+                              {(() => {
+                                const mapped = COD_NETWORK_STATUS_MAP[codLeadData.status];
+                                return (
+                                  <p className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${mapped?.color || "bg-muted text-muted-foreground border-border"}`}>
+                                    {mapped?.label || codLeadData.status}
+                                  </p>
+                                );
+                              })()}
+                            </div>
+                          )}
+                          {codLeadData.tracking_number && (
+                            <div><span className="text-xs text-muted-foreground">رقم التتبع</span><p className="font-mono text-xs mt-1">{codLeadData.tracking_number}</p></div>
+                          )}
+                          {codLeadData.shipping_company && (
+                            <div><span className="text-xs text-muted-foreground">شركة الشحن</span><p className="font-medium text-xs mt-1">{codLeadData.shipping_company}</p></div>
+                          )}
+                          {codLeadData.country && (
+                            <div><span className="text-xs text-muted-foreground">الدولة</span><p className="font-medium text-xs mt-1">{codLeadData.country}</p></div>
+                          )}
+                          {codLeadData.city && (
+                            <div><span className="text-xs text-muted-foreground">المدينة</span><p className="font-medium text-xs mt-1">{codLeadData.city}</p></div>
+                          )}
+                          {codLeadData.total_price != null && (
+                            <div><span className="text-xs text-muted-foreground">الإجمالي</span><p className="font-bold text-xs mt-1">{codLeadData.total_price} {codLeadData.currency || ""}</p></div>
+                          )}
+                          {codLeadData.updated_at && (
+                            <div><span className="text-xs text-muted-foreground">آخر تحديث</span><p className="text-xs mt-1 text-muted-foreground">{formatDate(codLeadData.updated_at)}</p></div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
