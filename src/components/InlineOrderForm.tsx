@@ -234,7 +234,23 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
 
       const snapValue = snapchatConversionValue != null ? snapchatConversionValue * finalQuantity : null;
       const snapParam = snapValue != null ? `&snap_value=${snapValue}` : "";
-      navigate(`/thank-you?order=${encodeURIComponent(orderId)}&total=${finalPrice}${snapParam}`);
+
+      // Check if any product in order has gift enabled
+      let hasGift = false;
+      if (productId) {
+        const { data: prod } = await supabase
+          .from("products")
+          .select("has_gift")
+          .eq("id", productId)
+          .maybeSingle();
+        if ((prod as any)?.has_gift) hasGift = true;
+      }
+
+      if (hasGift) {
+        navigate(`/gift?order_id=${encodeURIComponent(orderId)}`);
+      } else {
+        navigate(`/thank-you?order=${encodeURIComponent(orderId)}&total=${finalPrice}${snapParam}`);
+      }
     } catch (err) {
       console.error("Order creation failed:", err);
       setErrors({ fullName: "حدث خطأ، حاول مرة أخرى" });

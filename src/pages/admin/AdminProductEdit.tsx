@@ -17,7 +17,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, Save, Upload, X, GripVertical, Star, Trash2, Package,
-  ImagePlus, Loader2, Eye, Tag, CloudOff, Check, Cloud, RotateCcw,
+  ImagePlus, Loader2, Eye, Tag, CloudOff, Check, Cloud, RotateCcw, Gift,
 } from "lucide-react";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
