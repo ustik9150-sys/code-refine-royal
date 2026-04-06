@@ -128,11 +128,16 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
     })();
   }, []);
 
+  const normalizeDigits = (str: string) =>
+    str.replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+       .replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
+
   const validate = useCallback(() => {
     const errs: Record<string, string> = {};
     if (!fullName.trim() || fullName.trim().length < 2) errs.fullName = "يرجى إدخال الاسم";
-    if (!phone.trim()) errs.phone = "يرجى إدخال رقم الهاتف";
-    else if (!/^[\+]?[0-9\s\-]{7,15}$/.test(phone.trim())) errs.phone = "رقم الهاتف غير صالح";
+    const normalizedPhone = normalizeDigits(phone.trim().replace(/\s/g, ""));
+    if (!normalizedPhone) errs.phone = "يرجى إدخال رقم الهاتف";
+    else if (!/^[\+]?[0-9\-]{7,15}$/.test(normalizedPhone)) errs.phone = "رقم الهاتف غير صالح";
     if (settings.show_city_field && settings.city_field_required && !city.trim()) {
       errs.city = "يرجى إدخال المدينة";
     }
@@ -150,7 +155,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
       const { data, error: invokeError } = await supabase.functions.invoke("create-order", {
         body: {
           customer_name: fullName.trim(),
-          customer_phone: phone.trim(),
+          customer_phone: normalizeDigits(phone.trim().replace(/\s/g, "")),
           city: city.trim() || null,
           address: city.trim() || null,
           payment_method: "cod",

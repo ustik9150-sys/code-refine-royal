@@ -27,11 +27,16 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
 
   const totalPrice = unitPrice * quantity;
 
+  const normalizeDigits = (str: string) =>
+    str.replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+       .replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
+
   const validate = useCallback(() => {
     const errs: Record<string, string> = {};
     if (!fullName.trim() || fullName.trim().length < 2) errs.fullName = "يرجى إدخال الاسم الكامل";
-    if (!phone.trim()) errs.phone = "يرجى إدخال رقم الهاتف";
-    else if (!/^(05|5|9|6|7|\+)[0-9]{7,14}$/.test(phone.trim().replace(/\s/g, ""))) errs.phone = "رقم الهاتف غير صالح";
+    const normalizedPhone = normalizeDigits(phone.trim().replace(/\s/g, ""));
+    if (!normalizedPhone) errs.phone = "يرجى إدخال رقم الهاتف";
+    else if (!/^(05|5|9|6|7|\+)[0-9]{7,14}$/.test(normalizedPhone)) errs.phone = "رقم الهاتف غير صالح";
     return errs;
   }, [fullName, phone]);
 
@@ -47,7 +52,7 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
       const { data, error } = await supabase.functions.invoke("create-order", {
         body: {
           customer_name: fullName.trim(),
-          customer_phone: phone.trim(),
+          customer_phone: normalizeDigits(phone.trim().replace(/\s/g, "")),
           city: city.trim() || null,
           address: city.trim() || null,
           payment_method: "cod",
