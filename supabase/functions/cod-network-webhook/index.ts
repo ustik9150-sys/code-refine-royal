@@ -90,28 +90,35 @@ serve(async (req) => {
     const rawPhone = body.phone || body.customer_phone;
     const normalizedPhone = rawPhone ? normalizePhone(rawPhone) : null;
 
+    let matchedOrder: { id: string; cod_network_data: Record<string, any> | null; cod_network_status: string | null } | null = null;
     let orderId: string | null = null;
 
     // 1. Match by lead_id
     if (leadId) {
       const { data } = await supabaseAdmin
         .from("orders")
-        .select("id")
+        .select("id, cod_network_data, cod_network_status")
         .eq("cod_network_lead_id", String(leadId))
         .maybeSingle();
-      if (data) orderId = data.id;
+      if (data) {
+        matchedOrder = data;
+        orderId = data.id;
+      }
     }
 
     // 2. Match by normalized phone (most recent)
     if (!orderId && normalizedPhone) {
       const { data } = await supabaseAdmin
         .from("orders")
-        .select("id")
+        .select("id, cod_network_data, cod_network_status")
         .eq("customer_phone", normalizedPhone)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (data) orderId = data.id;
+      if (data) {
+        matchedOrder = data;
+        orderId = data.id;
+      }
     }
 
     if (!orderId) {
@@ -127,16 +134,33 @@ serve(async (req) => {
     const statusMap = webhookType === "order" ? ORDER_STATUS_MAP : LEAD_STATUS_MAP;
     const normalizedKey = normalizeStatus(codStatus);
     const mappedStatus = statusMap[normalizedKey] || null;
+    const existingCodData = matchedOrder?.cod_network_data && typeof matchedOrder.cod_network_data === "object"
+      ? matchedOrder.cod_network_data
+      : {};
+    const isNewOrderWebhook = webhookType === "order" && normalizedKey === "new";
 
-    const updateData: Record<string, any> = {
-      cod_network_status: `${webhookType}:${codStatus}`,
-    };
+    const updateData: Record<string, any> = {};
     if (leadId) updateData.cod_network_lead_id = String(leadId);
-    if (mappedStatus) updateData.status = mappedStatus;
 
-    // Store full webhook payload for order type (contains shipping details)
     if (webhookType === "order") {
-      updateData.cod_network_data = body;
+      updateData.cod_network_data = {
+        ...existingCodData,
+        order: body,
+      };
+
+      // Do not let order:new override a confirmed lead status in the system
+      if (!isNewOrderWebhook || !existingCodData.status) {
+        updateData.cod_network_status = `order:${codStatus}`;
+        if (mappedStatus) updateData.status = mappedStatus;
+      }
+    } else {
+      updateData.cod_network_status = `lead:${codStatus}`;
+      updateData.cod_network_data = {
+        ...existingCodData,
+        ...body,
+        order: existingCodData.order ?? null,
+      };
+      if (mappedStatus) updateData.status = mappedStatus;
     }
 
     const { error } = await supabaseAdmin
