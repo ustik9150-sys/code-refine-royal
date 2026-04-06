@@ -97,11 +97,17 @@ const COD_NETWORK_STATUS_MAP: Record<string, { label: string; color: string }> =
   on_hold: { label: "معلق", color: "bg-amber-100 text-amber-700 border-amber-200" },
   scheduled: { label: "مجدول", color: "bg-amber-100 text-amber-700 border-amber-200" },
   sent: { label: "تم الإرسال", color: "bg-violet-100 text-violet-700 border-violet-200" },
+  failed: { label: "فشل الإرسال", color: "bg-red-100 text-red-700 border-red-200" },
 };
 
 // Parse "type:status" format from cod_network_status
 const parseCodNetworkStatus = (raw: string | null) => {
   if (!raw) return null;
+  // Handle "failed:reason" format
+  if (raw.startsWith("failed:")) {
+    const reason = raw.slice(7);
+    return { label: `فشل: ${reason}`, color: "bg-red-100 text-red-700 border-red-200" };
+  }
   const status = raw.includes(":") ? raw.split(":")[1] : raw;
   return COD_NETWORK_STATUS_MAP[status] || { label: status, color: "bg-muted text-muted-foreground border-border" };
 };
@@ -706,9 +712,17 @@ export default function AdminOrders() {
           await supabase.from("orders").update(updateData).eq("id", order.id);
           success++;
         } else {
+          // Extract error reason from CodNetwork response
+          const errorData = res.data?.data;
+          const errorMsg = errorData?.message || errorData?.error || (typeof errorData === 'string' ? errorData : JSON.stringify(errorData || 'فشل غير معروف'));
+          const errorStatus = `failed:${errorMsg}`.slice(0, 200);
+          await supabase.from("orders").update({ cod_network_status: errorStatus }).eq("id", order.id);
+          toast({ title: `فشل إرسال طلب ${order.customer_name}`, description: errorMsg, variant: "destructive" });
           failed++;
         }
-      } catch {
+      } catch (err: any) {
+        const errMsg = err?.message || String(err);
+        await supabase.from("orders").update({ cod_network_status: `failed:${errMsg}`.slice(0, 200) }).eq("id", order.id);
         failed++;
       }
     }
