@@ -29,6 +29,7 @@ interface CodProduct {
 
 const DEFAULT: CodNetworkSettings = {
   enabled: false,
+  auto_send: false,
   api_token: "",
   default_country: "SA",
   default_city: "",
