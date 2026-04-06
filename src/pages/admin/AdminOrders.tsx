@@ -1268,6 +1268,24 @@ export default function AdminOrders() {
                   )}
                 </div>
 
+                {/* Gift */}
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm text-foreground flex items-center gap-1.5">🎁 الهدية المجانية</h4>
+                  {selectedOrder.gift_sku ? (
+                    <div className="bg-pink-50 dark:bg-pink-950/30 border border-pink-200 dark:border-pink-800 rounded-xl p-3 space-y-1">
+                      <p className="text-sm font-medium text-foreground">{selectedOrder.gift_name}</p>
+                      <p className="text-xs text-muted-foreground">SKU: {selectedOrder.gift_sku}</p>
+                      {selectedOrder.gift_selected_at && (
+                        <p className="text-[10px] text-muted-foreground">
+                          تم الاختيار: {new Date(selectedOrder.gift_selected_at).toLocaleString("ar-SA", { timeZone: "Asia/Riyadh" })}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">لم يتم اختيار هدية</p>
+                  )}
+                </div>
+
                 {/* Status */}
                 <div className="space-y-2">
                   <h4 className="font-semibold text-sm text-foreground">تغيير الحالة</h4>
