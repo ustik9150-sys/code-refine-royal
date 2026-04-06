@@ -699,11 +699,11 @@ export default function AdminOrders() {
         });
 
         if (res.data?.success) {
-          // Save lead_id if returned
+          // Save lead_id and set cod_network_status to "sent"
           const leadId = res.data?.data?.data?.id || res.data?.data?.id;
-          if (leadId) {
-            await supabase.from("orders").update({ cod_network_lead_id: String(leadId) } as any).eq("id", order.id);
-          }
+          const updateData: any = { cod_network_status: "sent" };
+          if (leadId) updateData.cod_network_lead_id = String(leadId);
+          await supabase.from("orders").update(updateData).eq("id", order.id);
           success++;
         } else {
           failed++;
