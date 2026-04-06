@@ -560,6 +560,8 @@ export default function AdminOrders() {
   const openOrder = async (order: Order) => {
     setSelectedOrder(order);
     setInternalNotes(order.notes || "");
+    setCodLeadData(null);
+
     const { data: items } = await supabase
       .from("order_items")
       .select("*")
@@ -573,6 +575,23 @@ export default function AdminOrders() {
       .eq("entity_id", order.id)
       .order("created_at", { ascending: false });
     setAuditLogs((logs as AuditLog[]) || []);
+
+    // Fetch lead data from CodNetwork
+    if (order.cod_network_lead_id && codNetworkSettings?.api_token) {
+      setLoadingLeadData(true);
+      try {
+        const res = await supabase.functions.invoke("cod-network-proxy", {
+          body: { action: "get_lead", api_token: codNetworkSettings.api_token, lead_id: order.cod_network_lead_id },
+        });
+        if (res.data?.success && res.data?.data?.data) {
+          setCodLeadData(res.data.data.data);
+        }
+      } catch (e) {
+        console.error("Failed to fetch lead data:", e);
+      } finally {
+        setLoadingLeadData(false);
+      }
+    }
   };
 
   const updateStatus = async (orderId: string, newStatus: string) => {
