@@ -579,7 +579,6 @@ export default function AdminOrders() {
         after_snapshot: { status: newStatus },
       });
       toast({ title: "تم التحديث" });
-      fetchOrders();
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
         openOrder({ ...selectedOrder, status: newStatus });
