@@ -894,7 +894,13 @@ export default function AdminOrders() {
               </Button>
             </motion.div>
           ) : (
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              {codNetworkSettings?.api_token && orders.some(o => o.cod_network_lead_id) && (
+                <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1.5 h-8" onClick={syncAllFromCodNetwork} disabled={syncingFromCod}>
+                  {syncingFromCod ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  مزامنة من CodNetwork
+                </Button>
+              )}
               <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1.5 h-8" onClick={() => setSelectionMode(true)}>
                 <CheckCircle className="w-3.5 h-3.5" /> تحديد
               </Button>
