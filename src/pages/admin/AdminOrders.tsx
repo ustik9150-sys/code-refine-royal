@@ -940,6 +940,47 @@ export default function AdminOrders() {
                   </div>
                 </div>
 
+                {/* Order Summary */}
+                <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 space-y-2">
+                  <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" /> ملخص الطلب
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div><span className="text-xs text-muted-foreground">المجموع الفرعي</span><p className="font-medium inline-flex items-center gap-1">{selectedOrder.subtotal ?? selectedOrder.total} <CurrencySymbol code={currency.code} symbol={cs} iconSize="h-3 w-3" /></p></div>
+                    <div><span className="text-xs text-muted-foreground">الشحن</span><p className="font-medium inline-flex items-center gap-1">{selectedOrder.shipping_cost ?? 0} <CurrencySymbol code={currency.code} symbol={cs} iconSize="h-3 w-3" /></p></div>
+                    <div><span className="text-xs text-muted-foreground">الإجمالي</span><p className="font-bold text-base inline-flex items-center gap-1">{selectedOrder.total} <CurrencySymbol code={currency.code} symbol={cs} iconSize="h-3 w-3" /></p></div>
+                    <div><span className="text-xs text-muted-foreground">طريقة الدفع</span><p className="font-medium">{selectedOrder.payment_method === "cod" ? "الدفع عند الاستلام" : selectedOrder.payment_method === "bank_transfer" ? "تحويل بنكي" : selectedOrder.payment_method === "card" ? "بطاقة" : selectedOrder.payment_method}</p></div>
+                    <div><span className="text-xs text-muted-foreground">طريقة الشحن</span><p className="font-medium">{selectedOrder.shipping_method === "standard" ? "عادي" : selectedOrder.shipping_method === "express" ? "سريع" : selectedOrder.shipping_method}</p></div>
+                    {selectedOrder.city && <div><span className="text-xs text-muted-foreground">المدينة</span><p className="font-medium">{selectedOrder.city}</p></div>}
+                  </div>
+                </div>
+
+                {/* CodNetwork Status */}
+                {selectedOrder.cod_network_status && (
+                  <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 space-y-2">
+                    <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
+                      <Send className="w-4 h-4" /> حالة CodNetwork
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-xs text-muted-foreground">الحالة</span>
+                        {(() => {
+                          const parsed = parseCodNetworkStatus(selectedOrder.cod_network_status);
+                          return parsed ? (
+                            <p className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${parsed.color}`} title={parsed.tooltip || undefined}>
+                              <Send className="w-2.5 h-2.5" />
+                              {parsed.label}
+                            </p>
+                          ) : null;
+                        })()}
+                      </div>
+                      {selectedOrder.cod_network_lead_id && (
+                        <div><span className="text-xs text-muted-foreground">Lead ID</span><p className="font-mono text-xs mt-1">{selectedOrder.cod_network_lead_id}</p></div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Items */}
                 <div className="space-y-2">
                   <h4 className="font-semibold text-sm text-foreground">المنتجات</h4>
