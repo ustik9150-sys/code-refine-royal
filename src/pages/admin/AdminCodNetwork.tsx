@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface CodNetworkSettings {
   enabled: boolean;
+  auto_send: boolean;
   api_token: string;
   default_country: string;
   default_city: string;
