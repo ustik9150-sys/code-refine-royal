@@ -22,7 +22,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Download, Search, Eye, Phone, MessageCircle, CheckCircle, XCircle,
   ShoppingCart, Clock, TrendingUp, DollarSign, ChevronDown, ChevronUp,
-  Package, Trash2, MapPin, Send, Loader2,
+  Package, Trash2, MapPin, Send, Loader2, RefreshCw,
 } from "lucide-react";
 import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
@@ -996,9 +996,68 @@ export default function AdminOrders() {
                         <Loader2 className="w-3 h-3 animate-spin" /> جاري جلب بيانات الشحنة...
                       </div>
                     )}
+                    {selectedOrder?.cod_network_lead_id && codNetworkSettings?.api_token && !codLeadData && !loadingLeadData && (
+                      <div className="border-t border-border/40 pt-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full text-xs gap-2"
+                          onClick={async () => {
+                            setLoadingLeadData(true);
+                            try {
+                              const res = await supabase.functions.invoke("cod-network-proxy", {
+                                body: { action: "get_lead", api_token: codNetworkSettings.api_token, lead_id: selectedOrder.cod_network_lead_id },
+                              });
+                              if (res.data?.success && res.data?.data?.data) {
+                                const leadData = res.data.data.data;
+                                setCodLeadData(leadData);
+                                // Store in DB for future use
+                                await supabase.from("orders").update({ cod_network_data: leadData }).eq("id", selectedOrder.id);
+                                toast({ title: "تم تحديث بيانات الشحنة" });
+                              } else {
+                                toast({ title: "لا توجد بيانات", description: "تعذر جلب بيانات من CodNetwork", variant: "destructive" });
+                              }
+                            } catch {
+                              toast({ title: "خطأ في الاتصال", variant: "destructive" });
+                            }
+                            setLoadingLeadData(false);
+                          }}
+                        >
+                          <RefreshCw className="w-3 h-3" /> جلب تحديثات من CodNetwork
+                        </Button>
+                      </div>
+                    )}
                     {codLeadData && (
                       <div className="border-t border-border/40 pt-3 space-y-2">
-                        <p className="text-xs font-semibold text-muted-foreground">تفاصيل من CodNetwork</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-muted-foreground">تفاصيل من CodNetwork</p>
+                          {selectedOrder?.cod_network_lead_id && codNetworkSettings?.api_token && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs gap-1"
+                              disabled={loadingLeadData}
+                              onClick={async () => {
+                                setLoadingLeadData(true);
+                                try {
+                                  const res = await supabase.functions.invoke("cod-network-proxy", {
+                                    body: { action: "get_lead", api_token: codNetworkSettings.api_token, lead_id: selectedOrder!.cod_network_lead_id },
+                                  });
+                                  if (res.data?.success && res.data?.data?.data) {
+                                    const leadData = res.data.data.data;
+                                    setCodLeadData(leadData);
+                                    await supabase.from("orders").update({ cod_network_data: leadData }).eq("id", selectedOrder!.id);
+                                    toast({ title: "تم التحديث" });
+                                  }
+                                } catch {}
+                                setLoadingLeadData(false);
+                              }}
+                            >
+                              {loadingLeadData ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                              تحديث
+                            </Button>
+                          )}
+                        </div>
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           {codLeadData.status && (
                             <div>
