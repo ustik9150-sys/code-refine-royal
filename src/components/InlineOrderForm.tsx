@@ -121,7 +121,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
           } else if (row.key === "integrations") {
             setSheetsWebhook(v.google_sheets_webhook || "");
           } else if (row.key === "cod_network") {
-            if (v.enabled && v.api_token) setCodNetworkSettings(v);
+            if (v.enabled && v.api_token && v.auto_send) setCodNetworkSettings(v);
           }
         }
       }
