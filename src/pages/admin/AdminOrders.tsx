@@ -686,6 +686,8 @@ export default function AdminOrders() {
         failed++;
       }
     }
+    // Refresh orders list to reflect updates
+    await fetchOrders();
     toast({
       title: `تمت المزامنة: ${updated} من ${toSync.length}`,
       description: failed > 0 ? `فشل ${failed} طلب` : undefined,
