@@ -187,6 +187,26 @@ export default function AdminCodNetwork() {
 
         <div className="border-t border-border" />
 
+        {/* Auto Send Toggle */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <Send className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">إرسال تلقائي</p>
+              <p className="text-xs text-muted-foreground">إرسال كل طلب جديد تلقائياً عند إنشائه</p>
+            </div>
+          </div>
+          <Switch
+            checked={settings.auto_send}
+            onCheckedChange={(v) => setSettings((s) => ({ ...s, auto_send: v }))}
+            disabled={!settings.enabled}
+          />
+        </div>
+
+        <div className="border-t border-border" />
+
         {/* Status */}
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-foreground">الحالة:</span>
