@@ -808,7 +808,21 @@ export default function AdminProductEdit() {
               </div>
             </div>
 
-            <div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-xs flex items-center gap-1.5">
+                  <Gift className="w-3.5 h-3.5" /> هدية مجانية مع المنتج 🎁
+                </Label>
+                <p className="text-[10px] text-muted-foreground mt-0.5">عند التفعيل، يُعرض على العميل اختيار هدية بعد الطلب</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={hasGift} onCheckedChange={setHasGift} />
+                <span className={`text-xs font-medium ${hasGift ? "text-pink-600" : "text-muted-foreground"}`}>
+                  {hasGift ? "مفعل" : "معطل"}
+                </span>
+              </div>
+            </div>
+
               <Label className="text-xs">التصنيف</Label>
               <Input
                 value={category}
