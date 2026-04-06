@@ -490,10 +490,13 @@ export default function AdminOrders() {
       .channel("admin-orders")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, (payload) => {
         toast({ title: "🛒 طلب جديد!", description: `طلب جديد من ${(payload.new as any).customer_name}` });
-        fetchOrders();
+        setOrders(prev => [payload.new as Order, ...prev]);
       })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, () => {
-        fetchOrders();
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, (payload) => {
+        setOrders(prev => prev.map(o => o.id === (payload.new as Order).id ? { ...o, ...payload.new as Order } : o));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "orders" }, (payload) => {
+        setOrders(prev => prev.filter(o => o.id !== (payload.old as any).id));
       })
       .subscribe();
 
