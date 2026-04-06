@@ -686,17 +686,23 @@ export default function AdminOrders() {
             wrong: "cancelled",
             expired: "cancelled",
           };
-          if (leadData.status) {
+          // Map status: prefer order status (has shipment info), fallback to lead status
+          const orderStatusMap: Record<string, string> = {
+            new: "pending", shipped: "shipped", delivered: "delivered",
+            returned: "refunded", cancelled: "cancelled", on_hold: "pending", scheduled: "pending",
+          };
+          if (leadData.order?.status) {
+            const orderKey = leadData.order.status.toLowerCase().replace(/\s+/g, "_");
+            // Handle special case
+            const normalizedOrderKey = orderKey.includes("assigned") ? "shipped" : orderKey;
+            updateData.cod_network_status = `order:${leadData.order.status}`;
+            const mappedOrder = orderStatusMap[normalizedOrderKey];
+            if (mappedOrder) updateData.status = mappedOrder;
+          } else if (leadData.status) {
             updateData.cod_network_status = `lead:${leadData.status}`;
             const normalizedKey = leadData.status.toLowerCase().replace(/\s+/g, "_");
             const mappedStatus = leadStatusMap[normalizedKey];
-            if (mappedStatus) {
-              updateData.status = mappedStatus;
-            }
-          }
-          // Also store order/shipment data if available
-          if (leadData.order) {
-            updateData.cod_network_data = { ...leadData, order: leadData.order };
+            if (mappedStatus) updateData.status = mappedStatus;
           }
           await supabase.from("orders").update(updateData).eq("id", order.id);
           updated++;
