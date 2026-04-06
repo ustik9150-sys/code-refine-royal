@@ -452,6 +452,8 @@ export default function AdminOrders() {
   const [sendingToCod, setSendingToCod] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [codNetworkSettings, setCodNetworkSettings] = useState<{ enabled: boolean; api_token: string; default_country: string; default_city: string } | null>(null);
+  const [codLeadData, setCodLeadData] = useState<any>(null);
+  const [loadingLeadData, setLoadingLeadData] = useState(false);
   const { toast } = useToast();
 
   // Load CodNetwork settings
