@@ -6,6 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Normalize status: lowercase, replace spaces with underscores
+function normalizeStatus(s: string): string {
+  return s.toLowerCase().replace(/\s+/g, "_");
+}
+
 // Map CodNetwork lead statuses to our order statuses
 const LEAD_STATUS_MAP: Record<string, string> = {
   lead: "pending",
@@ -23,7 +28,7 @@ const LEAD_STATUS_MAP: Record<string, string> = {
 // Map CodNetwork order statuses to our order statuses
 const ORDER_STATUS_MAP: Record<string, string> = {
   new: "pending",
-  "assigned(order sent to shipping company)": "shipped",
+  "assigned(order_sent_to_shipping_company)": "shipped",
   shipped: "shipped",
   delivered: "delivered",
   returned: "refunded",
@@ -31,6 +36,14 @@ const ORDER_STATUS_MAP: Record<string, string> = {
   on_hold: "pending",
   scheduled: "pending",
 };
+
+// Normalize phone: strip country code prefix, ensure starts with 0
+function normalizePhone(phone: string): string {
+  let p = phone.replace(/[\s\-\+]/g, "");
+  if (p.startsWith("966")) p = p.slice(3);
+  if (!p.startsWith("0")) p = "0" + p;
+  return p;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -40,7 +53,6 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
 
-    // Optional: verify webhook secret via query param, header, or body
     const webhookSecret = Deno.env.get("COD_NETWORK_WEBHOOK_SECRET");
     if (webhookSecret) {
       const authHeader = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
@@ -53,10 +65,8 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      // If no secret provided at all, allow through (CodNetwork doesn't support custom secret headers)
     }
 
-    // Determine webhook type: "lead" or "order" via query param
     const webhookType = url.searchParams.get("type") || "lead";
 
     const body = await req.json();
@@ -64,8 +74,9 @@ serve(async (req) => {
 
     const codStatus = body.status;
     if (!codStatus) {
+      // Return 200 to prevent CodNetwork from disabling webhook
       return new Response(JSON.stringify({ success: false, error: "Missing status" }), {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -75,12 +86,10 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Extract identifiers based on webhook type
     const leadId = body.lead_id || body.id;
-    const phone = body.phone;
-    const reference = body.reference; // order webhooks may include reference
+    const rawPhone = body.phone || body.customer_phone;
+    const normalizedPhone = rawPhone ? normalizePhone(rawPhone) : null;
 
-    // Try to find matching order
     let orderId: string | null = null;
 
     // 1. Match by lead_id
@@ -93,12 +102,12 @@ serve(async (req) => {
       if (data) orderId = data.id;
     }
 
-    // 2. Match by phone (most recent)
-    if (!orderId && phone) {
+    // 2. Match by normalized phone (most recent)
+    if (!orderId && normalizedPhone) {
       const { data } = await supabaseAdmin
         .from("orders")
         .select("id")
-        .eq("customer_phone", phone)
+        .eq("customer_phone", normalizedPhone)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -106,16 +115,18 @@ serve(async (req) => {
     }
 
     if (!orderId) {
-      console.log("CodNetwork webhook: no matching order found for", { leadId, phone, reference });
+      console.log("CodNetwork webhook: no matching order found for", { leadId, rawPhone, normalizedPhone });
+      // Return 200 to prevent CodNetwork from disabling webhook
       return new Response(JSON.stringify({ success: false, error: "Order not found" }), {
-        status: 404,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Map status based on webhook type
+    // Map status using normalized key
     const statusMap = webhookType === "order" ? ORDER_STATUS_MAP : LEAD_STATUS_MAP;
-    const mappedStatus = statusMap[codStatus] || null;
+    const normalizedKey = normalizeStatus(codStatus);
+    const mappedStatus = statusMap[normalizedKey] || null;
 
     const updateData: Record<string, any> = {
       cod_network_status: `${webhookType}:${codStatus}`,
@@ -131,7 +142,7 @@ serve(async (req) => {
     if (error) {
       console.error("CodNetwork webhook update error:", error);
       return new Response(JSON.stringify({ success: false, error: "Update failed" }), {
-        status: 500,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -143,8 +154,9 @@ serve(async (req) => {
     });
   } catch (err) {
     console.error("CodNetwork webhook error:", err);
+    // Return 200 even on error to prevent webhook disabling
     return new Response(JSON.stringify({ success: false, error: String(err) }), {
-      status: 500,
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
