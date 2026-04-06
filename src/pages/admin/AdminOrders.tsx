@@ -264,7 +264,10 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
           {order.cod_network_status && (() => {
             const parsed = parseCodNetworkStatus(order.cod_network_status);
             return parsed ? (
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium ${parsed.color}`}>
+              <span 
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium ${parsed.color}`}
+                title={parsed.tooltip || undefined}
+              >
                 <Send className="w-2.5 h-2.5" />
                 {parsed.label}
               </span>
