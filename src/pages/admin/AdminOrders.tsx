@@ -103,16 +103,80 @@ const COD_NETWORK_STATUS_MAP: Record<string, { label: string; color: string }> =
   failed: { label: "فشل الإرسال", color: "bg-red-100 text-red-700 border-red-200" },
 };
 
+const LEAD_STATUS_TO_SYSTEM_MAP: Record<string, string> = {
+  lead: "pending",
+  confirmed: "confirmed",
+  delivered: "delivered",
+  return: "refunded",
+  call_later: "pending",
+  call_later_scheduled: "pending",
+  no_reply: "pending",
+  cancelled: "cancelled",
+  wrong: "cancelled",
+  expired: "cancelled",
+};
+
+const ORDER_STATUS_TO_SYSTEM_MAP: Record<string, string> = {
+  new: "pending",
+  shipped: "shipped",
+  delivered: "delivered",
+  returned: "refunded",
+  cancelled: "cancelled",
+  on_hold: "pending",
+  scheduled: "pending",
+};
+
+const normalizeCodNetworkStatus = (status: string) => status.toLowerCase().replace(/\s+/g, "_");
+
+const normalizeCodNetworkOrderStatus = (status: string) => {
+  const normalized = normalizeCodNetworkStatus(status);
+  return normalized.includes("assigned") ? "shipped" : normalized;
+};
+
+const getPreferredCodNetworkStatus = (raw: string | null, data?: any) => {
+  const leadStatus = typeof data?.status === "string" ? data.status : null;
+  const orderStatus = typeof data?.order?.status === "string" ? data.order.status : null;
+  const normalizedOrderStatus = orderStatus ? normalizeCodNetworkOrderStatus(orderStatus) : null;
+
+  if (normalizedOrderStatus && normalizedOrderStatus !== "new") {
+    return `order:${orderStatus}`;
+  }
+  if (leadStatus) return `lead:${leadStatus}`;
+  if (orderStatus) return `order:${orderStatus}`;
+  return raw;
+};
+
+const getMappedSystemStatusFromCodData = (data?: any) => {
+  const leadMappedStatus = typeof data?.status === "string"
+    ? LEAD_STATUS_TO_SYSTEM_MAP[normalizeCodNetworkStatus(data.status)]
+    : null;
+  const orderStatus = typeof data?.order?.status === "string" ? data.order.status : null;
+  const normalizedOrderStatus = orderStatus ? normalizeCodNetworkOrderStatus(orderStatus) : null;
+
+  if (normalizedOrderStatus && normalizedOrderStatus !== "new") {
+    return ORDER_STATUS_TO_SYSTEM_MAP[normalizedOrderStatus] || null;
+  }
+  if (leadMappedStatus) return leadMappedStatus;
+  if (normalizedOrderStatus) return ORDER_STATUS_TO_SYSTEM_MAP[normalizedOrderStatus] || null;
+  return null;
+};
+
+const getShipmentData = (data?: any) => (data?.order && typeof data.order === "object" ? data.order : data);
+
 // Parse "type:status" format from cod_network_status
-const parseCodNetworkStatus = (raw: string | null) => {
-  if (!raw) return null;
-  // Handle "failed:reason" format - show clean Arabic label, keep reason as tooltip
-  if (raw.startsWith("failed:")) {
+const parseCodNetworkStatus = (raw: string | null, data?: any) => {
+  if (!raw && !data) return null;
+  if (raw?.startsWith("failed:")) {
     const reason = raw.slice(7);
     return { label: "فشل الإرسال", tooltip: reason, color: "bg-red-100 text-red-700 border-red-200" };
   }
-  const status = raw.includes(":") ? raw.split(":")[1] : raw;
-  const mapped = COD_NETWORK_STATUS_MAP[status];
+  const effectiveRaw = getPreferredCodNetworkStatus(raw, data);
+  if (!effectiveRaw) return null;
+  const status = effectiveRaw.includes(":") ? effectiveRaw.split(":")[1] : effectiveRaw;
+  const normalizedStatus = effectiveRaw.startsWith("order:")
+    ? normalizeCodNetworkOrderStatus(status)
+    : normalizeCodNetworkStatus(status);
+  const mapped = COD_NETWORK_STATUS_MAP[normalizedStatus];
   return mapped ? { ...mapped, tooltip: undefined as string | undefined } : { label: status, tooltip: undefined as string | undefined, color: "bg-muted text-muted-foreground border-border" };
 };
 
@@ -266,7 +330,7 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
             {status.label}
           </div>
           {order.cod_network_status && (() => {
-            const parsed = parseCodNetworkStatus(order.cod_network_status);
+            const parsed = parseCodNetworkStatus(order.cod_network_status, order.cod_network_data);
             return parsed ? (
               <span 
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium ${parsed.color}`}
@@ -346,7 +410,7 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
                   <div>
                     <p className="text-[10px] text-muted-foreground mb-0.5">حالة CodNetwork</p>
                     {(() => {
-                      const parsed = parseCodNetworkStatus(order.cod_network_status);
+                      const parsed = parseCodNetworkStatus(order.cod_network_status, order.cod_network_data);
                       return parsed ? (
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${parsed.color}`}>
                           {parsed.label}
@@ -673,37 +737,10 @@ export default function AdminOrders() {
         if (res.data?.success && res.data?.data?.data) {
           const leadData = res.data.data.data;
           const updateData: Record<string, any> = { cod_network_data: leadData };
-          // Map CodNetwork lead status to our system status
-          const leadStatusMap: Record<string, string> = {
-            lead: "pending",
-            confirmed: "confirmed",
-            delivered: "delivered",
-            return: "refunded",
-            call_later: "pending",
-            call_later_scheduled: "pending",
-            no_reply: "pending",
-            cancelled: "cancelled",
-            wrong: "cancelled",
-            expired: "cancelled",
-          };
-          // Map status: prefer order status (has shipment info), fallback to lead status
-          const orderStatusMap: Record<string, string> = {
-            new: "pending", shipped: "shipped", delivered: "delivered",
-            returned: "refunded", cancelled: "cancelled", on_hold: "pending", scheduled: "pending",
-          };
-          if (leadData.order?.status) {
-            const orderKey = leadData.order.status.toLowerCase().replace(/\s+/g, "_");
-            // Handle special case
-            const normalizedOrderKey = orderKey.includes("assigned") ? "shipped" : orderKey;
-            updateData.cod_network_status = `order:${leadData.order.status}`;
-            const mappedOrder = orderStatusMap[normalizedOrderKey];
-            if (mappedOrder) updateData.status = mappedOrder;
-          } else if (leadData.status) {
-            updateData.cod_network_status = `lead:${leadData.status}`;
-            const normalizedKey = leadData.status.toLowerCase().replace(/\s+/g, "_");
-            const mappedStatus = leadStatusMap[normalizedKey];
-            if (mappedStatus) updateData.status = mappedStatus;
-          }
+          const preferredCodStatus = getPreferredCodNetworkStatus(null, leadData);
+          const mappedStatus = getMappedSystemStatusFromCodData(leadData);
+          if (preferredCodStatus) updateData.cod_network_status = preferredCodStatus;
+          if (mappedStatus) updateData.status = mappedStatus;
           await supabase.from("orders").update(updateData).eq("id", order.id);
           updated++;
         } else {
@@ -1053,7 +1090,7 @@ export default function AdminOrders() {
                       <div>
                         <span className="text-xs text-muted-foreground">الحالة</span>
                         {(() => {
-                          const parsed = parseCodNetworkStatus(selectedOrder.cod_network_status);
+                          const parsed = parseCodNetworkStatus(selectedOrder.cod_network_status, codLeadData || selectedOrder.cod_network_data);
                           return parsed ? (
                             <p className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${parsed.color}`} title={parsed.tooltip || undefined}>
                               <Send className="w-2.5 h-2.5" />
@@ -1088,19 +1125,11 @@ export default function AdminOrders() {
                               if (res.data?.success && res.data?.data?.data) {
                                 const leadData = res.data.data.data;
                                 setCodLeadData(leadData);
-                                const leadStatusMap: Record<string, string> = { lead: "pending", confirmed: "confirmed", delivered: "delivered", return: "refunded", call_later: "pending", call_later_scheduled: "pending", no_reply: "pending", cancelled: "cancelled", wrong: "cancelled", expired: "cancelled" };
-                                const orderStatusMap: Record<string, string> = { new: "pending", shipped: "shipped", delivered: "delivered", returned: "refunded", cancelled: "cancelled", on_hold: "pending", scheduled: "pending" };
                                 const updateData: Record<string, any> = { cod_network_data: leadData };
-                                if (leadData.order?.status) {
-                                  const ok = leadData.order.status.toLowerCase().replace(/\s+/g, "_");
-                                  updateData.cod_network_status = `order:${leadData.order.status}`;
-                                  const mapped = orderStatusMap[ok.includes("assigned") ? "shipped" : ok];
-                                  if (mapped) updateData.status = mapped;
-                                } else if (leadData.status) {
-                                  updateData.cod_network_status = `lead:${leadData.status}`;
-                                  const mapped = leadStatusMap[leadData.status.toLowerCase().replace(/\s+/g, "_")];
-                                  if (mapped) updateData.status = mapped;
-                                }
+                                const preferredCodStatus = getPreferredCodNetworkStatus(null, leadData);
+                                const mappedStatus = getMappedSystemStatusFromCodData(leadData);
+                                if (preferredCodStatus) updateData.cod_network_status = preferredCodStatus;
+                                if (mappedStatus) updateData.status = mappedStatus;
                                 await supabase.from("orders").update(updateData).eq("id", selectedOrder.id);
                                 toast({ title: "تم تحديث بيانات الشحنة" });
                               } else {
@@ -1135,19 +1164,11 @@ export default function AdminOrders() {
                                   if (res.data?.success && res.data?.data?.data) {
                                     const leadData = res.data.data.data;
                                     setCodLeadData(leadData);
-                                    const leadStatusMap: Record<string, string> = { lead: "pending", confirmed: "confirmed", delivered: "delivered", return: "refunded", call_later: "pending", call_later_scheduled: "pending", no_reply: "pending", cancelled: "cancelled", wrong: "cancelled", expired: "cancelled" };
-                                    const orderStatusMap: Record<string, string> = { new: "pending", shipped: "shipped", delivered: "delivered", returned: "refunded", cancelled: "cancelled", on_hold: "pending", scheduled: "pending" };
                                     const updateData: Record<string, any> = { cod_network_data: leadData };
-                                    if (leadData.order?.status) {
-                                      const ok = leadData.order.status.toLowerCase().replace(/\s+/g, "_");
-                                      updateData.cod_network_status = `order:${leadData.order.status}`;
-                                      const mapped = orderStatusMap[ok.includes("assigned") ? "shipped" : ok];
-                                      if (mapped) updateData.status = mapped;
-                                    } else if (leadData.status) {
-                                      updateData.cod_network_status = `lead:${leadData.status}`;
-                                      const mapped = leadStatusMap[leadData.status.toLowerCase().replace(/\s+/g, "_")];
-                                      if (mapped) updateData.status = mapped;
-                                    }
+                                    const preferredCodStatus = getPreferredCodNetworkStatus(null, leadData);
+                                    const mappedStatus = getMappedSystemStatusFromCodData(leadData);
+                                    if (preferredCodStatus) updateData.cod_network_status = preferredCodStatus;
+                                    if (mappedStatus) updateData.status = mappedStatus;
                                     await supabase.from("orders").update(updateData).eq("id", selectedOrder!.id);
                                     toast({ title: "تم التحديث" });
                                   }
@@ -1160,48 +1181,60 @@ export default function AdminOrders() {
                             </Button>
                           )}
                         </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          {codLeadData.status && (
-                            <div>
-                              <span className="text-xs text-muted-foreground">حالة الشحنة</span>
-                              {(() => {
-                                const mapped = COD_NETWORK_STATUS_MAP[codLeadData.status];
-                                return (
-                                  <p className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${mapped?.color || "bg-muted text-muted-foreground border-border"}`}>
-                                    {mapped?.label || codLeadData.status}
+                        {(() => {
+                          const shipmentData = getShipmentData(codLeadData);
+                          const shipmentStatus = typeof shipmentData?.status === "string" ? shipmentData.status : null;
+                          const shipmentStatusKey = shipmentStatus ? normalizeCodNetworkOrderStatus(shipmentStatus) : null;
+                          const shipmentStatusMeta = shipmentStatusKey ? COD_NETWORK_STATUS_MAP[shipmentStatusKey] : null;
+                          const country = shipmentData?.customer_country?.name || codLeadData?.customer_country?.name || shipmentData?.country || codLeadData?.country;
+                          const city = shipmentData?.customer_city || codLeadData?.customer_city || shipmentData?.city || codLeadData?.city;
+                          const area = shipmentData?.customer_area || codLeadData?.customer_area || shipmentData?.area || codLeadData?.area;
+                          const address = shipmentData?.customer_address || codLeadData?.customer_address || shipmentData?.address || codLeadData?.address;
+                          const total = shipmentData?.total ?? shipmentData?.total_price ?? codLeadData?.total ?? codLeadData?.total_price;
+                          const currency = shipmentData?.currency || codLeadData?.currency || "";
+                          const reference = shipmentData?.reference || codLeadData?.reference;
+                          const updatedAt = shipmentData?.last_update || shipmentData?.updated_at || codLeadData?.last_update || codLeadData?.updated_at;
+
+                          return (
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              {shipmentStatus && (
+                                <div>
+                                  <span className="text-xs text-muted-foreground">حالة الشحنة</span>
+                                  <p className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${shipmentStatusMeta?.color || "bg-muted text-muted-foreground border-border"}`}>
+                                    {shipmentStatusMeta?.label || shipmentStatus}
                                   </p>
-                                );
-                              })()}
+                                </div>
+                              )}
+                              {shipmentData?.tracking_number && (
+                                <div><span className="text-xs text-muted-foreground">رقم التتبع</span><p className="font-mono text-xs mt-1">{shipmentData.tracking_number}</p></div>
+                              )}
+                              {shipmentData?.shipping_company && (
+                                <div><span className="text-xs text-muted-foreground">شركة الشحن</span><p className="font-medium text-xs mt-1">{shipmentData.shipping_company}</p></div>
+                              )}
+                              {country && (
+                                <div><span className="text-xs text-muted-foreground">الدولة</span><p className="font-medium text-xs mt-1">{country}</p></div>
+                              )}
+                              {city && (
+                                <div><span className="text-xs text-muted-foreground">المدينة</span><p className="font-medium text-xs mt-1">{city}</p></div>
+                              )}
+                              {area && (
+                                <div><span className="text-xs text-muted-foreground">المنطقة</span><p className="font-medium text-xs mt-1">{area}</p></div>
+                              )}
+                              {address && (
+                                <div className="col-span-2"><span className="text-xs text-muted-foreground">العنوان</span><p className="font-medium text-xs mt-1">{address}</p></div>
+                              )}
+                              {total != null && (
+                                <div><span className="text-xs text-muted-foreground">الإجمالي</span><p className="font-bold text-xs mt-1">{total} {currency}</p></div>
+                              )}
+                              {reference && (
+                                <div><span className="text-xs text-muted-foreground">المرجع</span><p className="font-mono text-xs mt-1">{reference}</p></div>
+                              )}
+                              {updatedAt && (
+                                <div><span className="text-xs text-muted-foreground">آخر تحديث</span><p className="text-xs mt-1 text-muted-foreground">{formatDate(updatedAt)}</p></div>
+                              )}
                             </div>
-                          )}
-                          {codLeadData.tracking_number && (
-                            <div><span className="text-xs text-muted-foreground">رقم التتبع</span><p className="font-mono text-xs mt-1">{codLeadData.tracking_number}</p></div>
-                          )}
-                          {codLeadData.shipping_company && (
-                            <div><span className="text-xs text-muted-foreground">شركة الشحن</span><p className="font-medium text-xs mt-1">{codLeadData.shipping_company}</p></div>
-                          )}
-                          {(codLeadData.customer_country?.name || codLeadData.country) && (
-                            <div><span className="text-xs text-muted-foreground">الدولة</span><p className="font-medium text-xs mt-1">{codLeadData.customer_country?.name || codLeadData.country}</p></div>
-                          )}
-                          {(codLeadData.customer_city || codLeadData.city) && (
-                            <div><span className="text-xs text-muted-foreground">المدينة</span><p className="font-medium text-xs mt-1">{codLeadData.customer_city || codLeadData.city}</p></div>
-                          )}
-                          {(codLeadData.customer_area) && (
-                            <div><span className="text-xs text-muted-foreground">المنطقة</span><p className="font-medium text-xs mt-1">{codLeadData.customer_area}</p></div>
-                          )}
-                          {(codLeadData.customer_address) && (
-                            <div className="col-span-2"><span className="text-xs text-muted-foreground">العنوان</span><p className="font-medium text-xs mt-1">{codLeadData.customer_address}</p></div>
-                          )}
-                          {(codLeadData.total != null || codLeadData.total_price != null) && (
-                            <div><span className="text-xs text-muted-foreground">الإجمالي</span><p className="font-bold text-xs mt-1">{codLeadData.total ?? codLeadData.total_price} {codLeadData.currency || ""}</p></div>
-                          )}
-                          {codLeadData.reference && (
-                            <div><span className="text-xs text-muted-foreground">المرجع</span><p className="font-mono text-xs mt-1">{codLeadData.reference}</p></div>
-                          )}
-                          {(codLeadData.last_update || codLeadData.updated_at) && (
-                            <div><span className="text-xs text-muted-foreground">آخر تحديث</span><p className="text-xs mt-1 text-muted-foreground">{formatDate(codLeadData.last_update || codLeadData.updated_at)}</p></div>
-                          )}
-                        </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
