@@ -15,6 +15,7 @@ import FAQ from "./pages/FAQ";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import ThankYou from "./pages/ThankYou";
+import GiftSelection from "./pages/GiftSelection";
 import OrderLanding from "./pages/OrderLanding";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -59,6 +60,7 @@ const App = () => (
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/thank-you" element={<ThankYou />} />
+          <Route path="/gift" element={<GiftSelection />} />
           <Route path="/order" element={<OrderLanding />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 

@@ -17,7 +17,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, Save, Upload, X, GripVertical, Star, Trash2, Package,
-  ImagePlus, Loader2, Eye, Tag, CloudOff, Check, Cloud, RotateCcw,
+  ImagePlus, Loader2, Eye, Tag, CloudOff, Check, Cloud, RotateCcw, Gift,
 } from "lucide-react";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
@@ -189,6 +189,7 @@ export default function AdminProductEdit() {
   const [hiddenFromHome, setHiddenFromHome] = useState(false);
   const [slug, setSlug] = useState("");
   const [snapchatConversionValue, setSnapchatConversionValue] = useState("");
+  const [hasGift, setHasGift] = useState(false);
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -199,7 +200,7 @@ export default function AdminProductEdit() {
   const getCurrentFormData = useCallback((): ProductDraftData => ({
     nameAr, descAr, price, compareAt, inventory, sku, category,
     isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, snapchatConversionValue,
-  }), [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, snapchatConversionValue]);
+  }), [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, snapchatConversionValue, hasGift]);
 
   // Auto-save draft on form changes
   useEffect(() => {
@@ -266,6 +267,7 @@ export default function AdminProductEdit() {
       setHiddenFromHome((product as any).hidden_from_home || false);
       setSlug((product as any).slug || "");
       setSnapchatConversionValue((product as any).snapchat_conversion_value ? String((product as any).snapchat_conversion_value) : "");
+      setHasGift((product as any).has_gift || false);
 
       // Set initial data for change detection
       const initialData: ProductDraftData = {
@@ -333,6 +335,7 @@ export default function AdminProductEdit() {
       hidden_from_home: hiddenFromHome,
       slug: slug.trim() || null,
       snapchat_conversion_value: snapchatConversionValue ? parseFloat(snapchatConversionValue) : null,
+      has_gift: hasGift,
     };
 
     try {
@@ -801,6 +804,21 @@ export default function AdminProductEdit() {
                 <Switch checked={hiddenFromHome} onCheckedChange={setHiddenFromHome} />
                 <span className={`text-xs font-medium ${hiddenFromHome ? "text-destructive" : "text-muted-foreground"}`}>
                   {hiddenFromHome ? "مخفي" : "ظاهر"}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-xs flex items-center gap-1.5">
+                  <Gift className="w-3.5 h-3.5" /> هدية مجانية مع المنتج 🎁
+                </Label>
+                <p className="text-[10px] text-muted-foreground mt-0.5">عند التفعيل، يُعرض على العميل اختيار هدية بعد الطلب</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={hasGift} onCheckedChange={setHasGift} />
+                <span className={`text-xs font-medium ${hasGift ? "text-pink-600" : "text-muted-foreground"}`}>
+                  {hasGift ? "مفعل" : "معطل"}
                 </span>
               </div>
             </div>

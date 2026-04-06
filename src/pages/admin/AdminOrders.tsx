@@ -50,6 +50,9 @@ type Order = {
   cod_network_status: string | null;
   cod_network_lead_id: string | null;
   cod_network_data: any | null;
+  gift_sku: string | null;
+  gift_name: string | null;
+  gift_selected_at: string | null;
 };
 
 type OrderItem = {
@@ -341,6 +344,11 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
               </span>
             ) : null;
           })()}
+          {order.gift_sku && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950/30 dark:text-pink-400 dark:border-pink-800">
+              🎁 {order.gift_name || order.gift_sku}
+            </span>
+          )}
         </div>
 
         {/* Quick Actions */}
@@ -693,13 +701,14 @@ export default function AdminOrders() {
 
   const exportCSV = (ordersList?: Order[]) => {
     const target = ordersList || filtered;
-    const headers = ["رقم الطلب", "العميل", "الجوال", "الموقع", "IP", "المجموع", "الحالة", "الدفع", "التاريخ"];
+    const headers = ["رقم الطلب", "العميل", "الجوال", "الموقع", "IP", "المجموع", "الحالة", "الدفع", "الهدية", "التاريخ"];
     const rows = target.map((o) => [
       o.order_number, o.customer_name, o.customer_phone,
       o.ip_city && o.ip_country ? `${o.ip_city} - ${o.ip_country}` : (o.city || ""),
       o.ip_address || "",
       o.total, STATUS_MAP[o.status]?.label || o.status,
       PAYMENT_MAP[o.payment_method] || o.payment_method,
+      o.gift_sku ? `${o.gift_name || ""} (${o.gift_sku})` : "لا توجد هدية",
       new Date(o.created_at).toLocaleDateString("en-US"),
     ]);
     const csv = "\uFEFF" + [headers, ...rows].map((r) => r.join(",")).join("\n");
@@ -1262,6 +1271,24 @@ export default function AdminOrders() {
                         </TableBody>
                       </Table>
                     </div>
+                  )}
+                </div>
+
+                {/* Gift */}
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm text-foreground flex items-center gap-1.5">🎁 الهدية المجانية</h4>
+                  {selectedOrder.gift_sku ? (
+                    <div className="bg-pink-50 dark:bg-pink-950/30 border border-pink-200 dark:border-pink-800 rounded-xl p-3 space-y-1">
+                      <p className="text-sm font-medium text-foreground">{selectedOrder.gift_name}</p>
+                      <p className="text-xs text-muted-foreground">SKU: {selectedOrder.gift_sku}</p>
+                      {selectedOrder.gift_selected_at && (
+                        <p className="text-[10px] text-muted-foreground">
+                          تم الاختيار: {new Date(selectedOrder.gift_selected_at).toLocaleString("ar-SA", { timeZone: "Asia/Riyadh" })}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">لم يتم اختيار هدية</p>
                   )}
                 </div>
 
