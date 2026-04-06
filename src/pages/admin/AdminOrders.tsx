@@ -1123,7 +1123,14 @@ export default function AdminOrders() {
                                   if (res.data?.success && res.data?.data?.data) {
                                     const leadData = res.data.data.data;
                                     setCodLeadData(leadData);
-                                    await supabase.from("orders").update({ cod_network_data: leadData }).eq("id", selectedOrder!.id);
+                                    const leadStatusMap: Record<string, string> = { lead: "pending", confirmed: "confirmed", delivered: "delivered", return: "refunded", call_later: "pending", call_later_scheduled: "pending", no_reply: "pending", cancelled: "cancelled", wrong: "cancelled", expired: "cancelled" };
+                                    const updateData: Record<string, any> = { cod_network_data: leadData };
+                                    if (leadData.status) {
+                                      updateData.cod_network_status = `lead:${leadData.status}`;
+                                      const mapped = leadStatusMap[leadData.status.toLowerCase().replace(/\s+/g, "_")];
+                                      if (mapped) updateData.status = mapped;
+                                    }
+                                    await supabase.from("orders").update(updateData).eq("id", selectedOrder!.id);
                                     toast({ title: "تم التحديث" });
                                   }
                                 } catch {}
