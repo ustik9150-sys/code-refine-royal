@@ -593,7 +593,6 @@ export default function AdminOrders() {
     const { error } = await supabase.from("orders").delete().eq("id", deleteOrderTarget);
     if (!error) {
       toast({ title: "تم حذف الطلب" });
-      fetchOrders();
     }
     setDeleteOrderTarget(null);
   };
