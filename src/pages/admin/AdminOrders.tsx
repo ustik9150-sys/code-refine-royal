@@ -652,6 +652,46 @@ export default function AdminOrders() {
     exportCSV(selected);
   };
 
+  const syncAllFromCodNetwork = async () => {
+    if (!codNetworkSettings?.api_token) return;
+    setSyncingFromCod(true);
+    // Find all orders with a lead_id
+    const toSync = orders.filter(o => o.cod_network_lead_id);
+    if (toSync.length === 0) {
+      toast({ title: "لا توجد طلبات للمزامنة" });
+      setSyncingFromCod(false);
+      return;
+    }
+    let updated = 0;
+    let failed = 0;
+    for (const order of toSync) {
+      try {
+        const res = await supabase.functions.invoke("cod-network-proxy", {
+          body: { action: "get_lead", api_token: codNetworkSettings.api_token, lead_id: order.cod_network_lead_id },
+        });
+        if (res.data?.success && res.data?.data?.data) {
+          const leadData = res.data.data.data;
+          const updateData: Record<string, any> = { cod_network_data: leadData };
+          // Also update cod_network_status from lead status
+          if (leadData.status) {
+            updateData.cod_network_status = `lead:${leadData.status}`;
+          }
+          await supabase.from("orders").update(updateData).eq("id", order.id);
+          updated++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+    toast({
+      title: `تمت المزامنة: ${updated} من ${toSync.length}`,
+      description: failed > 0 ? `فشل ${failed} طلب` : undefined,
+    });
+    setSyncingFromCod(false);
+  };
+
   const sendSelectedToCodNetwork = async () => {
     if (!codNetworkSettings) {
       toast({ title: "خطأ", description: "CodNetwork غير مفعل", variant: "destructive" });
