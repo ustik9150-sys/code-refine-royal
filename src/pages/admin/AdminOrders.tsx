@@ -103,13 +103,14 @@ const COD_NETWORK_STATUS_MAP: Record<string, { label: string; color: string }> =
 // Parse "type:status" format from cod_network_status
 const parseCodNetworkStatus = (raw: string | null) => {
   if (!raw) return null;
-  // Handle "failed:reason" format
+  // Handle "failed:reason" format - show clean Arabic label, keep reason as tooltip
   if (raw.startsWith("failed:")) {
     const reason = raw.slice(7);
-    return { label: `فشل: ${reason}`, color: "bg-red-100 text-red-700 border-red-200" };
+    return { label: "فشل الإرسال", tooltip: reason, color: "bg-red-100 text-red-700 border-red-200" };
   }
   const status = raw.includes(":") ? raw.split(":")[1] : raw;
-  return COD_NETWORK_STATUS_MAP[status] || { label: status, color: "bg-muted text-muted-foreground border-border" };
+  const mapped = COD_NETWORK_STATUS_MAP[status];
+  return mapped ? { ...mapped, tooltip: undefined as string | undefined } : { label: status, tooltip: undefined as string | undefined, color: "bg-muted text-muted-foreground border-border" };
 };
 
 const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", {
@@ -264,7 +265,10 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
           {order.cod_network_status && (() => {
             const parsed = parseCodNetworkStatus(order.cod_network_status);
             return parsed ? (
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium ${parsed.color}`}>
+              <span 
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium ${parsed.color}`}
+                title={parsed.tooltip || undefined}
+              >
                 <Send className="w-2.5 h-2.5" />
                 {parsed.label}
               </span>
