@@ -103,10 +103,10 @@ const COD_NETWORK_STATUS_MAP: Record<string, { label: string; color: string }> =
 // Parse "type:status" format from cod_network_status
 const parseCodNetworkStatus = (raw: string | null) => {
   if (!raw) return null;
-  // Handle "failed:reason" format
+  // Handle "failed:reason" format - show clean Arabic label, keep reason as tooltip
   if (raw.startsWith("failed:")) {
     const reason = raw.slice(7);
-    return { label: `فشل: ${reason}`, color: "bg-red-100 text-red-700 border-red-200" };
+    return { label: "فشل الإرسال", tooltip: reason, color: "bg-red-100 text-red-700 border-red-200" };
   }
   const status = raw.includes(":") ? raw.split(":")[1] : raw;
   return COD_NETWORK_STATUS_MAP[status] || { label: status, color: "bg-muted text-muted-foreground border-border" };
