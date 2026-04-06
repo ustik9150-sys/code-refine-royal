@@ -134,6 +134,11 @@ serve(async (req) => {
     if (leadId) updateData.cod_network_lead_id = String(leadId);
     if (mappedStatus) updateData.status = mappedStatus;
 
+    // Store full webhook payload for order type (contains shipping details)
+    if (webhookType === "order") {
+      updateData.cod_network_data = body;
+    }
+
     const { error } = await supabaseAdmin
       .from("orders")
       .update(updateData)

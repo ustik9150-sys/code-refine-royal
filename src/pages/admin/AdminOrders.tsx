@@ -576,21 +576,9 @@ export default function AdminOrders() {
       .order("created_at", { ascending: false });
     setAuditLogs((logs as AuditLog[]) || []);
 
-    // Fetch lead data from CodNetwork
-    if (order.cod_network_lead_id && codNetworkSettings?.api_token) {
-      setLoadingLeadData(true);
-      try {
-        const res = await supabase.functions.invoke("cod-network-proxy", {
-          body: { action: "get_lead", api_token: codNetworkSettings.api_token, lead_id: order.cod_network_lead_id },
-        });
-        if (res.data?.success && res.data?.data?.data) {
-          setCodLeadData(res.data.data.data);
-        }
-      } catch (e) {
-        console.error("Failed to fetch lead data:", e);
-      } finally {
-        setLoadingLeadData(false);
-      }
+    // Use stored webhook data instead of API call
+    if ((order as any).cod_network_data) {
+      setCodLeadData((order as any).cod_network_data);
     }
   };
 
