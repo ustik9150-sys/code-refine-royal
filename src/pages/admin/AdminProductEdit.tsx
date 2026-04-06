@@ -823,6 +823,7 @@ export default function AdminProductEdit() {
               </div>
             </div>
 
+            <div>
               <Label className="text-xs">التصنيف</Label>
               <Input
                 value={category}
