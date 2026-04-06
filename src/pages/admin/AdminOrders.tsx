@@ -109,7 +109,8 @@ const parseCodNetworkStatus = (raw: string | null) => {
     return { label: "فشل الإرسال", tooltip: reason, color: "bg-red-100 text-red-700 border-red-200" };
   }
   const status = raw.includes(":") ? raw.split(":")[1] : raw;
-  return COD_NETWORK_STATUS_MAP[status] || { label: status, color: "bg-muted text-muted-foreground border-border" };
+  const mapped = COD_NETWORK_STATUS_MAP[status];
+  return mapped ? { ...mapped, tooltip: undefined as string | undefined } : { label: status, tooltip: undefined as string | undefined, color: "bg-muted text-muted-foreground border-border" };
 };
 
 const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", {
