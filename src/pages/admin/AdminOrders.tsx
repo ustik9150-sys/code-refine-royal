@@ -579,8 +579,8 @@ export default function AdminOrders() {
     setAuditLogs((logs as AuditLog[]) || []);
 
     // Use stored webhook data instead of API call
-    if ((order as any).cod_network_data) {
-      setCodLeadData((order as any).cod_network_data);
+    if (order.cod_network_data) {
+      setCodLeadData(order.cod_network_data);
     }
   };
 
