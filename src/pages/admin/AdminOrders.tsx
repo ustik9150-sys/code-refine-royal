@@ -673,9 +673,30 @@ export default function AdminOrders() {
         if (res.data?.success && res.data?.data?.data) {
           const leadData = res.data.data.data;
           const updateData: Record<string, any> = { cod_network_data: leadData };
-          // Also update cod_network_status from lead status
+          // Map CodNetwork lead status to our system status
+          const leadStatusMap: Record<string, string> = {
+            lead: "pending",
+            confirmed: "confirmed",
+            delivered: "delivered",
+            return: "refunded",
+            call_later: "pending",
+            call_later_scheduled: "pending",
+            no_reply: "pending",
+            cancelled: "cancelled",
+            wrong: "cancelled",
+            expired: "cancelled",
+          };
           if (leadData.status) {
             updateData.cod_network_status = `lead:${leadData.status}`;
+            const normalizedKey = leadData.status.toLowerCase().replace(/\s+/g, "_");
+            const mappedStatus = leadStatusMap[normalizedKey];
+            if (mappedStatus) {
+              updateData.status = mappedStatus;
+            }
+          }
+          // Also store order/shipment data if available
+          if (leadData.order) {
+            updateData.cod_network_data = { ...leadData, order: leadData.order };
           }
           await supabase.from("orders").update(updateData).eq("id", order.id);
           updated++;
