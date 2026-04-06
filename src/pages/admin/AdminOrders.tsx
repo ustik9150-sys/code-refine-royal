@@ -344,6 +344,11 @@ function OrderCard({ order, index, onStatusChange, onOpen, onDelete, selected, o
               </span>
             ) : null;
           })()}
+          {order.gift_sku && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950/30 dark:text-pink-400 dark:border-pink-800">
+              🎁 {order.gift_name || order.gift_sku}
+            </span>
+          )}
         </div>
 
         {/* Quick Actions */}
