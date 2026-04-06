@@ -189,6 +189,7 @@ export default function AdminProductEdit() {
   const [hiddenFromHome, setHiddenFromHome] = useState(false);
   const [slug, setSlug] = useState("");
   const [snapchatConversionValue, setSnapchatConversionValue] = useState("");
+  const [hasGift, setHasGift] = useState(false);
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
