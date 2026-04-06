@@ -701,13 +701,14 @@ export default function AdminOrders() {
 
   const exportCSV = (ordersList?: Order[]) => {
     const target = ordersList || filtered;
-    const headers = ["رقم الطلب", "العميل", "الجوال", "الموقع", "IP", "المجموع", "الحالة", "الدفع", "التاريخ"];
+    const headers = ["رقم الطلب", "العميل", "الجوال", "الموقع", "IP", "المجموع", "الحالة", "الدفع", "الهدية", "التاريخ"];
     const rows = target.map((o) => [
       o.order_number, o.customer_name, o.customer_phone,
       o.ip_city && o.ip_country ? `${o.ip_city} - ${o.ip_country}` : (o.city || ""),
       o.ip_address || "",
       o.total, STATUS_MAP[o.status]?.label || o.status,
       PAYMENT_MAP[o.payment_method] || o.payment_method,
+      o.gift_sku ? `${o.gift_name || ""} (${o.gift_sku})` : "لا توجد هدية",
       new Date(o.created_at).toLocaleDateString("en-US"),
     ]);
     const csv = "\uFEFF" + [headers, ...rows].map((r) => r.join(",")).join("\n");
