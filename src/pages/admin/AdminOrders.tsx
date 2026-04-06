@@ -50,6 +50,9 @@ type Order = {
   cod_network_status: string | null;
   cod_network_lead_id: string | null;
   cod_network_data: any | null;
+  gift_sku: string | null;
+  gift_name: string | null;
+  gift_selected_at: string | null;
 };
 
 type OrderItem = {
