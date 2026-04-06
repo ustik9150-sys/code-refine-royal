@@ -35,6 +35,8 @@ type Order = {
   customer_phone: string;
   city: string | null;
   total: number;
+  subtotal: number;
+  shipping_cost: number;
   status: string;
   payment_method: string;
   shipping_method: string;
