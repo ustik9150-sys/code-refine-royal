@@ -267,6 +267,7 @@ export default function AdminProductEdit() {
       setHiddenFromHome((product as any).hidden_from_home || false);
       setSlug((product as any).slug || "");
       setSnapchatConversionValue((product as any).snapchat_conversion_value ? String((product as any).snapchat_conversion_value) : "");
+      setHasGift((product as any).has_gift || false);
 
       // Set initial data for change detection
       const initialData: ProductDraftData = {
