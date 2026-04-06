@@ -96,6 +96,7 @@ const COD_NETWORK_STATUS_MAP: Record<string, { label: string; color: string }> =
   returned: { label: "مرتجع", color: "bg-orange-100 text-orange-700 border-orange-200" },
   on_hold: { label: "معلق", color: "bg-amber-100 text-amber-700 border-amber-200" },
   scheduled: { label: "مجدول", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  sent: { label: "تم الإرسال", color: "bg-violet-100 text-violet-700 border-violet-200" },
 };
 
 // Parse "type:status" format from cod_network_status
@@ -698,11 +699,11 @@ export default function AdminOrders() {
         });
 
         if (res.data?.success) {
-          // Save lead_id if returned
+          // Save lead_id and set cod_network_status to "sent"
           const leadId = res.data?.data?.data?.id || res.data?.data?.id;
-          if (leadId) {
-            await supabase.from("orders").update({ cod_network_lead_id: String(leadId) } as any).eq("id", order.id);
-          }
+          const updateData: any = { cod_network_status: "sent" };
+          if (leadId) updateData.cod_network_lead_id = String(leadId);
+          await supabase.from("orders").update(updateData).eq("id", order.id);
           success++;
         } else {
           failed++;
