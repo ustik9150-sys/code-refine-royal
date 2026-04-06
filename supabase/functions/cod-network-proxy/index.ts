@@ -81,12 +81,36 @@ serve(async (req) => {
     }
 
     if (action === "get_lead" && body.lead_id) {
-      const res = await fetch(`${COD_NETWORK_API_BASE}/leads/${body.lead_id}`, {
+      // Try fetching the lead first
+      const leadRes = await fetch(`${COD_NETWORK_API_BASE}/leads/${body.lead_id}`, {
         method: "GET",
         headers: authHeaders,
       });
-      const data = await res.json().catch(() => ({}));
-      return new Response(JSON.stringify({ success: res.ok, status: res.status, data }), {
+      const leadData = await leadRes.json().catch(() => ({}));
+      
+      // Also fetch the order associated with this lead (contains shipment details)
+      const orderRes = await fetch(`${COD_NETWORK_API_BASE}/orders?lead_id=${body.lead_id}`, {
+        method: "GET",
+        headers: authHeaders,
+      });
+      const orderData = await orderRes.json().catch(() => ({}));
+      console.log("CodNetwork get_lead:", leadRes.status, "get_order:", orderRes.status);
+      
+      // Merge: prefer lead data for status, attach order data for shipment info
+      const lead = leadRes.ok ? leadData?.data : null;
+      const order = orderRes.ok && orderData?.data?.length > 0 ? orderData.data[0] : null;
+      
+      if (lead || order) {
+        const merged = {
+          ...(lead || {}),
+          order: order || null,
+        };
+        return new Response(JSON.stringify({ success: true, data: { data: merged } }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      return new Response(JSON.stringify({ success: false, status: leadRes.status, data: leadData }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
