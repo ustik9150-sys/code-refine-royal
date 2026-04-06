@@ -184,7 +184,6 @@ const GiftSelection = () => {
                 </div>
                 <div className="p-3 space-y-1">
                   <p className="font-semibold text-foreground text-sm">{gift.name}</p>
-                  <p className="text-xs text-muted-foreground">SKU: {gift.sku}</p>
                   <span className="inline-block text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                     مجاناً 🎁
                   </span>
