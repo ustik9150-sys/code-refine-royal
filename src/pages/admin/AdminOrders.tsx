@@ -96,6 +96,7 @@ const COD_NETWORK_STATUS_MAP: Record<string, { label: string; color: string }> =
   returned: { label: "مرتجع", color: "bg-orange-100 text-orange-700 border-orange-200" },
   on_hold: { label: "معلق", color: "bg-amber-100 text-amber-700 border-amber-200" },
   scheduled: { label: "مجدول", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  sent: { label: "تم الإرسال", color: "bg-violet-100 text-violet-700 border-violet-200" },
 };
 
 // Parse "type:status" format from cod_network_status
