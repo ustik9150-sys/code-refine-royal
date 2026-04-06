@@ -52,7 +52,7 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
       const { data, error } = await supabase.functions.invoke("create-order", {
         body: {
           customer_name: fullName.trim(),
-          customer_phone: phone.trim(),
+          customer_phone: normalizeDigits(phone.trim().replace(/\s/g, "")),
           city: city.trim() || null,
           address: city.trim() || null,
           payment_method: "cod",
