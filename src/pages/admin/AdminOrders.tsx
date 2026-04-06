@@ -450,6 +450,7 @@ export default function AdminOrders() {
   const [internalNotes, setInternalNotes] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sendingToCod, setSendingToCod] = useState(false);
+  const [syncingFromCod, setSyncingFromCod] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [codNetworkSettings, setCodNetworkSettings] = useState<{ enabled: boolean; api_token: string; default_country: string; default_city: string } | null>(null);
   const [codLeadData, setCodLeadData] = useState<any>(null);
@@ -649,6 +650,46 @@ export default function AdminOrders() {
   const exportSelectedCSV = () => {
     const selected = orders.filter(o => selectedIds.has(o.id));
     exportCSV(selected);
+  };
+
+  const syncAllFromCodNetwork = async () => {
+    if (!codNetworkSettings?.api_token) return;
+    setSyncingFromCod(true);
+    // Find all orders with a lead_id
+    const toSync = orders.filter(o => o.cod_network_lead_id);
+    if (toSync.length === 0) {
+      toast({ title: "لا توجد طلبات للمزامنة" });
+      setSyncingFromCod(false);
+      return;
+    }
+    let updated = 0;
+    let failed = 0;
+    for (const order of toSync) {
+      try {
+        const res = await supabase.functions.invoke("cod-network-proxy", {
+          body: { action: "get_lead", api_token: codNetworkSettings.api_token, lead_id: order.cod_network_lead_id },
+        });
+        if (res.data?.success && res.data?.data?.data) {
+          const leadData = res.data.data.data;
+          const updateData: Record<string, any> = { cod_network_data: leadData };
+          // Also update cod_network_status from lead status
+          if (leadData.status) {
+            updateData.cod_network_status = `lead:${leadData.status}`;
+          }
+          await supabase.from("orders").update(updateData).eq("id", order.id);
+          updated++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+    toast({
+      title: `تمت المزامنة: ${updated} من ${toSync.length}`,
+      description: failed > 0 ? `فشل ${failed} طلب` : undefined,
+    });
+    setSyncingFromCod(false);
   };
 
   const sendSelectedToCodNetwork = async () => {
@@ -853,7 +894,13 @@ export default function AdminOrders() {
               </Button>
             </motion.div>
           ) : (
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              {codNetworkSettings?.api_token && orders.some(o => o.cod_network_lead_id) && (
+                <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1.5 h-8" onClick={syncAllFromCodNetwork} disabled={syncingFromCod}>
+                  {syncingFromCod ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  مزامنة من CodNetwork
+                </Button>
+              )}
               <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1.5 h-8" onClick={() => setSelectionMode(true)}>
                 <CheckCircle className="w-3.5 h-3.5" /> تحديد
               </Button>
