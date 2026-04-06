@@ -490,10 +490,13 @@ export default function AdminOrders() {
       .channel("admin-orders")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, (payload) => {
         toast({ title: "🛒 طلب جديد!", description: `طلب جديد من ${(payload.new as any).customer_name}` });
-        fetchOrders();
+        setOrders(prev => [payload.new as Order, ...prev]);
       })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, () => {
-        fetchOrders();
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, (payload) => {
+        setOrders(prev => prev.map(o => o.id === (payload.new as Order).id ? { ...o, ...payload.new as Order } : o));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "orders" }, (payload) => {
+        setOrders(prev => prev.filter(o => o.id !== (payload.old as any).id));
       })
       .subscribe();
 
@@ -576,7 +579,6 @@ export default function AdminOrders() {
         after_snapshot: { status: newStatus },
       });
       toast({ title: "تم التحديث" });
-      fetchOrders();
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
         openOrder({ ...selectedOrder, status: newStatus });
@@ -591,7 +593,6 @@ export default function AdminOrders() {
     const { error } = await supabase.from("orders").delete().eq("id", deleteOrderTarget);
     if (!error) {
       toast({ title: "تم حذف الطلب" });
-      fetchOrders();
     }
     setDeleteOrderTarget(null);
   };
