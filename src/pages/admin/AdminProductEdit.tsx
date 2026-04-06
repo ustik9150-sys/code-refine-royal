@@ -335,6 +335,7 @@ export default function AdminProductEdit() {
       hidden_from_home: hiddenFromHome,
       slug: slug.trim() || null,
       snapchat_conversion_value: snapchatConversionValue ? parseFloat(snapchatConversionValue) : null,
+      has_gift: hasGift,
     };
 
     try {
