@@ -6,6 +6,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const COD_NETWORK_API_BASE = "https://api.cod.network/v1/seller";
+
+const CURRENCY_COUNTRY_MAP: Record<string, string> = {
+  SAR: "KSA", AED: "ARE", KWD: "KWT", BHD: "BHR", QAR: "QAT",
+  OMR: "OMN", EGP: "EGY", USD: "USA", EUR: "DEU", GBP: "GBR",
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -24,10 +31,9 @@ serve(async (req) => {
       shipping_cost = 0,
       total,
       user_id,
-      items, // array of { product_id, product_name, quantity, unit_price, total_price }
+      items,
     } = await req.json();
 
-    // Validate required fields
     if (!customer_name || !customer_phone || !items?.length) {
       return new Response(
         JSON.stringify({ success: false, error: "Missing required fields" }),
@@ -35,7 +41,6 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase admin client
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -84,10 +89,9 @@ serve(async (req) => {
 
     if (itemsError) {
       console.error("Order items insert error:", itemsError);
-      // Order was created, log but don't fail
     }
 
-    // Send Pushover notification (fire-and-forget, order saved regardless)
+    // Pushover notification (fire-and-forget)
     try {
       const PUSHOVER_TOKEN = Deno.env.get("PUSHOVER_TOKEN");
       const PUSHOVER_USER = Deno.env.get("PUSHOVER_USER");
@@ -108,14 +112,116 @@ serve(async (req) => {
             title: "طلب جديد 🔔",
           }),
         });
-
         console.log("Pushover response:", pushRes.status);
-      } else {
-        console.log("Pushover not configured, skipping notification");
       }
     } catch (pushErr) {
       console.error("Pushover notification failed:", pushErr);
+    }
+
+    // Auto-send to CodNetwork if enabled (fire-and-forget)
+    try {
+      const { data: codSetting } = await supabaseAdmin
+        .from("store_settings")
+        .select("value")
+        .eq("key", "cod_network")
+        .maybeSingle();
+
+      const codConfig = codSetting?.value as any;
+      if (codConfig?.enabled && codConfig?.auto_send && codConfig?.api_token) {
+        console.log("Auto-sending order to CodNetwork...");
+
+        // Fetch product SKUs and currency
+        const productIds = items.map((i: any) => i.product_id).filter(Boolean);
+        let skuMap: Record<string, string> = {};
+        let productCurrencyCode: string | null = null;
+
+        if (productIds.length > 0) {
+          const { data: products } = await supabaseAdmin
+            .from("products")
+            .select("id, sku, currency_enabled, currency_code")
+            .in("id", productIds);
+          if (products) {
+            skuMap = Object.fromEntries(products.map((p: any) => [p.id, p.sku || ""]));
+            const withCurrency = products.find((p: any) => p.currency_enabled && p.currency_code);
+            if (withCurrency) productCurrencyCode = withCurrency.currency_code;
+          }
+        }
+
+        // Fetch store currency as fallback
+        let storeCurrency = "SAR";
+        if (!productCurrencyCode) {
+          const { data: currSetting } = await supabaseAdmin
+            .from("store_settings")
+            .select("value")
+            .eq("key", "currency")
+            .maybeSingle();
+          if (currSetting?.value) {
+            storeCurrency = (currSetting.value as any).code || "SAR";
+          }
+        }
+
+        const effectiveCurrency = productCurrencyCode || storeCurrency;
+        const codCountry = CURRENCY_COUNTRY_MAP[effectiveCurrency] || codConfig.default_country || "KSA";
+        const codCity = city?.trim() || codConfig.default_city || "N/A";
+        const codAddress = address?.trim() || city?.trim() || "N/A";
+
+        const leadItems = items.map((item: any) => ({
+          sku: (item.product_id && skuMap[item.product_id]) || item.product_name,
+          price: Number(item.total_price),
+          quantity: Number(item.quantity || 1),
+        }));
+
+        if (leadItems.length === 0) {
+          leadItems.push({ sku: "UNKNOWN", price: Number(total), quantity: 1 });
+        }
+
+        const leadData = {
+          full_name: customer_name,
+          phone: customer_phone,
+          country: codCountry,
+          address: codAddress,
+          city: codCity,
+          area: codCity,
+          currency: effectiveCurrency,
+          items: leadItems,
+        };
+
+        console.log("CodNetwork auto-send lead_data:", JSON.stringify(leadData));
+
+        const res = await fetch(`${COD_NETWORK_API_BASE}/leads`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${codConfig.api_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(leadData),
+        });
+
+        const data = await res.json().catch(() => ({}));
+        console.log("CodNetwork auto-send response:", res.status, JSON.stringify(data));
+
+        if (res.ok && data) {
+          const leadId = data?.data?.id || data?.id;
+          const updateData: any = { cod_network_status: "sent" };
+          if (leadId) updateData.cod_network_lead_id = String(leadId);
+          await supabaseAdmin.from("orders").update(updateData).eq("id", orderId);
+          console.log(`CodNetwork auto-send: order ${orderId} sent successfully`);
+        } else {
+          const errorMsg = data?.message || data?.error || "فشل غير معروف";
+          await supabaseAdmin
+            .from("orders")
+            .update({ cod_network_status: `failed:${errorMsg}`.slice(0, 200) })
+            .eq("id", orderId);
+          console.error(`CodNetwork auto-send failed for ${orderId}:`, errorMsg);
+        }
+      }
+    } catch (codErr) {
+      console.error("CodNetwork auto-send error:", codErr);
       // Don't fail the order
+      await supabaseAdmin
+        .from("orders")
+        .update({ cod_network_status: `failed:${String(codErr)}`.slice(0, 200) })
+        .eq("id", orderId);
     }
 
     console.log(`Order ${orderId} created successfully`);
