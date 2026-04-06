@@ -706,9 +706,17 @@ export default function AdminOrders() {
           await supabase.from("orders").update(updateData).eq("id", order.id);
           success++;
         } else {
+          // Extract error reason from CodNetwork response
+          const errorData = res.data?.data;
+          const errorMsg = errorData?.message || errorData?.error || (typeof errorData === 'string' ? errorData : JSON.stringify(errorData || 'فشل غير معروف'));
+          const errorStatus = `failed:${errorMsg}`.slice(0, 200);
+          await supabase.from("orders").update({ cod_network_status: errorStatus }).eq("id", order.id);
+          toast({ title: `فشل إرسال طلب ${order.customer_name}`, description: errorMsg, variant: "destructive" });
           failed++;
         }
-      } catch {
+      } catch (err: any) {
+        const errMsg = err?.message || String(err);
+        await supabase.from("orders").update({ cod_network_status: `failed:${errMsg}`.slice(0, 200) }).eq("id", order.id);
         failed++;
       }
     }
