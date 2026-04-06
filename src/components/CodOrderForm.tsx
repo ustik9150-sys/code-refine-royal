@@ -68,6 +68,24 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || "Order creation failed");
 
+      const orderId = data.order_id;
+
+      // Check if product has gift enabled
+      let hasGift = false;
+      if (productId) {
+        const { data: prod } = await supabase
+          .from("products")
+          .select("has_gift")
+          .eq("id", productId)
+          .maybeSingle();
+        if ((prod as any)?.has_gift) hasGift = true;
+      }
+
+      if (hasGift && orderId) {
+        navigate(`/gift?order_id=${encodeURIComponent(orderId)}`);
+        return;
+      }
+
       setSuccess(true);
     } catch (err) {
       console.error("Order creation failed:", err);
