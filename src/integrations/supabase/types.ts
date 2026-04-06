@@ -99,6 +99,7 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          cod_network_data: Json | null
           cod_network_lead_id: string | null
           cod_network_status: string | null
           created_at: string
@@ -123,6 +124,7 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          cod_network_data?: Json | null
           cod_network_lead_id?: string | null
           cod_network_status?: string | null
           created_at?: string
@@ -147,6 +149,7 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          cod_network_data?: Json | null
           cod_network_lead_id?: string | null
           cod_network_status?: string | null
           created_at?: string
