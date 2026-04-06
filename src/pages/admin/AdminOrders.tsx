@@ -1019,17 +1019,26 @@ export default function AdminOrders() {
                           {codLeadData.shipping_company && (
                             <div><span className="text-xs text-muted-foreground">شركة الشحن</span><p className="font-medium text-xs mt-1">{codLeadData.shipping_company}</p></div>
                           )}
-                          {codLeadData.country && (
-                            <div><span className="text-xs text-muted-foreground">الدولة</span><p className="font-medium text-xs mt-1">{codLeadData.country}</p></div>
+                          {(codLeadData.customer_country?.name || codLeadData.country) && (
+                            <div><span className="text-xs text-muted-foreground">الدولة</span><p className="font-medium text-xs mt-1">{codLeadData.customer_country?.name || codLeadData.country}</p></div>
                           )}
-                          {codLeadData.city && (
-                            <div><span className="text-xs text-muted-foreground">المدينة</span><p className="font-medium text-xs mt-1">{codLeadData.city}</p></div>
+                          {(codLeadData.customer_city || codLeadData.city) && (
+                            <div><span className="text-xs text-muted-foreground">المدينة</span><p className="font-medium text-xs mt-1">{codLeadData.customer_city || codLeadData.city}</p></div>
                           )}
-                          {codLeadData.total_price != null && (
-                            <div><span className="text-xs text-muted-foreground">الإجمالي</span><p className="font-bold text-xs mt-1">{codLeadData.total_price} {codLeadData.currency || ""}</p></div>
+                          {(codLeadData.customer_area) && (
+                            <div><span className="text-xs text-muted-foreground">المنطقة</span><p className="font-medium text-xs mt-1">{codLeadData.customer_area}</p></div>
                           )}
-                          {codLeadData.updated_at && (
-                            <div><span className="text-xs text-muted-foreground">آخر تحديث</span><p className="text-xs mt-1 text-muted-foreground">{formatDate(codLeadData.updated_at)}</p></div>
+                          {(codLeadData.customer_address) && (
+                            <div className="col-span-2"><span className="text-xs text-muted-foreground">العنوان</span><p className="font-medium text-xs mt-1">{codLeadData.customer_address}</p></div>
+                          )}
+                          {(codLeadData.total != null || codLeadData.total_price != null) && (
+                            <div><span className="text-xs text-muted-foreground">الإجمالي</span><p className="font-bold text-xs mt-1">{codLeadData.total ?? codLeadData.total_price} {codLeadData.currency || ""}</p></div>
+                          )}
+                          {codLeadData.reference && (
+                            <div><span className="text-xs text-muted-foreground">المرجع</span><p className="font-mono text-xs mt-1">{codLeadData.reference}</p></div>
+                          )}
+                          {(codLeadData.last_update || codLeadData.updated_at) && (
+                            <div><span className="text-xs text-muted-foreground">آخر تحديث</span><p className="text-xs mt-1 text-muted-foreground">{formatDate(codLeadData.last_update || codLeadData.updated_at)}</p></div>
                           )}
                         </div>
                       </div>
