@@ -1089,8 +1089,14 @@ export default function AdminOrders() {
                                 const leadData = res.data.data.data;
                                 setCodLeadData(leadData);
                                 const leadStatusMap: Record<string, string> = { lead: "pending", confirmed: "confirmed", delivered: "delivered", return: "refunded", call_later: "pending", call_later_scheduled: "pending", no_reply: "pending", cancelled: "cancelled", wrong: "cancelled", expired: "cancelled" };
+                                const orderStatusMap: Record<string, string> = { new: "pending", shipped: "shipped", delivered: "delivered", returned: "refunded", cancelled: "cancelled", on_hold: "pending", scheduled: "pending" };
                                 const updateData: Record<string, any> = { cod_network_data: leadData };
-                                if (leadData.status) {
+                                if (leadData.order?.status) {
+                                  const ok = leadData.order.status.toLowerCase().replace(/\s+/g, "_");
+                                  updateData.cod_network_status = `order:${leadData.order.status}`;
+                                  const mapped = orderStatusMap[ok.includes("assigned") ? "shipped" : ok];
+                                  if (mapped) updateData.status = mapped;
+                                } else if (leadData.status) {
                                   updateData.cod_network_status = `lead:${leadData.status}`;
                                   const mapped = leadStatusMap[leadData.status.toLowerCase().replace(/\s+/g, "_")];
                                   if (mapped) updateData.status = mapped;
