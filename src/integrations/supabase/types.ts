@@ -106,6 +106,9 @@ export type Database = {
           customer_email: string | null
           customer_name: string
           customer_phone: string
+          gift_name: string | null
+          gift_selected_at: string | null
+          gift_sku: string | null
           id: string
           ip_address: string | null
           ip_city: string | null
@@ -131,6 +134,9 @@ export type Database = {
           customer_email?: string | null
           customer_name: string
           customer_phone: string
+          gift_name?: string | null
+          gift_selected_at?: string | null
+          gift_sku?: string | null
           id?: string
           ip_address?: string | null
           ip_city?: string | null
@@ -156,6 +162,9 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string
           customer_phone?: string
+          gift_name?: string | null
+          gift_selected_at?: string | null
+          gift_sku?: string | null
           id?: string
           ip_address?: string | null
           ip_city?: string | null
@@ -274,6 +283,7 @@ export type Database = {
           currency_enabled: boolean
           description_ar: string | null
           description_en: string | null
+          has_gift: boolean
           hidden_from_home: boolean
           id: string
           inventory: number
@@ -296,6 +306,7 @@ export type Database = {
           currency_enabled?: boolean
           description_ar?: string | null
           description_en?: string | null
+          has_gift?: boolean
           hidden_from_home?: boolean
           id?: string
           inventory?: number
@@ -318,6 +329,7 @@ export type Database = {
           currency_enabled?: boolean
           description_ar?: string | null
           description_en?: string | null
+          has_gift?: boolean
           hidden_from_home?: boolean
           id?: string
           inventory?: number
