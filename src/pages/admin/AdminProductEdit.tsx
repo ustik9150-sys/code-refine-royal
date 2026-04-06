@@ -200,7 +200,7 @@ export default function AdminProductEdit() {
   const getCurrentFormData = useCallback((): ProductDraftData => ({
     nameAr, descAr, price, compareAt, inventory, sku, category,
     isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, snapchatConversionValue,
-  }), [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, snapchatConversionValue]);
+  }), [nameAr, descAr, price, compareAt, inventory, sku, category, isActive, tags, currencyEnabled, currencyCode, hiddenFromHome, slug, snapchatConversionValue, hasGift]);
 
   // Auto-save draft on form changes
   useEffect(() => {
