@@ -173,11 +173,11 @@ const GiftSelection = () => {
                 }`}
               >
                 {/* Image — controlled aspect ratio */}
-                <div className="aspect-[4/3] bg-muted overflow-hidden">
+                <div className="aspect-square bg-muted overflow-hidden">
                   <img
                     src={gift.image}
                     alt={gift.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
 
@@ -186,7 +186,6 @@ const GiftSelection = () => {
                   <p className="font-semibold text-foreground text-xs leading-snug line-clamp-2">
                     {gift.name}
                   </p>
-                  <p className="text-[10px] text-muted-foreground font-mono">{gift.sku}</p>
                   <span className="inline-block text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                     🎁 مجاناً
                   </span>
