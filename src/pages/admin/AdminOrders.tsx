@@ -99,6 +99,8 @@ const COD_NETWORK_STATUS_MAP: Record<string, { label: string; color: string }> =
   expired: { label: "منتهي", color: "bg-gray-100 text-gray-500 border-gray-200" },
   new: { label: "طلب جديد", color: "bg-blue-100 text-blue-700 border-blue-200" },
   shipped: { label: "تم الشحن", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  assigned: { label: "تم التعيين", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
+  assigned_to_courier: { label: "تم التعيين للمندوب", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
   returned: { label: "مرتجع", color: "bg-orange-100 text-orange-700 border-orange-200" },
   on_hold: { label: "معلق", color: "bg-amber-100 text-amber-700 border-amber-200" },
   scheduled: { label: "مجدول", color: "bg-amber-100 text-amber-700 border-amber-200" },
@@ -127,13 +129,14 @@ const ORDER_STATUS_TO_SYSTEM_MAP: Record<string, string> = {
   cancelled: "cancelled",
   on_hold: "pending",
   scheduled: "pending",
+  assigned: "confirmed",
+  assigned_to_courier: "confirmed",
 };
 
 const normalizeCodNetworkStatus = (status: string) => status.toLowerCase().replace(/\s+/g, "_");
 
 const normalizeCodNetworkOrderStatus = (status: string) => {
-  const normalized = normalizeCodNetworkStatus(status);
-  return normalized.includes("assigned") ? "shipped" : normalized;
+  return normalizeCodNetworkStatus(status);
 };
 
 const getPreferredCodNetworkStatus = (raw: string | null, data?: any) => {
