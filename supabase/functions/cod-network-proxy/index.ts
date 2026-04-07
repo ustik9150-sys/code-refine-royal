@@ -94,11 +94,16 @@ serve(async (req) => {
         headers: authHeaders,
       });
       const orderData = await orderRes.json().catch(() => ({}));
-      console.log("CodNetwork get_lead:", leadRes.status, "get_order:", orderRes.status);
+      console.log("CodNetwork get_lead:", leadRes.status, "get_order:", orderRes.status, "lead_id:", body.lead_id);
       
       // Merge: prefer lead data for status, attach order data for shipment info
       const lead = leadRes.ok ? leadData?.data : null;
-      const order = orderRes.ok && orderData?.data?.length > 0 ? orderData.data[0] : null;
+      // Filter orders to find the one matching this lead_id (API may not filter properly)
+      const ordersArr = orderRes.ok && Array.isArray(orderData?.data) ? orderData.data : [];
+      const order = ordersArr.find((o: any) => String(o.lead_id) === String(body.lead_id)) || null;
+      if (ordersArr.length > 0 && !order) {
+        console.log("CodNetwork: orders returned but none matched lead_id", body.lead_id, "got lead_ids:", ordersArr.map((o: any) => o.lead_id));
+      }
       
       if (lead || order) {
         const merged = {
