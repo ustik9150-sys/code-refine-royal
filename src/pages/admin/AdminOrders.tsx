@@ -127,13 +127,14 @@ const ORDER_STATUS_TO_SYSTEM_MAP: Record<string, string> = {
   cancelled: "cancelled",
   on_hold: "pending",
   scheduled: "pending",
+  assigned: "confirmed",
+  assigned_to_courier: "confirmed",
 };
 
 const normalizeCodNetworkStatus = (status: string) => status.toLowerCase().replace(/\s+/g, "_");
 
 const normalizeCodNetworkOrderStatus = (status: string) => {
-  const normalized = normalizeCodNetworkStatus(status);
-  return normalized.includes("assigned") ? "shipped" : normalized;
+  return normalizeCodNetworkStatus(status);
 };
 
 const getPreferredCodNetworkStatus = (raw: string | null, data?: any) => {
