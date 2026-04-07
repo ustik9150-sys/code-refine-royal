@@ -822,14 +822,9 @@ export default function AdminOrders() {
           leadItems.push({ sku: "UNKNOWN", price: Number(order.total), quantity: 1 });
         }
 
-        // Add gift as separate item with price 0
-        if (order.gift_sku) {
-          leadItems.push({
-            sku: order.gift_sku,
-            price: 0,
-            quantity: 1,
-          });
-        }
+        // Add gift as a note instead of a line item (CodNetwork rejects unknown SKUs)
+        const giftNote = order.gift_sku ? `🎁 هدية: ${order.gift_name || order.gift_sku}` : "";
+        const orderNotes = [order.notes, giftNote].filter(Boolean).join(" | ");
 
         const res = await supabase.functions.invoke("cod-network-proxy", {
           body: {
