@@ -30,22 +30,39 @@ const GiftSelection = () => {
 
   useEffect(() => {
     if (!orderId) { navigate("/"); return; }
-    (async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select("id, gift_sku, gift_name, total")
-        .eq("id", orderId)
-        .maybeSingle();
 
-      if (!data) { navigate("/"); return; }
-      if (data.gift_sku) {
-        setAlreadySelected(true);
-        setExistingGift(data.gift_name || data.gift_sku);
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("get-order-status", {
+          body: { order_id: orderId },
+        });
+
+        if (cancelled) return;
+        if (error || !data?.success || !data?.order) {
+          navigate("/");
+          return;
+        }
+
+        if (data.order.gift_sku) {
+          setAlreadySelected(true);
+          setExistingGift(data.order.gift_name || data.order.gift_sku);
+        }
+
+        setOrderTotal(data.order.total ?? null);
+      } catch (err) {
+        console.error("Failed to load order status:", err);
+        if (!cancelled) navigate("/");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setOrderTotal(data.total);
-      setLoading(false);
     })();
-  }, [orderId]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [orderId, navigate]);
 
   useEffect(() => {
     if (loading || alreadySelected) return;
