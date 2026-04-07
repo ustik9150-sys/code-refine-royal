@@ -839,6 +839,7 @@ export default function AdminOrders() {
               area: codCity,
               currency: effectiveCurrency,
               items: leadItems,
+              ...(orderNotes ? { note: orderNotes } : {}),
             },
           },
         });
