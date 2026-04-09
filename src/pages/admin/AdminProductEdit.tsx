@@ -978,6 +978,17 @@ export default function AdminProductEdit() {
             إلغاء
           </Button>
           <div className="flex items-center gap-3">
+            {!isNew && slug && (
+              <a
+                href={`/product/${slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" className="rounded-xl gap-2" type="button">
+                  <Eye className="w-4 h-4" /> معاينة
+                </Button>
+              </a>
+            )}
             {!isNew && (
               <Button
                 variant="outline"
