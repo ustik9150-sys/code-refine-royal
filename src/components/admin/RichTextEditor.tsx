@@ -1,9 +1,10 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
+import { supabase } from "@/integrations/supabase/client";
 import TextAlign from "@tiptap/extension-text-align";
 import Color from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
@@ -81,12 +82,16 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
     }
   }, [editor]);
 
-  const addImage = useCallback(() => {
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const addImage = useCallback(async (file: File) => {
     if (!editor) return;
-    const url = window.prompt("أدخل رابط الصورة:", "https://");
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
+    const ext = file.name.split(".").pop();
+    const path = `editor/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file, { cacheControl: "3600" });
+    if (error) return;
+    const { data: { publicUrl } } = supabase.storage.from("product-images").getPublicUrl(path);
+    editor.chain().focus().setImage({ src: publicUrl }).run();
   }, [editor]);
 
   const [showColors, setShowColors] = React.useState(false);
@@ -190,9 +195,20 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
             <Unlink className="w-4 h-4" />
           </ToolbarButton>
         )}
-        <ToolbarButton onClick={addImage} title="إدراج صورة">
+        <ToolbarButton onClick={() => imageInputRef.current?.click()} title="إدراج صورة">
           <ImagePlus className="w-4 h-4" />
         </ToolbarButton>
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) addImage(file);
+            e.target.value = "";
+          }}
+        />
 
         <div className="flex-1" />
 
