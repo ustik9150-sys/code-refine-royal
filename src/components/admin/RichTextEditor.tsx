@@ -82,12 +82,16 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
     }
   }, [editor]);
 
-  const addImage = useCallback(() => {
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const addImage = useCallback(async (file: File) => {
     if (!editor) return;
-    const url = window.prompt("أدخل رابط الصورة:", "https://");
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
+    const ext = file.name.split(".").pop();
+    const path = `editor/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file, { cacheControl: "3600" });
+    if (error) return;
+    const { data: { publicUrl } } = supabase.storage.from("product-images").getPublicUrl(path);
+    editor.chain().focus().setImage({ src: publicUrl }).run();
   }, [editor]);
 
   const [showColors, setShowColors] = React.useState(false);
