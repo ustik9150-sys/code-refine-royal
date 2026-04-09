@@ -195,9 +195,20 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
             <Unlink className="w-4 h-4" />
           </ToolbarButton>
         )}
-        <ToolbarButton onClick={addImage} title="إدراج صورة">
+        <ToolbarButton onClick={() => imageInputRef.current?.click()} title="إدراج صورة">
           <ImagePlus className="w-4 h-4" />
         </ToolbarButton>
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) addImage(file);
+            e.target.value = "";
+          }}
+        />
 
         <div className="flex-1" />
 
