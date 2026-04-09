@@ -324,6 +324,48 @@ export default function AdminWhatsApp() {
                 {testingConnection ? <Loader2 className="w-4 h-4 animate-spin ml-1" /> : <Wifi className="w-4 h-4 ml-1" />}
                 اختبار الاتصال
               </Button>
+
+              {/* Connection Status Card */}
+              {connectionStatus !== "unknown" && (
+                <div className="mt-4 rounded-xl border border-border/50 bg-muted/30 overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/40">
+                        <TableHead className="text-center text-xs">Auth Status</TableHead>
+                        <TableHead className="text-center text-xs">API URL</TableHead>
+                        <TableHead className="text-center text-xs">Instance ID</TableHead>
+                        <TableHead className="text-center text-xs">Token</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="text-center">
+                          {connectionStatus === "connected" ? (
+                            <Badge className="bg-emerald-500 text-white border-0">authenticated</Badge>
+                          ) : (
+                            <Badge variant="destructive">disconnected</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <code className="text-xs bg-card px-2 py-1 rounded border border-border/50 select-all" dir="ltr">
+                            https://api.ultramsg.com/{settings.instance_id}
+                          </code>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <code className="text-xs bg-card px-2 py-1 rounded border border-border/50 select-all" dir="ltr">
+                            {settings.instance_id || "—"}
+                          </code>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <code className="text-xs bg-card px-2 py-1 rounded border border-border/50 select-all" dir="ltr">
+                            {settings.token ? settings.token.substring(0, 10) + "…" : "—"}
+                          </code>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </div>
 
             <div className="border-t border-border/30 pt-6 space-y-4">
