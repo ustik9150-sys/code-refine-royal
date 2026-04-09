@@ -25,6 +25,7 @@ import {
   Table2,
   Truck,
   MessageCircle,
+  Download,
 } from "lucide-react";
 import MobileBottomNav from "./MobileBottomNav";
 
@@ -36,6 +37,7 @@ const navItems = [
   { to: "/admin/cod-network", icon: Truck, label: "CodNetwork" },
   { to: "/admin/google-sheets", icon: Table2, label: "Google Sheets" },
   { to: "/admin/whatsapp", icon: MessageCircle, label: "واتساب" },
+  { to: "/admin/import-orders", icon: Download, label: "استيراد الطلبات" },
   { to: "/admin/pages", icon: FileText, label: "الصفحات" },
   { to: "/admin/settings", icon: Settings, label: "الإعدادات" },
 ];
