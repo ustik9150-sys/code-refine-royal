@@ -18,7 +18,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, Save, Upload, X, GripVertical, Star, Trash2, Package,
   ImagePlus, Loader2, Eye, Tag, CloudOff, Check, Cloud, RotateCcw, Gift,
+  Copy, ExternalLink, Wand2,
 } from "lucide-react";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
 } from "@dnd-kit/core";
@@ -592,18 +594,62 @@ export default function AdminProductEdit() {
                   className="rounded-xl admin-input flex-1"
                   placeholder="my-product-name"
                 />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="rounded-xl h-10 w-10 shrink-0"
+                  title="اقتراح من الاسم"
+                  onClick={() => {
+                    if (nameAr.trim()) {
+                      const suggested = nameAr.trim().replace(/\s+/g, "-").replace(/[^a-zA-Z0-9\u0600-\u06FF-_]/g, "").toLowerCase();
+                      setSlug(suggested);
+                    }
+                  }}
+                >
+                  <Wand2 className="w-4 h-4" />
+                </Button>
               </div>
+              {/* Live URL Preview */}
+              {slug && (
+                <div className="mt-2 flex items-center gap-2 p-2 rounded-lg bg-muted/50 border border-border/30">
+                  <span className="text-[11px] text-muted-foreground truncate flex-1" dir="ltr">
+                    {window.location.origin}/product/{slug}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/product/${slug}`);
+                      toast({ title: "✅ تم نسخ الرابط" });
+                    }}
+                    className="p-1 hover:bg-muted rounded transition-colors shrink-0"
+                    title="نسخ الرابط"
+                  >
+                    <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+                  </button>
+                  {!isNew && (
+                    <a
+                      href={`/product/${slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 hover:bg-muted rounded transition-colors shrink-0"
+                      title="معاينة المنتج"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                    </a>
+                  )}
+                </div>
+              )}
               <p className="text-[10px] text-muted-foreground mt-1">
-                اتركه فارغاً لاستخدام الرابط التلقائي. يقبل حروف إنجليزية وأرقام وشرطات.
+                اتركه فارغاً لاستخدام الرابط التلقائي. اضغط العصا السحرية لاقتراح من الاسم.
               </p>
             </div>
 
             <div>
               <Label className="text-xs">الوصف</Label>
-              <textarea
-                value={descAr}
-                onChange={(e) => setDescAr(e.target.value)}
-                className="w-full mt-1 border border-border rounded-xl p-3 text-sm min-h-[120px] bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+              <RichTextEditor
+                content={descAr}
+                onChange={(html) => setDescAr(html)}
                 placeholder="أضف وصفاً جذاباً للمنتج..."
               />
             </div>
