@@ -50,6 +50,7 @@ type MessageLog = {
 };
 
 const EVENT_MAP: Record<string, string> = {
+  new_order: "عند إنشاء طلب جديد",
   confirmed: "عند تأكيد الطلب",
   shipped: "عند خروج الطلب للتوصيل",
   delivered: "عند التسليم",

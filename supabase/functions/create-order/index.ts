@@ -224,6 +224,21 @@ serve(async (req) => {
         .eq("id", orderId);
     }
 
+    // WhatsApp new_order notification (fire-and-forget)
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      await fetch(`${supabaseUrl}/functions/v1/send-whatsapp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+        },
+        body: JSON.stringify({ order_id: orderId, event: "new_order" }),
+      });
+    } catch (waErr) {
+      console.error("WhatsApp new_order notification failed:", waErr);
+    }
+
     console.log(`Order ${orderId} created successfully`);
 
     return new Response(
