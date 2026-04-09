@@ -682,6 +682,27 @@ export default function AdminOrders() {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
         openOrder({ ...selectedOrder, status: newStatus });
       }
+
+      // Auto-send WhatsApp message
+      const eventMap: Record<string, string> = {
+        confirmed: "confirmed",
+        shipped: "shipped",
+        delivered: "delivered",
+      };
+      const whatsappEvent = eventMap[newStatus];
+      if (whatsappEvent) {
+        supabase.functions.invoke("send-whatsapp", {
+          body: { order_id: orderId, event: whatsappEvent },
+        }).then(({ data, error: fnError }) => {
+          if (data?.success) {
+            toast({ title: "تم إرسال رسالة واتساب ✅" });
+          } else if (data?.skipped) {
+            // Already sent, no notification needed
+          } else if (fnError || data?.error) {
+            console.log("WhatsApp:", data?.error || fnError?.message);
+          }
+        });
+      }
     }
   };
 
