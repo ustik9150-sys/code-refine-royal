@@ -195,30 +195,39 @@ export default function AdminImportOrders() {
           error: null,
         };
 
-        if (order && result.statusChanged) {
-          // Prevent status downgrade
-          const statusOrder = ["pending", "confirmed", "shipped", "delivered", "cancelled", "refunded"];
-          const oldIdx = statusOrder.indexOf(order.status);
-          const newIdx = statusOrder.indexOf(newStatus);
-          if (newIdx > oldIdx || newStatus === "cancelled") {
-            const { error } = await supabase
-              .from("orders")
-              .update({
-                status: newStatus as any,
-                cod_network_status: row.trackingStatus || row.status,
-                cod_network_data: {
-                  tracking_number: row.trackingNumber,
-                  tracking_status: row.trackingStatus,
-                  last_update: row.lastUpdate,
-                  imported_at: new Date().toISOString(),
-                },
-              })
-              .eq("id", order.id);
+        if (order) {
+          const codNetworkUpdate: Record<string, any> = {
+            cod_network_status: row.trackingStatus || row.status || null,
+            cod_network_data: {
+              tracking_number: row.trackingNumber,
+              tracking_status: row.trackingStatus,
+              last_update: row.lastUpdate,
+              imported_at: new Date().toISOString(),
+              reference: row.reference,
+              lead_id: row.leadId,
+            },
+            cod_network_lead_id: row.leadId || order.cod_network_lead_id || null,
+          };
 
-            if (error) {
-              result.error = error.message;
-            } else {
-              result.updated = true;
+          // Only upgrade main status if it actually changed and is higher priority
+          if (result.statusChanged) {
+            const statusOrder = ["pending", "confirmed", "shipped", "delivered", "cancelled", "refunded"];
+            const oldIdx = statusOrder.indexOf(order.status);
+            const newIdx = statusOrder.indexOf(newStatus);
+            if (newIdx > oldIdx || newStatus === "cancelled") {
+              codNetworkUpdate.status = newStatus as any;
+            }
+          }
+
+          const { error } = await supabase
+            .from("orders")
+            .update(codNetworkUpdate)
+            .eq("id", order.id);
+
+          if (error) {
+            result.error = error.message;
+          } else {
+            result.updated = true;
 
               // Send WhatsApp for "shipped" (out for delivery)
               if (newStatus === "shipped" && waEnabled && shippedTemplate) {
@@ -265,7 +274,6 @@ export default function AdminImportOrders() {
                     }
                   }
                 }
-              }
             }
           }
         }
