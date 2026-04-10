@@ -379,6 +379,7 @@ export default function AdminImportOrders() {
                 <thead className="bg-muted/50 sticky top-0">
                   <tr>
                     <th className="p-3 text-right font-medium">Reference</th>
+                    <th className="p-3 text-right font-medium">Lead ID</th>
                     <th className="p-3 text-right font-medium">العميل</th>
                     <th className="p-3 text-right font-medium">الهاتف</th>
                     <th className="p-3 text-right font-medium">الحالة</th>
@@ -390,6 +391,7 @@ export default function AdminImportOrders() {
                   {rows.slice(0, 50).map((r, i) => (
                     <tr key={i} className="hover:bg-muted/30">
                       <td className="p-3 font-mono text-xs">{r.reference}</td>
+                      <td className="p-3 font-mono text-xs">{r.leadId || "—"}</td>
                       <td className="p-3">{r.customerName}</td>
                       <td className="p-3 font-mono text-xs" dir="ltr">{r.customerPhone}</td>
                       <td className="p-3">
