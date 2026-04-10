@@ -14,6 +14,7 @@ import * as XLSX from "xlsx";
 /* ─── types ─── */
 interface ImportRow {
   reference: string;
+  leadId: string;
   customerName: string;
   customerPhone: string;
   status: string;
@@ -89,14 +90,15 @@ export default function AdminImportOrders() {
 
         const parsed: ImportRow[] = json.map((r) => ({
           reference: String(r["Reference"] || r["reference"] || r["Ref"] || r["ref"] || r["Order ID"] || r["order_id"] || "").trim(),
+          leadId: String(r["Lead ID"] || r["lead_id"] || r["LeadID"] || r["leadId"] || "").trim(),
           customerName: String(r["Customer Name"] || r["customer_name"] || r["Name"] || r["name"] || "").trim(),
-          customerPhone: String(r["Customer Phone"] || r["customer_phone"] || r["Phone"] || r["phone"] || "").trim(),
+          customerPhone: String(r["Customer Phone"] || r["customer_phone"] || r["Phone"] || r["phone"] || "").trim().replace(/\.0$/, ""),
           status: String(r["Status"] || r["status"] || "").trim(),
           products: String(r["Products"] || r["products"] || r["Product"] || r["product"] || "").trim(),
-          trackingNumber: String(r["Tracking Number"] || r["tracking_number"] || r["AWB"] || r["awb"] || "").trim(),
+          trackingNumber: String(r["Tracking Number"] || r["tracking_number"] || r["AWB"] || r["awb"] || "").trim().replace(/\.0$/, ""),
           trackingStatus: String(r["Tracking Status"] || r["tracking_status"] || "").trim(),
           lastUpdate: String(r["Last Update"] || r["last_update"] || r["Updated At"] || "").trim(),
-        })).filter(r => r.reference);
+        })).filter(r => r.reference || r.leadId);
 
         setRows(parsed);
         setStep("preview");
@@ -142,14 +144,23 @@ export default function AdminImportOrders() {
 
     for (let i = 0; i < rows.length; i += batchSize) {
       const batch = rows.slice(i, i + batchSize);
-      const refs = batch.map(r => r.reference);
+      
+      // Collect all possible identifiers for matching
+      const leadIds = batch.map(r => r.leadId).filter(Boolean);
+      const refs = batch.map(r => r.reference).filter(Boolean);
+      // Also try reference without CODNET- prefix as lead_id
+      const refAsLeadIds = refs.map(r => r.replace(/^CODNET-/i, "")).filter(r => /^\d+$/.test(r));
+      const allLeadIds = [...new Set([...leadIds, ...refAsLeadIds])];
 
-      // Try matching by cod_network_lead_id first, then by order_number
-      const { data: ordersByLead } = await supabase
-        .from("orders")
-        .select("id, order_number, status, customer_name, customer_phone, cod_network_lead_id")
-        .in("cod_network_lead_id", refs);
+      // Match by cod_network_lead_id
+      const { data: ordersByLead } = allLeadIds.length > 0
+        ? await supabase
+            .from("orders")
+            .select("id, order_number, status, customer_name, customer_phone, cod_network_lead_id")
+            .in("cod_network_lead_id", allLeadIds)
+        : { data: [] };
 
+      // Match by order_number (numeric refs)
       const numericRefs = refs.filter(r => /^\d+$/.test(r)).map(Number);
       const { data: ordersByNum } = numericRefs.length > 0
         ? await supabase
@@ -167,7 +178,10 @@ export default function AdminImportOrders() {
       });
 
       for (const row of batch) {
-        const order = orderMap.get(row.reference);
+        // Try multiple keys to find the order
+        const order = orderMap.get(row.leadId) 
+          || orderMap.get(row.reference.replace(/^CODNET-/i, ""))
+          || orderMap.get(row.reference);
         const newStatus = mapCodStatus(row.trackingStatus || row.status);
         const result: MatchResult = {
           row,
@@ -365,6 +379,7 @@ export default function AdminImportOrders() {
                 <thead className="bg-muted/50 sticky top-0">
                   <tr>
                     <th className="p-3 text-right font-medium">Reference</th>
+                    <th className="p-3 text-right font-medium">Lead ID</th>
                     <th className="p-3 text-right font-medium">العميل</th>
                     <th className="p-3 text-right font-medium">الهاتف</th>
                     <th className="p-3 text-right font-medium">الحالة</th>
@@ -376,6 +391,7 @@ export default function AdminImportOrders() {
                   {rows.slice(0, 50).map((r, i) => (
                     <tr key={i} className="hover:bg-muted/30">
                       <td className="p-3 font-mono text-xs">{r.reference}</td>
+                      <td className="p-3 font-mono text-xs">{r.leadId || "—"}</td>
                       <td className="p-3">{r.customerName}</td>
                       <td className="p-3 font-mono text-xs" dir="ltr">{r.customerPhone}</td>
                       <td className="p-3">
