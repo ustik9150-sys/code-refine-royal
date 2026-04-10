@@ -139,6 +139,16 @@ const ProductDetails = ({ productSlug }: { productSlug?: string }) => {
         </>
       );
     }
+    // If description contains HTML tags, render as HTML
+    if (/<[a-z][\s\S]*>/i.test(desc)) {
+      return (
+        <div
+          className="prose prose-sm max-w-none [&>p]:mb-2 [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:mb-3 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-2 [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-2 [&>ul]:list-disc [&>ul]:pr-5 [&>ol]:list-decimal [&>ol]:pr-5 [&>ul>li]:mb-1 [&>ol>li]:mb-1 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_a]:text-primary [&_a]:underline"
+          dangerouslySetInnerHTML={{ __html: desc }}
+        />
+      );
+    }
+    // Fallback for plain text descriptions
     return desc.split("\n").map((line, i) => {
       if (!line.trim()) return null;
       if (line.startsWith("•")) {
