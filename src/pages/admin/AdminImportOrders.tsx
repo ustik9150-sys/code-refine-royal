@@ -90,14 +90,15 @@ export default function AdminImportOrders() {
 
         const parsed: ImportRow[] = json.map((r) => ({
           reference: String(r["Reference"] || r["reference"] || r["Ref"] || r["ref"] || r["Order ID"] || r["order_id"] || "").trim(),
+          leadId: String(r["Lead ID"] || r["lead_id"] || r["LeadID"] || r["leadId"] || "").trim(),
           customerName: String(r["Customer Name"] || r["customer_name"] || r["Name"] || r["name"] || "").trim(),
-          customerPhone: String(r["Customer Phone"] || r["customer_phone"] || r["Phone"] || r["phone"] || "").trim(),
+          customerPhone: String(r["Customer Phone"] || r["customer_phone"] || r["Phone"] || r["phone"] || "").trim().replace(/\.0$/, ""),
           status: String(r["Status"] || r["status"] || "").trim(),
           products: String(r["Products"] || r["products"] || r["Product"] || r["product"] || "").trim(),
-          trackingNumber: String(r["Tracking Number"] || r["tracking_number"] || r["AWB"] || r["awb"] || "").trim(),
+          trackingNumber: String(r["Tracking Number"] || r["tracking_number"] || r["AWB"] || r["awb"] || "").trim().replace(/\.0$/, ""),
           trackingStatus: String(r["Tracking Status"] || r["tracking_status"] || "").trim(),
           lastUpdate: String(r["Last Update"] || r["last_update"] || r["Updated At"] || "").trim(),
-        })).filter(r => r.reference);
+        })).filter(r => r.reference || r.leadId);
 
         setRows(parsed);
         setStep("preview");
