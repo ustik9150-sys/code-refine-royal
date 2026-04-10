@@ -14,6 +14,7 @@ import * as XLSX from "xlsx";
 /* ─── types ─── */
 interface ImportRow {
   reference: string;
+  leadId: string;
   customerName: string;
   customerPhone: string;
   status: string;
