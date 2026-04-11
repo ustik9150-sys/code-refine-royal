@@ -90,6 +90,10 @@ serve(async (req) => {
     const rawPhone = body.phone || body.customer_phone;
     const normalizedPhone = rawPhone ? normalizePhone(rawPhone) : null;
 
+    // Build the incoming cod_network_status string early for dedup check
+    const normalizedKey = normalizeStatus(codStatus);
+    const incomingCodStatus = webhookType === "order" ? `order:${codStatus}` : `lead:${codStatus}`;
+
     let matchedOrder: { id: string; cod_network_data: Record<string, any> | null; cod_network_status: string | null } | null = null;
     let orderId: string | null = null;
 
@@ -123,16 +127,23 @@ serve(async (req) => {
 
     if (!orderId) {
       console.log("CodNetwork webhook: no matching order found for", { leadId, rawPhone, normalizedPhone });
-      // Return 200 to prevent CodNetwork from disabling webhook
       return new Response(JSON.stringify({ success: false, error: "Order not found" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Map status using normalized key
+    // *** DEDUP: Skip if status hasn't changed — saves DB writes and costs ***
+    if (matchedOrder?.cod_network_status === incomingCodStatus) {
+      console.log(`CodNetwork webhook: SKIPPED (status unchanged: ${incomingCodStatus}) for order ${orderId}`);
+      return new Response(JSON.stringify({ success: true, skipped: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Map status
     const statusMap = webhookType === "order" ? ORDER_STATUS_MAP : LEAD_STATUS_MAP;
-    const normalizedKey = normalizeStatus(codStatus);
     const mappedStatus = statusMap[normalizedKey] || null;
     const existingCodData = matchedOrder?.cod_network_data && typeof matchedOrder.cod_network_data === "object"
       ? matchedOrder.cod_network_data
@@ -147,14 +158,12 @@ serve(async (req) => {
         ...existingCodData,
         order: body,
       };
-
-      // Do not let order:new override a confirmed lead status in the system
       if (!isNewOrderWebhook || !existingCodData.status) {
-        updateData.cod_network_status = `order:${codStatus}`;
+        updateData.cod_network_status = incomingCodStatus;
         if (mappedStatus) updateData.status = mappedStatus;
       }
     } else {
-      updateData.cod_network_status = `lead:${codStatus}`;
+      updateData.cod_network_status = incomingCodStatus;
       updateData.cod_network_data = {
         ...existingCodData,
         ...body,
