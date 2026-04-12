@@ -74,7 +74,7 @@ const HotjarLogo = () => (
 );
 
 const CodNetworkLogo = () => (
-  <img src="https://static-content-dropify.com/dropify_static_assets/img/apps/new_apps/codnetwork.svg" alt="COD Network" width="20" height="20" className="rounded" />
+  <img src="https://static-content-dropify.com/dropify_static_assets/img/apps/new_apps/codnetwork.svg" alt="COD Network" width="32" height="32" className="rounded" />
 );
 
 const WhatsAppLogo = () => (
