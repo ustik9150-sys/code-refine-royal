@@ -31,6 +31,7 @@ import AdminCodNetwork from "./pages/admin/AdminCodNetwork";
 import AdminWhatsApp from "./pages/admin/AdminWhatsApp";
 import AdminImportOrders from "./pages/admin/AdminImportOrders";
 import AdminAppStore from "./pages/admin/AdminAppStore";
+import AdminAppSettings from "./pages/admin/AdminAppSettings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,6 +81,7 @@ const App = () => (
             <Route path="whatsapp" element={<AdminWhatsApp />} />
             <Route path="import-orders" element={<AdminImportOrders />} />
             <Route path="app-store" element={<AdminAppStore />} />
+            <Route path="app-store/:appId" element={<AdminAppSettings />} />
             <Route path="pages" element={<AdminPages />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>

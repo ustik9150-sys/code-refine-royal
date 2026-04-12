@@ -275,7 +275,7 @@ export default function AdminAppStore() {
     if (app.route) {
       navigate(app.route);
     } else {
-      toast({ title: `إعدادات ${app.name}`, description: "صفحة الإعدادات قيد التطوير" });
+      navigate(`/admin/app-store/${app.id}`);
     }
   };
 
