@@ -142,8 +142,11 @@ export default function AdminReviews() {
     if (ratingFilter !== "all") {
       result = result.filter((r: any) => r.rating === Number(ratingFilter));
     }
+    if (dialectFilter !== "all") {
+      result = result.filter((r: any) => r.dialect === dialectFilter);
+    }
     return result;
-  }, [reviews, searchQuery, ratingFilter]);
+  }, [reviews, searchQuery, ratingFilter, dialectFilter]);
 
   // Stats
   const stats = useMemo(() => {
