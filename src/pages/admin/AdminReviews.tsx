@@ -1,16 +1,18 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Trash2, Sparkles, Plus, Loader2, MessageSquare, Pencil, Search, Filter } from "lucide-react";
+import { Star, Trash2, Sparkles, Plus, Loader2, MessageSquare, Pencil, Search, Filter, Flame, Eye, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const badgeLabels: Record<string, string> = {
   verified_purchase: "✔ تم الشراء",
@@ -57,6 +59,12 @@ export default function AdminReviews() {
   const [addOpen, setAddOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
+  const [socialProof, setSocialProof] = useState({
+    social_proof_purchases: true,
+    social_proof_viewers: true,
+    social_proof_limited: true,
+  });
+  const [socialProofSaving, setSocialProofSaving] = useState(false);
   const [newReview, setNewReview] = useState({
     reviewer_name: "",
     reviewer_gender: "male",
@@ -64,6 +72,41 @@ export default function AdminReviews() {
     comment: "",
     badge_type: "verified_purchase",
   });
+
+  // Load social proof settings
+  useEffect(() => {
+    const loadSocialProof = async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "app_config_reviews")
+        .maybeSingle();
+      if (data?.value && typeof data.value === "object") {
+        const v = data.value as Record<string, any>;
+        setSocialProof({
+          social_proof_purchases: v.social_proof_purchases !== false,
+          social_proof_viewers: v.social_proof_viewers !== false,
+          social_proof_limited: v.social_proof_limited !== false,
+        });
+      }
+    };
+    loadSocialProof();
+  }, []);
+
+  const saveSocialProof = async (newState: typeof socialProof) => {
+    setSocialProofSaving(true);
+    setSocialProof(newState);
+    const { error } = await supabase.from("store_settings").upsert(
+      { key: "app_config_reviews", value: newState as any },
+      { onConflict: "key" }
+    );
+    if (error) {
+      toast.error("فشل في حفظ الإعدادات");
+    } else {
+      toast.success("تم حفظ الإعدادات");
+    }
+    setSocialProofSaving(false);
+  };
 
   const { data: products = [] } = useQuery({
     queryKey: ["admin-products-list"],
@@ -212,6 +255,64 @@ export default function AdminReviews() {
             التقييمات والمراجعات
           </h1>
           <p className="text-xs text-muted-foreground mt-1">توليد وإدارة تقييمات المنتجات بالذكاء الاصطناعي</p>
+        </div>
+      </div>
+
+      {/* Social Proof Controls */}
+      <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm overflow-hidden">
+        <div className="p-4 border-b border-border/40 bg-muted/30">
+          <h2 className="text-sm font-bold text-foreground">⚡ محفزات التحويل (Social Proof)</h2>
+          <p className="text-[11px] text-muted-foreground mt-0.5">عناصر نفسية تظهر في صفحة المنتج لزيادة معدل الشراء</p>
+        </div>
+        <div className="p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
+                <Flame className="w-4 h-4 text-destructive" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">عدد المشتريات اليوم</Label>
+                <p className="text-[10px] text-muted-foreground">مثال: "تم شراء هذا المنتج 27 مرة اليوم"</p>
+              </div>
+            </div>
+            <Switch
+              checked={socialProof.social_proof_purchases}
+              disabled={socialProofSaving}
+              onCheckedChange={(v) => saveSocialProof({ ...socialProof, social_proof_purchases: v })}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <Eye className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">عدد المشاهدين الآن</Label>
+                <p className="text-[10px] text-muted-foreground">مثال: "26 يشاهدون الآن"</p>
+              </div>
+            </div>
+            <Switch
+              checked={socialProof.social_proof_viewers}
+              disabled={socialProofSaving}
+              onCheckedChange={(v) => saveSocialProof({ ...socialProof, social_proof_viewers: v })}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">الكمية محدودة</Label>
+                <p className="text-[10px] text-muted-foreground">تظهر عبارة "الكمية محدودة" لخلق إلحاح</p>
+              </div>
+            </div>
+            <Switch
+              checked={socialProof.social_proof_limited}
+              disabled={socialProofSaving}
+              onCheckedChange={(v) => saveSocialProof({ ...socialProof, social_proof_limited: v })}
+            />
+          </div>
         </div>
       </div>
 
