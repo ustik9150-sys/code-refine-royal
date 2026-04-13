@@ -53,6 +53,7 @@ function ReviewAvatar({ name, gender }: { name: string; gender: string }) {
 export default function AdminReviews() {
   const queryClient = useQueryClient();
   const [selectedProduct, setSelectedProduct] = useState<string>("");
+  const [generateDialect, setGenerateDialect] = useState<string>("mixed");
   const [generateCount, setGenerateCount] = useState("50");
   const [editReview, setEditReview] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
