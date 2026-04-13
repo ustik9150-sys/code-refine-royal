@@ -241,6 +241,62 @@ export type Database = {
           },
         ]
       }
+      product_reviews: {
+        Row: {
+          badge_type: string | null
+          comment: string
+          created_at: string
+          dialect: string | null
+          highlight_label: string | null
+          id: string
+          is_highlighted: boolean
+          product_id: string
+          rating: number
+          review_date: string
+          reviewer_gender: string
+          reviewer_name: string
+          sort_order: number
+        }
+        Insert: {
+          badge_type?: string | null
+          comment: string
+          created_at?: string
+          dialect?: string | null
+          highlight_label?: string | null
+          id?: string
+          is_highlighted?: boolean
+          product_id: string
+          rating?: number
+          review_date?: string
+          reviewer_gender?: string
+          reviewer_name: string
+          sort_order?: number
+        }
+        Update: {
+          badge_type?: string | null
+          comment?: string
+          created_at?: string
+          dialect?: string | null
+          highlight_label?: string | null
+          id?: string
+          is_highlighted?: boolean
+          product_id?: string
+          rating?: number
+          review_date?: string
+          reviewer_gender?: string
+          reviewer_name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_revisions: {
         Row: {
           admin_id: string
