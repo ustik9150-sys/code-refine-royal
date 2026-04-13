@@ -258,6 +258,64 @@ export default function AdminReviews() {
         </div>
       </div>
 
+      {/* Social Proof Controls */}
+      <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm overflow-hidden">
+        <div className="p-4 border-b border-border/40 bg-muted/30">
+          <h2 className="text-sm font-bold text-foreground">⚡ محفزات التحويل (Social Proof)</h2>
+          <p className="text-[11px] text-muted-foreground mt-0.5">عناصر نفسية تظهر في صفحة المنتج لزيادة معدل الشراء</p>
+        </div>
+        <div className="p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
+                <Flame className="w-4 h-4 text-destructive" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">عدد المشتريات اليوم</Label>
+                <p className="text-[10px] text-muted-foreground">مثال: "تم شراء هذا المنتج 27 مرة اليوم"</p>
+              </div>
+            </div>
+            <Switch
+              checked={socialProof.social_proof_purchases}
+              disabled={socialProofSaving}
+              onCheckedChange={(v) => saveSocialProof({ ...socialProof, social_proof_purchases: v })}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <Eye className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">عدد المشاهدين الآن</Label>
+                <p className="text-[10px] text-muted-foreground">مثال: "26 يشاهدون الآن"</p>
+              </div>
+            </div>
+            <Switch
+              checked={socialProof.social_proof_viewers}
+              disabled={socialProofSaving}
+              onCheckedChange={(v) => saveSocialProof({ ...socialProof, social_proof_viewers: v })}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">الكمية محدودة</Label>
+                <p className="text-[10px] text-muted-foreground">تظهر عبارة "الكمية محدودة" لخلق إلحاح</p>
+              </div>
+            </div>
+            <Switch
+              checked={socialProof.social_proof_limited}
+              disabled={socialProofSaving}
+              onCheckedChange={(v) => saveSocialProof({ ...socialProof, social_proof_limited: v })}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Product Selector Card */}
       <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm overflow-hidden">
         <div className="p-4 border-b border-border/40 bg-muted/30">
