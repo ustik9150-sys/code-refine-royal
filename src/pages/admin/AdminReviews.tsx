@@ -323,14 +323,29 @@ export default function AdminReviews() {
       {/* Product Selector Card */}
       <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm overflow-hidden">
         <div className="p-4 border-b border-border/40 bg-muted/30">
-          <label className="text-xs font-medium text-muted-foreground mb-2 block">اختر المنتج</label>
+          <label className="text-xs font-medium text-muted-foreground mb-2 block flex items-center gap-1.5">
+            <Package className="w-3.5 h-3.5" />
+            اختر المنتج
+          </label>
           <Select value={selectedProduct} onValueChange={setSelectedProduct}>
             <SelectTrigger className="h-11 rounded-xl bg-background">
               <SelectValue placeholder="اختر المنتج لإدارة تقييماته" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[300px]">
               {products.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.name_ar}</SelectItem>
+                <SelectItem key={p.id} value={p.id}>
+                  <div className="flex items-center gap-2.5 py-0.5">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Package className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium leading-tight">{p.name_ar}</span>
+                      {p.category && (
+                        <span className="text-[10px] text-muted-foreground leading-tight">{p.category}</span>
+                      )}
+                    </div>
+                  </div>
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
