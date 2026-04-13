@@ -195,7 +195,7 @@ const appDefs: AppDef[] = [
 
   // التسويق
   { id: "codform-pro", name: "CodForm PRO", description: "نموذج طلب متقدم مع خيارات الكمية والمتغيرات وتحسينات لزيادة معدل التحويل.", logo: CodFormLogo, iconBg: "#8B5CF6", category: "التسويق", provider: "CodForm", defaultInstalled: true, badge: "PRO", route: "/admin/cod-form" },
-  { id: "gift-system", name: "نظام الهدايا", description: "أضف هدايا مجانية للطلبات لزيادة معدل إتمام الشراء وقيمة السلة.", logo: GiftIcon, iconBg: "#EC4899", category: "التسويق", provider: "CodForm", defaultInstalled: true },
+  { id: "gift-system", name: "نظام الهدايا", description: "أضف هدايا مجانية للطلبات لزيادة معدل إتمام الشراء وقيمة السلة.", logo: GiftIcon, iconBg: "#EC4899", category: "التسويق", provider: "CodForm", defaultInstalled: true, route: "/admin/app-store/gift-system" },
   { id: "urgency-timer", name: "مؤقت العرض", description: "عداد تنازلي يخلق إحساس بالاستعجال لدى العملاء لتسريع قرار الشراء.", logo: TimerIcon, iconBg: "#EF4444", category: "التسويق", provider: "CodForm", defaultInstalled: false },
   { id: "reviews", name: "التقييمات والمراجعات", description: "عرض تقييمات ومراجعات العملاء على صفحة المنتج لزيادة الثقة.", logo: StarIcon, iconBg: "#F59E0B", category: "التسويق", provider: "CodForm", defaultInstalled: true, route: "/admin/app-store/reviews" },
   { id: "upsell", name: "Upsell & Cross-sell", description: "عرض منتجات إضافية ومكملة لزيادة قيمة السلة ومتوسط الطلب.", logo: ShoppingBagIcon, iconBg: "#14B8A6", category: "التسويق", provider: "CodForm", defaultInstalled: false },
