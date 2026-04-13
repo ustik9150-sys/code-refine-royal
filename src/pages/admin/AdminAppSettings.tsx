@@ -191,6 +191,9 @@ const appConfigs: Record<string, AppConfig> = {
       { key: "reviews_enabled", label: "تفعيل التقييمات", placeholder: "", type: "toggle" },
       { key: "default_rating", label: "التقييم الافتراضي", placeholder: "4.8", type: "text" },
       { key: "default_count", label: "عدد التقييمات الافتراضي", placeholder: "150", type: "text" },
+      { key: "social_proof_purchases", label: "🔥 عرض عدد المشتريات اليوم", placeholder: "", type: "toggle" },
+      { key: "social_proof_viewers", label: "👁️ عرض عدد المشاهدين الآن", placeholder: "", type: "toggle" },
+      { key: "social_proof_limited", label: "⏳ عرض الكمية محدودة", placeholder: "", type: "toggle" },
     ],
   },
   "urgency-timer": {
