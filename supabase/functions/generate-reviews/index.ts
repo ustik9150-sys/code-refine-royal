@@ -32,16 +32,21 @@ serve(async (req) => {
       .single();
     if (!roleData) throw new Error("Unauthorized - Admin only");
 
-    const { productId, productName, productCategory, count = 50 } = await req.json();
+    const { productId, productName, productCategory, count = 50, dialect } = await req.json();
     if (!productId || !productName) throw new Error("productId and productName required");
 
     if (!lovableKey) throw new Error("LOVABLE_API_KEY not configured");
+
+    const dialectInstruction = dialect
+      ? `- جميع المراجعات يجب أن تكون بلهجة ${dialect === "khaliji" ? "خليجية" : dialect === "egyptian" ? "مصرية" : dialect === "moroccan" ? "مغربية" : "شامية"} فقط
+- اجعل كل المراجعات تحمل "dialect": "${dialect}"`
+      : `- استخدم لهجات متنوعة: خليجي، مصري، مغربي، شامي`;
 
     const prompt = `أنت مولد مراجعات منتجات عربية. أنشئ ${count} مراجعة واقعية لمنتج "${productName}" (فئة: ${productCategory || "عام"}).
 
 القواعد:
 - المراجعات يجب أن تبدو بشرية 100%
-- استخدم لهجات متنوعة: خليجي، مصري، مغربي، شامي
+${dialectInstruction}
 - اجعل بعض المراجعات قصيرة (جملة واحدة) وبعضها طويلة (2-3 جمل)
 - أضف أخطاء إملائية بسيطة أحياناً لتبدو واقعية
 - 70% تقييم 5 نجوم، 25% تقييم 4 نجوم، 5% تقييم 3 نجوم
@@ -54,7 +59,7 @@ serve(async (req) => {
   "reviewer_gender": "male" أو "female",
   "rating": 3-5,
   "comment": "التعليق",
-  "dialect": "khaliji" أو "egyptian" أو "moroccan" أو "shami",
+  "dialect": "${dialect || "khaliji أو egyptian أو moroccan أو shami"}",
   "badge_type": "verified_purchase" أو "trusted_customer"
 }`;
 

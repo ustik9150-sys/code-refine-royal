@@ -53,6 +53,7 @@ function ReviewAvatar({ name, gender }: { name: string; gender: string }) {
 export default function AdminReviews() {
   const queryClient = useQueryClient();
   const [selectedProduct, setSelectedProduct] = useState<string>("");
+  const [generateDialect, setGenerateDialect] = useState<string>("mixed");
   const [generateCount, setGenerateCount] = useState("50");
   const [editReview, setEditReview] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -170,6 +171,7 @@ export default function AdminReviews() {
           productName: product.name_ar,
           productCategory: product.category,
           count: parseInt(generateCount),
+          dialect: generateDialect !== "mixed" ? generateDialect : undefined,
         },
       });
       if (error) throw error;
@@ -357,13 +359,26 @@ export default function AdminReviews() {
             <div className="flex flex-wrap gap-2">
               <div className="flex items-center gap-1.5 flex-1 min-w-[200px]">
                 <Select value={generateCount} onValueChange={setGenerateCount}>
-                  <SelectTrigger className="w-[100px] h-9 rounded-lg text-xs">
+                  <SelectTrigger className="w-[90px] h-9 rounded-lg text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="20">20 تقييم</SelectItem>
                     <SelectItem value="50">50 تقييم</SelectItem>
                     <SelectItem value="100">100 تقييم</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={generateDialect} onValueChange={setGenerateDialect}>
+                  <SelectTrigger className="w-[110px] h-9 rounded-lg text-xs">
+                    <Globe className="w-3 h-3 ml-1" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mixed">لهجات متنوعة</SelectItem>
+                    <SelectItem value="khaliji">خليجي فقط</SelectItem>
+                    <SelectItem value="egyptian">مصري فقط</SelectItem>
+                    <SelectItem value="moroccan">مغربي فقط</SelectItem>
+                    <SelectItem value="shami">شامي فقط</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
