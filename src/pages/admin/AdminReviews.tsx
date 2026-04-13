@@ -1,14 +1,52 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Trash2, Sparkles, Plus, Loader2 } from "lucide-react";
+import { Star, Trash2, Sparkles, Plus, Loader2, MessageSquare, Pencil, Search, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+
+const badgeLabels: Record<string, string> = {
+  verified_purchase: "✔ تم الشراء",
+  trusted_customer: "✔ عميل موثوق",
+};
+
+const dialectLabels: Record<string, string> = {
+  khaliji: "خليجي",
+  egyptian: "مصري",
+  moroccan: "مغربي",
+  levantine: "شامي",
+};
+
+function ReviewStars({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" }) {
+  const w = size === "sm" ? "w-3.5 h-3.5" : "w-4 h-4";
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star key={i} className={`${w} ${i <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+      ))}
+    </div>
+  );
+}
+
+function ReviewAvatar({ name, gender }: { name: string; gender: string }) {
+  const colors = gender === "female"
+    ? ["bg-pink-100 text-pink-600", "bg-rose-100 text-rose-600", "bg-fuchsia-100 text-fuchsia-600"]
+    : ["bg-blue-100 text-blue-600", "bg-indigo-100 text-indigo-600", "bg-cyan-100 text-cyan-600"];
+  const color = colors[name.length % colors.length];
+  const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2);
+  return (
+    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold ${color} flex-shrink-0`}>
+      {initials}
+    </div>
+  );
+}
 
 export default function AdminReviews() {
   const queryClient = useQueryClient();
@@ -17,6 +55,8 @@ export default function AdminReviews() {
   const [editReview, setEditReview] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [newReview, setNewReview] = useState({
     reviewer_name: "",
     reviewer_gender: "male",
@@ -46,6 +86,32 @@ export default function AdminReviews() {
     },
     enabled: !!selectedProduct,
   });
+
+  const filteredReviews = useMemo(() => {
+    let result = reviews;
+    if (searchQuery) {
+      result = result.filter((r: any) =>
+        r.reviewer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.comment.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    if (ratingFilter !== "all") {
+      result = result.filter((r: any) => r.rating === Number(ratingFilter));
+    }
+    return result;
+  }, [reviews, searchQuery, ratingFilter]);
+
+  // Stats
+  const stats = useMemo(() => {
+    if (!reviews.length) return null;
+    const avg = (reviews.reduce((s: number, r: any) => s + r.rating, 0) / reviews.length).toFixed(1);
+    const dist = [5, 4, 3, 2, 1].map(star => ({
+      star,
+      count: reviews.filter((r: any) => r.rating === star).length,
+      pct: Math.round((reviews.filter((r: any) => r.rating === star).length / reviews.length) * 100),
+    }));
+    return { avg, total: reviews.length, dist };
+  }, [reviews]);
 
   const generateMutation = useMutation({
     mutationFn: async () => {
@@ -135,147 +201,347 @@ export default function AdminReviews() {
   const selectedProductName = products.find((p) => p.id === selectedProduct)?.name_ar;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">التقييمات والمراجعات</h1>
-        <p className="text-sm text-muted-foreground mt-1">توليد وإدارة تقييمات المنتجات</p>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+              <Star className="w-4 h-4 text-amber-500" />
+            </div>
+            التقييمات والمراجعات
+          </h1>
+          <p className="text-xs text-muted-foreground mt-1">توليد وإدارة تقييمات المنتجات بالذكاء الاصطناعي</p>
+        </div>
       </div>
 
-      {/* Product Selector */}
-      <div className="bg-card border border-border rounded-xl p-4 space-y-4">
-        <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-          <SelectTrigger>
-            <SelectValue placeholder="اختر المنتج" />
-          </SelectTrigger>
-          <SelectContent>
-            {products.map((p) => (
-              <SelectItem key={p.id} value={p.id}>{p.name_ar}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Product Selector Card */}
+      <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm overflow-hidden">
+        <div className="p-4 border-b border-border/40 bg-muted/30">
+          <label className="text-xs font-medium text-muted-foreground mb-2 block">اختر المنتج</label>
+          <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+            <SelectTrigger className="h-11 rounded-xl bg-background">
+              <SelectValue placeholder="اختر المنتج لإدارة تقييماته" />
+            </SelectTrigger>
+            <SelectContent>
+              {products.map((p) => (
+                <SelectItem key={p.id} value={p.id}>{p.name_ar}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {selectedProduct && (
-          <div className="flex flex-wrap gap-2">
-            <Select value={generateCount} onValueChange={setGenerateCount}>
-              <SelectTrigger className="w-28">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="20">20 تقييم</SelectItem>
-                <SelectItem value="50">50 تقييم</SelectItem>
-                <SelectItem value="100">100 تقييم</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              onClick={() => generateMutation.mutate()}
-              disabled={generateMutation.isPending}
-              className="gap-2"
-            >
-              {generateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              توليد تقييمات بالذكاء الاصطناعي
-            </Button>
-            <Dialog open={addOpen} onOpenChange={setAddOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <Plus className="w-4 h-4" /> إضافة يدوي
+          <div className="p-4 space-y-3">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-1.5 flex-1 min-w-[200px]">
+                <Select value={generateCount} onValueChange={setGenerateCount}>
+                  <SelectTrigger className="w-[100px] h-9 rounded-lg text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="20">20 تقييم</SelectItem>
+                    <SelectItem value="50">50 تقييم</SelectItem>
+                    <SelectItem value="100">100 تقييم</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={() => generateMutation.mutate()}
+                  disabled={generateMutation.isPending}
+                  size="sm"
+                  className="gap-1.5 h-9 rounded-lg bg-gradient-to-l from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0 shadow-sm flex-1"
+                >
+                  {generateMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  <span className="text-xs">توليد بالذكاء الاصطناعي</span>
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader><DialogTitle>إضافة تقييم يدوي</DialogTitle></DialogHeader>
-                <div className="space-y-3">
-                  <Input
-                    placeholder="اسم المراجع"
-                    value={newReview.reviewer_name}
-                    onChange={(e) => setNewReview({ ...newReview, reviewer_name: e.target.value })}
-                  />
-                  <div className="flex gap-2">
-                    <Select value={String(newReview.rating)} onValueChange={(v) => setNewReview({ ...newReview, rating: Number(v) })}>
-                      <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {[5, 4, 3, 2, 1].map((r) => <SelectItem key={r} value={String(r)}>{r} ⭐</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    <Select value={newReview.reviewer_gender} onValueChange={(v) => setNewReview({ ...newReview, reviewer_gender: v })}>
-                      <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="male">ذكر</SelectItem>
-                        <SelectItem value="female">أنثى</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Textarea
-                    placeholder="التعليق"
-                    value={newReview.comment}
-                    onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                  />
-                  <Button onClick={() => addMutation.mutate()} disabled={addMutation.isPending || !newReview.reviewer_name || !newReview.comment} className="w-full">
-                    إضافة
+              </div>
+              <Dialog open={addOpen} onOpenChange={setAddOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1.5 h-9 rounded-lg text-xs">
+                    <Plus className="w-3.5 h-3.5" /> إضافة يدوي
                   </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-            {reviews.length > 0 && (
-              <Button variant="destructive" size="sm" onClick={() => deleteAllMutation.mutate()} disabled={deleteAllMutation.isPending}>
-                حذف الكل ({reviews.length})
-              </Button>
-            )}
+                </DialogTrigger>
+                <DialogContent className="rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-right">إضافة تقييم يدوي</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-muted-foreground">اسم المراجع</label>
+                      <Input
+                        placeholder="مثال: أحمد محمد"
+                        value={newReview.reviewer_name}
+                        onChange={(e) => setNewReview({ ...newReview, reviewer_name: e.target.value })}
+                        className="h-10 rounded-xl"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-muted-foreground">التقييم</label>
+                        <Select value={String(newReview.rating)} onValueChange={(v) => setNewReview({ ...newReview, rating: Number(v) })}>
+                          <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {[5, 4, 3, 2, 1].map((r) => (
+                              <SelectItem key={r} value={String(r)}>
+                                <span className="flex items-center gap-1">{r} <Star className="w-3 h-3 fill-amber-400 text-amber-400" /></span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-muted-foreground">الجنس</label>
+                        <Select value={newReview.reviewer_gender} onValueChange={(v) => setNewReview({ ...newReview, reviewer_gender: v })}>
+                          <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="male">ذكر</SelectItem>
+                            <SelectItem value="female">أنثى</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-muted-foreground">التعليق</label>
+                      <Textarea
+                        placeholder="اكتب تعليق المراجعة..."
+                        value={newReview.comment}
+                        onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                        className="rounded-xl min-h-[80px]"
+                      />
+                    </div>
+                    <Button
+                      onClick={() => addMutation.mutate()}
+                      disabled={addMutation.isPending || !newReview.reviewer_name || !newReview.comment}
+                      className="w-full h-10 rounded-xl"
+                    >
+                      {addMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "إضافة التقييم"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              {reviews.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => deleteAllMutation.mutate()}
+                  disabled={deleteAllMutation.isPending}
+                  className="gap-1.5 h-9 rounded-lg text-xs text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  حذف الكل
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>
 
+      {/* Stats Card */}
+      {stats && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-4"
+        >
+          <div className="flex items-start gap-4">
+            {/* Average */}
+            <div className="text-center flex-shrink-0">
+              <div className="text-3xl font-bold text-foreground">{stats.avg}</div>
+              <ReviewStars rating={Math.round(Number(stats.avg))} size="md" />
+              <div className="text-[11px] text-muted-foreground mt-1">{stats.total} تقييم</div>
+            </div>
+            {/* Distribution */}
+            <div className="flex-1 space-y-1.5">
+              {stats.dist.map(({ star, count, pct }) => (
+                <div key={star} className="flex items-center gap-2 text-xs">
+                  <span className="w-3 text-muted-foreground font-medium">{star}</span>
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                  <div className="flex-1 h-2 bg-muted/50 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 0.5, delay: (5 - star) * 0.08 }}
+                      className="h-full bg-amber-400 rounded-full"
+                    />
+                  </div>
+                  <span className="w-8 text-left text-muted-foreground tabular-nums">{pct}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Reviews List */}
       {selectedProduct && (
-        <div className="space-y-2">
-          <div className="text-sm text-muted-foreground">{reviews.length} تقييم لـ {selectedProductName}</div>
-          {isLoading ? (
-            <div className="text-center py-10 text-muted-foreground">جاري التحميل...</div>
-          ) : reviews.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground border border-dashed border-border rounded-xl">
-              لا توجد تقييمات بعد. استخدم زر "توليد تقييمات" لإنشاء تقييمات تلقائياً.
-            </div>
-          ) : (
-            reviews.map((r: any) => (
-              <div key={r.id} className="bg-card border border-border rounded-lg p-3 flex items-start gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="font-bold">{r.reviewer_name}</span>
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <Star key={i} className={`w-3 h-3 ${i <= r.rating ? "fill-amber-400 text-amber-400" : "text-muted"}`} />
-                      ))}
-                    </div>
-                    {r.is_highlighted && <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 rounded">{r.highlight_label}</span>}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{r.comment}</p>
-                </div>
-                <div className="flex gap-1 flex-shrink-0">
-                  <Button size="sm" variant="ghost" onClick={() => setEditReview({ ...r })}>تعديل</Button>
-                  <Button size="sm" variant="ghost" onClick={() => setDeleteId(r.id)}>
-                    <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                  </Button>
-                </div>
+        <div className="space-y-3">
+          {/* Search & Filter */}
+          {reviews.length > 0 && (
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="ابحث في التقييمات..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-9 rounded-lg pr-9 text-xs"
+                />
               </div>
-            ))
+              <Select value={ratingFilter} onValueChange={setRatingFilter}>
+                <SelectTrigger className="w-[100px] h-9 rounded-lg text-xs">
+                  <Filter className="w-3 h-3 ml-1" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">الكل</SelectItem>
+                  {[5, 4, 3, 2, 1].map(r => (
+                    <SelectItem key={r} value={String(r)}>{r} نجوم</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           )}
+
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{filteredReviews.length} تقييم {searchQuery || ratingFilter !== "all" ? `(من ${reviews.length})` : ""}</span>
+            <span className="text-[11px]">{selectedProductName}</span>
+          </div>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : reviews.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-16 border border-dashed border-border/60 rounded-2xl bg-muted/20"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-3">
+                <MessageSquare className="w-6 h-6 text-amber-500" />
+              </div>
+              <p className="text-sm font-medium text-foreground">لا توجد تقييمات بعد</p>
+              <p className="text-xs text-muted-foreground mt-1">استخدم زر "توليد بالذكاء الاصطناعي" لإنشاء تقييمات تلقائياً</p>
+            </motion.div>
+          ) : (
+            <div className="space-y-2">
+              <AnimatePresence mode="popLayout">
+                {filteredReviews.map((r: any, idx: number) => (
+                  <motion.div
+                    key={r.id}
+                    layout
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2, delay: idx < 10 ? idx * 0.03 : 0 }}
+                    className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-3 hover:border-border transition-colors group"
+                  >
+                    <div className="flex items-start gap-3">
+                      <ReviewAvatar name={r.reviewer_name} gender={r.reviewer_gender} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-semibold text-foreground">{r.reviewer_name}</span>
+                          <ReviewStars rating={r.rating} />
+                          {r.badge_type && badgeLabels[r.badge_type] && (
+                            <Badge variant="secondary" className="text-[10px] h-5 px-1.5 font-normal bg-emerald-50 text-emerald-700 border-emerald-200/50">
+                              {badgeLabels[r.badge_type]}
+                            </Badge>
+                          )}
+                          {r.dialect && dialectLabels[r.dialect] && (
+                            <span className="text-[10px] text-muted-foreground/60">{dialectLabels[r.dialect]}</span>
+                          )}
+                          {r.is_highlighted && (
+                            <Badge variant="secondary" className="text-[10px] h-5 px-1.5 font-normal bg-amber-50 text-amber-700 border-amber-200/50">
+                              {r.highlight_label || "مميز"}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed line-clamp-3">{r.comment}</p>
+                        <div className="text-[10px] text-muted-foreground/50 mt-1.5">
+                          {new Date(r.review_date).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" })}
+                        </div>
+                      </div>
+                      <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 rounded-lg"
+                          onClick={() => setEditReview({ ...r })}
+                        >
+                          <Pencil className="w-3 h-3 text-muted-foreground" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 rounded-lg"
+                          onClick={() => setDeleteId(r.id)}
+                        >
+                          <Trash2 className="w-3 h-3 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Empty state when no product selected */}
+      {!selectedProduct && (
+        <div className="text-center py-20">
+          <div className="w-14 h-14 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-4">
+            <Star className="w-7 h-7 text-muted-foreground/40" />
+          </div>
+          <p className="text-sm text-muted-foreground">اختر منتجًا للبدء في إدارة تقييماته</p>
         </div>
       )}
 
       {/* Edit Dialog */}
       <Dialog open={!!editReview} onOpenChange={(o) => !o && setEditReview(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>تعديل التقييم</DialogTitle></DialogHeader>
+        <DialogContent className="rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-right">تعديل التقييم</DialogTitle>
+          </DialogHeader>
           {editReview && (
-            <div className="space-y-3">
-              <Input value={editReview.reviewer_name} onChange={(e) => setEditReview({ ...editReview, reviewer_name: e.target.value })} />
-              <Select value={String(editReview.rating)} onValueChange={(v) => setEditReview({ ...editReview, rating: Number(v) })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {[5, 4, 3, 2, 1].map((r) => <SelectItem key={r} value={String(r)}>{r} ⭐</SelectItem>)}
-                </SelectContent>
-              </Select>
-              <Textarea value={editReview.comment} onChange={(e) => setEditReview({ ...editReview, comment: e.target.value })} />
-              <Button onClick={() => updateMutation.mutate(editReview)} disabled={updateMutation.isPending} className="w-full">
-                حفظ التعديلات
+            <div className="space-y-4 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">اسم المراجع</label>
+                <Input
+                  value={editReview.reviewer_name}
+                  onChange={(e) => setEditReview({ ...editReview, reviewer_name: e.target.value })}
+                  className="h-10 rounded-xl"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">التقييم</label>
+                <Select value={String(editReview.rating)} onValueChange={(v) => setEditReview({ ...editReview, rating: Number(v) })}>
+                  <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {[5, 4, 3, 2, 1].map((r) => (
+                      <SelectItem key={r} value={String(r)}>
+                        <span className="flex items-center gap-1">{r} <Star className="w-3 h-3 fill-amber-400 text-amber-400" /></span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">التعليق</label>
+                <Textarea
+                  value={editReview.comment}
+                  onChange={(e) => setEditReview({ ...editReview, comment: e.target.value })}
+                  className="rounded-xl min-h-[80px]"
+                />
+              </div>
+              <Button
+                onClick={() => updateMutation.mutate(editReview)}
+                disabled={updateMutation.isPending}
+                className="w-full h-10 rounded-xl"
+              >
+                {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "حفظ التعديلات"}
               </Button>
             </div>
           )}
