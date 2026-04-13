@@ -251,7 +251,7 @@ const GiftSelection = () => {
         <Button
           onClick={() => handleSubmit()}
           disabled={!selectedSku || submitting}
-          className="w-full rounded-2xl h-13 text-base gap-2 font-bold bg-gradient-to-l from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 shadow-lg shadow-pink-300/30"
+          className="w-full rounded-2xl h-13 text-base gap-2 font-bold bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg shadow-foreground/10"
           size="lg"
         >
           {submitting ? (
