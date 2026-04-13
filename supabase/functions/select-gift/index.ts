@@ -1,10 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const VALID_SKUS: Record<string, string> = {
-  BIOAQUA99: "كريم الخوخ لتبيض و تنعيم البشرة",
-  TTEHRSOIN: "زيت اديفاسي لتطويل الشعر",
-};
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -25,7 +20,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (!sku || !VALID_SKUS[sku]) {
+    if (!sku || typeof sku !== "string") {
       return new Response(
         JSON.stringify({ success: false, error: "Invalid gift SKU" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -36,6 +31,21 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Validate SKU against gifts table
+    const { data: gift, error: giftErr } = await supabase
+      .from("gifts")
+      .select("id, name, sku, is_active")
+      .eq("sku", sku)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (giftErr || !gift) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid or inactive gift SKU" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Check order exists and no gift already selected
     const { data: order, error: fetchErr } = await supabase
@@ -58,14 +68,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    const giftName = VALID_SKUS[sku];
-
     // Save gift on order
     const { error: updateErr } = await supabase
       .from("orders")
       .update({
         gift_sku: sku,
-        gift_name: giftName,
+        gift_name: gift.name,
         gift_selected_at: new Date().toISOString(),
       })
       .eq("id", order_id);
@@ -77,7 +85,7 @@ Deno.serve(async (req) => {
       .from("order_items")
       .insert({
         order_id,
-        product_name: `🎁 ${giftName} (${sku})`,
+        product_name: `🎁 ${gift.name} (${sku})`,
         quantity: 1,
         unit_price: 0,
         total_price: 0,
@@ -85,7 +93,6 @@ Deno.serve(async (req) => {
 
     if (itemErr) {
       console.error("Failed to insert gift order item:", itemErr);
-      // Don't fail the whole request - gift is already saved on the order
     }
 
     return new Response(
