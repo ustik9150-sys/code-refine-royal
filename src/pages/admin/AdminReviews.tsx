@@ -171,6 +171,7 @@ export default function AdminReviews() {
           productName: product.name_ar,
           productCategory: product.category,
           count: parseInt(generateCount),
+          dialect: generateDialect !== "mixed" ? generateDialect : undefined,
         },
       });
       if (error) throw error;
