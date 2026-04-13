@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Trash2, Sparkles, Plus, Loader2, MessageSquare, Pencil, Search, Filter, Flame, Eye, Clock } from "lucide-react";
+import { Star, Trash2, Sparkles, Plus, Loader2, MessageSquare, Pencil, Search, Filter, Flame, Eye, Clock, Package, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
