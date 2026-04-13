@@ -87,7 +87,7 @@ const CodOrderForm = ({ productName, productId, unitPrice, compareAtPrice, produ
       }
 
       if (hasGift && orderId) {
-        navigate(`/gift?order_id=${encodeURIComponent(orderId)}`);
+        navigate(`/gift?order_id=${encodeURIComponent(orderId)}&product_id=${encodeURIComponent(productId || "")}`);
         return;
       }
 
