@@ -59,6 +59,7 @@ export default function AdminReviews() {
   const [addOpen, setAddOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
+  const [dialectFilter, setDialectFilter] = useState<string>("all");
   const [socialProof, setSocialProof] = useState({
     social_proof_purchases: true,
     social_proof_viewers: true,
