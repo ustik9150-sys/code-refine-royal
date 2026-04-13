@@ -37,7 +37,7 @@ type Product = {
   currency_code?: string | null;
 };
 
-const ProductDetails = ({ productSlug }: { productSlug?: string }) => {
+const ProductDetails = ({ productSlug, onProductLoaded }: { productSlug?: string; onProductLoaded?: (productId: string) => void }) => {
   const { currency } = useCurrency();
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -68,6 +68,7 @@ const ProductDetails = ({ productSlug }: { productSlug?: string }) => {
 
       if (data) {
         setProduct(data as Product);
+        onProductLoaded?.(data.id);
         const { data: imgs } = await supabase
           .from("product_images")
           .select("url")

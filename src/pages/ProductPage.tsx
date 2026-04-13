@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import StoreHeader from "@/components/StoreHeader";
 import ProductDetails from "@/components/ProductDetails";
 import StoreFooter from "@/components/StoreFooter";
-import TestimonialsSection from "@/components/TestimonialsSection";
+import ProductReviews from "@/components/ProductReviews";
+import SocialProofBar from "@/components/SocialProofBar";
 import TrackingPixels from "@/components/TrackingPixels";
 import { useTrackVisit } from "@/hooks/useTrackVisit";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [productId, setProductId] = useState<string>();
   useTrackVisit(`/product/${slug}`);
 
   return (
@@ -30,9 +33,10 @@ const ProductPage = () => {
       <StoreHeader />
       <main className="flex-1">
         <div className="container">
-          <ProductDetails productSlug={slug} />
+          <ProductDetails productSlug={slug} onProductLoaded={setProductId} />
+          <SocialProofBar />
         </div>
-        <TestimonialsSection />
+        <ProductReviews productId={productId} />
       </main>
       <StoreFooter />
     </div>
