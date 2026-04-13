@@ -91,10 +91,16 @@ serve(async (req) => {
 
     let reviews: any[];
     try {
-      const parsed = JSON.parse(content);
+      // Strip markdown code blocks if present
+      let cleanContent = content.trim();
+      if (cleanContent.startsWith("```")) {
+        cleanContent = cleanContent.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+      }
+      const parsed = JSON.parse(cleanContent);
       reviews = Array.isArray(parsed) ? parsed : parsed.reviews || parsed.data || Object.values(parsed)[0];
       if (!Array.isArray(reviews)) throw new Error("Not an array");
-    } catch {
+    } catch (parseErr) {
+      console.error("Parse error:", parseErr, "Content:", content?.substring(0, 200));
       throw new Error("Failed to parse AI response");
     }
 
