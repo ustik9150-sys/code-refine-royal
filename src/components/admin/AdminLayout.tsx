@@ -41,7 +41,7 @@ const navItems = [
   { to: "/admin/whatsapp", icon: MessageCircle, label: "واتساب" },
   { to: "/admin/import-orders", icon: Download, label: "استيراد الطلبات" },
   { to: "/admin/app-store", icon: Store, label: "التطبيقات" },
-  { to: "/admin/reviews", icon: Star, label: "التقييمات" },
+  
   { to: "/admin/pages", icon: FileText, label: "الصفحات" },
   { to: "/admin/settings", icon: Settings, label: "الإعدادات" },
 ];
