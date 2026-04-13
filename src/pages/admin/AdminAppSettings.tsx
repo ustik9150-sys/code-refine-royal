@@ -8,6 +8,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import AdminReviews from "./AdminReviews";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 // ─── App config schema per app ──────────────────────────────────────
 interface FieldDef {
@@ -268,6 +275,22 @@ export default function AdminAppSettings() {
   const updateField = (key: string, val: any) => {
     setValues((prev) => ({ ...prev, [key]: val }));
   };
+
+  // If this is the reviews app, render the full reviews management UI
+  if (appId === "reviews") {
+    return (
+      <div className="space-y-6">
+        <button
+          onClick={() => navigate("/admin/app-store")}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowRight className="w-4 h-4" />
+          العودة لمتجر التطبيقات
+        </button>
+        <AdminReviews />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl space-y-6">
