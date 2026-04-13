@@ -252,7 +252,7 @@ const InlineOrderForm = ({ productName, productId, productSku, unitPrice, quanti
       }
 
       if (hasGift) {
-        navigate(`/gift?order_id=${encodeURIComponent(orderId)}`);
+        navigate(`/gift?order_id=${encodeURIComponent(orderId)}&product_id=${encodeURIComponent(productId || "")}`);
       } else {
         navigate(`/thank-you?order=${encodeURIComponent(orderId)}&total=${finalPrice}${snapParam}`);
       }

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AdminReviews from "./AdminReviews";
+import AdminGifts from "./AdminGifts";
 
 // ─── App config schema per app ──────────────────────────────────────
 interface FieldDef {
@@ -285,6 +286,22 @@ export default function AdminAppSettings() {
           العودة لمتجر التطبيقات
         </button>
         <AdminReviews />
+      </div>
+    );
+  }
+
+  // If this is the gift system, render the gift management UI
+  if (appId === "gift-system") {
+    return (
+      <div className="space-y-6">
+        <button
+          onClick={() => navigate("/admin/app-store")}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowRight className="w-4 h-4" />
+          العودة لمتجر التطبيقات
+        </button>
+        <AdminGifts />
       </div>
     );
   }
