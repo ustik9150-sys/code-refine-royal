@@ -498,8 +498,8 @@ export default function AdminReviews() {
         <div className="space-y-3">
           {/* Search & Filter */}
           {reviews.length > 0 && (
-            <div className="flex gap-2">
-              <div className="relative flex-1">
+            <div className="flex gap-2 flex-wrap">
+              <div className="relative flex-1 min-w-[150px]">
                 <Search className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="ابحث في التقييمات..."
@@ -514,9 +514,21 @@ export default function AdminReviews() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">الكل</SelectItem>
+                  <SelectItem value="all">كل النجوم</SelectItem>
                   {[5, 4, 3, 2, 1].map(r => (
                     <SelectItem key={r} value={String(r)}>{r} نجوم</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={dialectFilter} onValueChange={setDialectFilter}>
+                <SelectTrigger className="w-[110px] h-9 rounded-lg text-xs">
+                  <Globe className="w-3 h-3 ml-1" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">كل اللهجات</SelectItem>
+                  {Object.entries(dialectLabels).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
