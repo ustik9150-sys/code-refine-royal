@@ -581,7 +581,10 @@ export default function AdminReviews() {
                             </Badge>
                           )}
                           {r.dialect && dialectLabels[r.dialect] && (
-                            <span className="text-[10px] text-muted-foreground/60">{dialectLabels[r.dialect]}</span>
+                            <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-normal border-primary/20 text-primary/70">
+                              <Globe className="w-2.5 h-2.5 ml-0.5" />
+                              {dialectLabels[r.dialect]}
+                            </Badge>
                           )}
                           {r.is_highlighted && (
                             <Badge variant="secondary" className="text-[10px] h-5 px-1.5 font-normal bg-amber-50 text-amber-700 border-amber-200/50">
