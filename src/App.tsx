@@ -32,7 +32,7 @@ import AdminWhatsApp from "./pages/admin/AdminWhatsApp";
 import AdminImportOrders from "./pages/admin/AdminImportOrders";
 import AdminAppStore from "./pages/admin/AdminAppStore";
 import AdminAppSettings from "./pages/admin/AdminAppSettings";
-import AdminReviews from "./pages/admin/AdminReviews";
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
