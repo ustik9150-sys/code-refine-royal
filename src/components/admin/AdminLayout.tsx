@@ -27,7 +27,6 @@ import {
   MessageCircle,
   Download,
   Store,
-  Star,
 } from "lucide-react";
 import MobileBottomNav from "./MobileBottomNav";
 
