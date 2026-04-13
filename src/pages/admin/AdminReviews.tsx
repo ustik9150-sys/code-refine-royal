@@ -59,6 +59,12 @@ export default function AdminReviews() {
   const [addOpen, setAddOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
+  const [socialProof, setSocialProof] = useState({
+    social_proof_purchases: true,
+    social_proof_viewers: true,
+    social_proof_limited: true,
+  });
+  const [socialProofSaving, setSocialProofSaving] = useState(false);
   const [newReview, setNewReview] = useState({
     reviewer_name: "",
     reviewer_gender: "male",
@@ -66,6 +72,41 @@ export default function AdminReviews() {
     comment: "",
     badge_type: "verified_purchase",
   });
+
+  // Load social proof settings
+  useEffect(() => {
+    const loadSocialProof = async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "app_config_reviews")
+        .maybeSingle();
+      if (data?.value && typeof data.value === "object") {
+        const v = data.value as Record<string, any>;
+        setSocialProof({
+          social_proof_purchases: v.social_proof_purchases !== false,
+          social_proof_viewers: v.social_proof_viewers !== false,
+          social_proof_limited: v.social_proof_limited !== false,
+        });
+      }
+    };
+    loadSocialProof();
+  }, []);
+
+  const saveSocialProof = async (newState: typeof socialProof) => {
+    setSocialProofSaving(true);
+    setSocialProof(newState);
+    const { error } = await supabase.from("store_settings").upsert(
+      { key: "app_config_reviews", value: newState as any },
+      { onConflict: "key" }
+    );
+    if (error) {
+      toast.error("فشل في حفظ الإعدادات");
+    } else {
+      toast.success("تم حفظ الإعدادات");
+    }
+    setSocialProofSaving(false);
+  };
 
   const { data: products = [] } = useQuery({
     queryKey: ["admin-products-list"],
