@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Trash2, Sparkles, Plus, Loader2, MessageSquare, Pencil, Search, Filter, Flame, Eye, Clock } from "lucide-react";
+import { Star, Trash2, Sparkles, Plus, Loader2, MessageSquare, Pencil, Search, Filter, Flame, Eye, Clock, Package, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
@@ -59,6 +59,7 @@ export default function AdminReviews() {
   const [addOpen, setAddOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
+  const [dialectFilter, setDialectFilter] = useState<string>("all");
   const [socialProof, setSocialProof] = useState({
     social_proof_purchases: true,
     social_proof_viewers: true,
@@ -141,8 +142,11 @@ export default function AdminReviews() {
     if (ratingFilter !== "all") {
       result = result.filter((r: any) => r.rating === Number(ratingFilter));
     }
+    if (dialectFilter !== "all") {
+      result = result.filter((r: any) => r.dialect === dialectFilter);
+    }
     return result;
-  }, [reviews, searchQuery, ratingFilter]);
+  }, [reviews, searchQuery, ratingFilter, dialectFilter]);
 
   // Stats
   const stats = useMemo(() => {
@@ -319,14 +323,29 @@ export default function AdminReviews() {
       {/* Product Selector Card */}
       <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm overflow-hidden">
         <div className="p-4 border-b border-border/40 bg-muted/30">
-          <label className="text-xs font-medium text-muted-foreground mb-2 block">اختر المنتج</label>
+          <label className="text-xs font-medium text-muted-foreground mb-2 block flex items-center gap-1.5">
+            <Package className="w-3.5 h-3.5" />
+            اختر المنتج
+          </label>
           <Select value={selectedProduct} onValueChange={setSelectedProduct}>
             <SelectTrigger className="h-11 rounded-xl bg-background">
               <SelectValue placeholder="اختر المنتج لإدارة تقييماته" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[300px]">
               {products.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.name_ar}</SelectItem>
+                <SelectItem key={p.id} value={p.id}>
+                  <div className="flex items-center gap-2.5 py-0.5">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Package className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium leading-tight">{p.name_ar}</span>
+                      {p.category && (
+                        <span className="text-[10px] text-muted-foreground leading-tight">{p.category}</span>
+                      )}
+                    </div>
+                  </div>
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -479,8 +498,8 @@ export default function AdminReviews() {
         <div className="space-y-3">
           {/* Search & Filter */}
           {reviews.length > 0 && (
-            <div className="flex gap-2">
-              <div className="relative flex-1">
+            <div className="flex gap-2 flex-wrap">
+              <div className="relative flex-1 min-w-[150px]">
                 <Search className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="ابحث في التقييمات..."
@@ -495,9 +514,21 @@ export default function AdminReviews() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">الكل</SelectItem>
+                  <SelectItem value="all">كل النجوم</SelectItem>
                   {[5, 4, 3, 2, 1].map(r => (
                     <SelectItem key={r} value={String(r)}>{r} نجوم</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={dialectFilter} onValueChange={setDialectFilter}>
+                <SelectTrigger className="w-[110px] h-9 rounded-lg text-xs">
+                  <Globe className="w-3 h-3 ml-1" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">كل اللهجات</SelectItem>
+                  {Object.entries(dialectLabels).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -550,7 +581,10 @@ export default function AdminReviews() {
                             </Badge>
                           )}
                           {r.dialect && dialectLabels[r.dialect] && (
-                            <span className="text-[10px] text-muted-foreground/60">{dialectLabels[r.dialect]}</span>
+                            <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-normal border-primary/20 text-primary/70">
+                              <Globe className="w-2.5 h-2.5 ml-0.5" />
+                              {dialectLabels[r.dialect]}
+                            </Badge>
                           )}
                           {r.is_highlighted && (
                             <Badge variant="secondary" className="text-[10px] h-5 px-1.5 font-normal bg-amber-50 text-amber-700 border-amber-200/50">
