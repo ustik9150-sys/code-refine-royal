@@ -144,10 +144,12 @@ const appConfigs: Record<string, AppConfig> = {
   },
   "pushover": {
     name: "Pushover Notifications",
-    description: "تنبيهات فورية على هاتفك عند استلام طلبات جديدة.",
+    description: "تنبيهات فورية على هاتفك عند استلام طلبات جديدة. أنشئ حساب على Pushover واحصل على API Token و User Key.",
     iconBg: "#2196F3",
     settingsKey: "app_config_pushover",
     fields: [
+      { key: "pushover_token", label: "API Token / App Key", placeholder: "axxxxxxxxxxxxxxxxxxxxxxxxxxxxx", type: "text", helpText: "أنشئ تطبيق جديد في pushover.net/apps واحصل على API Token" },
+      { key: "pushover_user", label: "User Key", placeholder: "uxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", type: "text", helpText: "تجده في الصفحة الرئيسية لحسابك على Pushover" },
       { key: "enabled", label: "تفعيل تنبيهات Pushover", placeholder: "", type: "toggle" },
     ],
     helpUrl: "https://pushover.net/",

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,10 +12,35 @@ serve(async (req) => {
   }
 
   try {
-    const PUSHOVER_TOKEN = Deno.env.get("PUSHOVER_TOKEN");
-    const PUSHOVER_USER = Deno.env.get("PUSHOVER_USER");
+    // Try env vars first, then fall back to store_settings
+    let pushoverToken = Deno.env.get("PUSHOVER_TOKEN");
+    let pushoverUser = Deno.env.get("PUSHOVER_USER");
 
-    if (!PUSHOVER_TOKEN || !PUSHOVER_USER) {
+    if (!pushoverToken || !pushoverUser) {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "app_config_pushover")
+        .single();
+
+      if (data?.value) {
+        const config = data.value as Record<string, unknown>;
+        if (!config.enabled) {
+          return new Response(
+            JSON.stringify({ success: false, error: "Pushover disabled" }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        pushoverToken = pushoverToken || (config.pushover_token as string);
+        pushoverUser = pushoverUser || (config.pushover_user as string);
+      }
+    }
+
+    if (!pushoverToken || !pushoverUser) {
       console.error("Missing Pushover credentials");
       return new Response(
         JSON.stringify({ success: false, error: "Pushover not configured" }),
@@ -35,8 +61,8 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        token: PUSHOVER_TOKEN,
-        user: PUSHOVER_USER,
+        token: pushoverToken,
+        user: pushoverUser,
         message,
         priority: 1,
         sound: "cashregister",
