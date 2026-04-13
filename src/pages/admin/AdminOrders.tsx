@@ -585,7 +585,9 @@ export default function AdminOrders() {
         setOrders(prev => [payload.new as Order, ...prev]);
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, (payload) => {
-        setOrders(prev => prev.map(o => o.id === (payload.new as Order).id ? { ...o, ...payload.new as Order } : o));
+        const updated = payload.new as Order;
+        setOrders(prev => prev.map(o => o.id === updated.id ? { ...o, ...updated } : o));
+        setSelectedOrder(prev => prev?.id === updated.id ? { ...prev, ...updated } : prev);
       })
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "orders" }, (payload) => {
         setOrders(prev => prev.filter(o => o.id !== (payload.old as any).id));
