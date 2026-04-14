@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-const API_URL = "https://foubanzluqitdntcnzbi.supabase.co/functions/v1/get-product-description";
+const DEFAULT_API_URL = "https://foubanzluqitdntcnzbi.supabase.co/functions/v1/get-product-description";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
 const VALID_COUNTRIES = ["السعودية", "الإمارات", "قطر"];
@@ -46,9 +47,37 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
   const [error, setError] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [countrySelected, setCountrySelected] = useState(false);
+  const [cloakingEnabled, setCloakingEnabled] = useState<boolean | null>(null);
+  const [apiUrl, setApiUrl] = useState(DEFAULT_API_URL);
+
+  // Load cloaking settings from store_settings
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const { data } = await supabase
+          .from("store_settings")
+          .select("value")
+          .eq("key", "app_config_cloaking")
+          .maybeSingle();
+
+        if (data?.value && typeof data.value === "object") {
+          const settings = data.value as Record<string, any>;
+          const enabled = settings.cloaking_enabled === true;
+          setCloakingEnabled(enabled);
+          if (settings.api_url) {
+            setApiUrl(settings.api_url);
+          }
+        } else {
+          setCloakingEnabled(false);
+        }
+      } catch {
+        setCloakingEnabled(false);
+      }
+    };
+    loadSettings();
+  }, []);
 
   const fetchDescription = useCallback(async (country: string) => {
-    // Check cache
     const cached = getCached(productHandle, country);
     if (cached) {
       setDescriptionHtml(cached);
@@ -58,7 +87,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetch(API_URL, {
+      const res = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ product_handle: productHandle, country }),
@@ -85,10 +114,16 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
     } finally {
       setLoading(false);
     }
-  }, [productHandle]);
+  }, [productHandle, apiUrl]);
 
-  // On mount: check localStorage for saved country
+  // On mount: check localStorage for saved country (only if cloaking is enabled)
   useEffect(() => {
+    if (cloakingEnabled === null) return; // still loading settings
+    if (!cloakingEnabled) {
+      setInitialized(true);
+      return;
+    }
+
     const saved = localStorage.getItem("selected_country");
     if (saved && VALID_COUNTRIES.includes(saved)) {
       setCountrySelected(true);
@@ -98,7 +133,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
       setShowPopup(true);
     }
     setInitialized(true);
-  }, [fetchDescription]);
+  }, [cloakingEnabled, fetchDescription]);
 
   const handleCountrySelect = useCallback((countryName: string) => {
     localStorage.setItem("selected_country", countryName);
@@ -115,6 +150,11 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
       setShowPopup(true);
     }
   }, [fetchDescription]);
+
+  // If cloaking is disabled, show default description
+  if (cloakingEnabled === false) {
+    return <>{defaultDescription || null}</>;
+  }
 
   if (!initialized) return null;
 
@@ -141,7 +181,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
         </div>
       )}
 
-      {/* Description Area — hidden until country is selected */}
+      {/* Description Area */}
       <div id="protected-description">
         {!countrySelected ? (
           null
