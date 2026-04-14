@@ -91,9 +91,14 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
     setLoading(true);
     setError(false);
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (anonKey) {
+        headers["apikey"] = anonKey;
+        headers["Authorization"] = `Bearer ${anonKey}`;
+      }
       const res = await fetch(apiUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ product_handle: productHandle, country }),
       });
 
