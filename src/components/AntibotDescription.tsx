@@ -49,6 +49,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
   const [countrySelected, setCountrySelected] = useState(false);
   const [cloakingEnabled, setCloakingEnabled] = useState<boolean | null>(null);
   const [apiUrl, setApiUrl] = useState(DEFAULT_API_URL);
+  const [anonKey, setAnonKey] = useState<string | null>(null);
 
   // Load cloaking settings from store_settings
   useEffect(() => {
@@ -66,6 +67,9 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
           setCloakingEnabled(enabled);
           if (settings.api_url) {
             setApiUrl(settings.api_url);
+          }
+          if (settings.supabase_anon_key) {
+            setAnonKey(settings.supabase_anon_key);
           }
         } else {
           setCloakingEnabled(false);
@@ -87,9 +91,14 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
     setLoading(true);
     setError(false);
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (anonKey) {
+        headers["apikey"] = anonKey;
+        headers["Authorization"] = `Bearer ${anonKey}`;
+      }
       const res = await fetch(apiUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ product_handle: productHandle, country }),
       });
 
@@ -114,7 +123,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
     } finally {
       setLoading(false);
     }
-  }, [productHandle, apiUrl]);
+  }, [productHandle, apiUrl, anonKey]);
 
   // On mount: check localStorage for saved country (only if cloaking is enabled)
   useEffect(() => {
