@@ -68,6 +68,9 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
           if (settings.api_url) {
             setApiUrl(settings.api_url);
           }
+          if (settings.supabase_anon_key) {
+            setAnonKey(settings.supabase_anon_key);
+          }
         } else {
           setCloakingEnabled(false);
         }
