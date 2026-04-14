@@ -133,6 +133,13 @@ const TimerIcon = () => (
   </svg>
 );
 
+const CloakingIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    <path d="M9 12l2 2 4-4"/>
+  </svg>
+);
+
 const StarIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff">
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -200,6 +207,9 @@ const appDefs: AppDef[] = [
   { id: "reviews", name: "التقييمات والمراجعات", description: "عرض تقييمات ومراجعات العملاء على صفحة المنتج لزيادة الثقة.", logo: StarIcon, iconBg: "#F59E0B", category: "التسويق", provider: "CodForm", defaultInstalled: true, route: "/admin/app-store/reviews" },
   { id: "upsell", name: "Upsell & Cross-sell", description: "عرض منتجات إضافية ومكملة لزيادة قيمة السلة ومتوسط الطلب.", logo: ShoppingBagIcon, iconBg: "#14B8A6", category: "التسويق", provider: "CodForm", defaultInstalled: false },
   { id: "abandoned-cart", name: "استرجاع السلات المتروكة", description: "إرسال رسائل تذكيرية للعملاء الذين لم يكملوا الشراء لاسترجاعهم.", logo: MegaphoneIcon, iconBg: "#F97316", category: "التسويق", provider: "CodForm", defaultInstalled: false, badge: "قريباً" },
+
+  // الحماية والأمان
+  { id: "cloaking", name: "Cloaking Protection", description: "حماية صفحات المنتجات من البوتات عبر نظام اختيار الدولة وجلب الوصف من سيرفر خارجي.", logo: CloakingIcon, iconBg: "#7C3AED", category: "الحماية والأمان", provider: "External Supabase", defaultInstalled: false, route: "/admin/app-store/cloaking" },
 ];
 
 const categories = [...new Set(appDefs.map((a) => a.category))];
