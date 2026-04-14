@@ -341,9 +341,13 @@ export default function AdminReviews() {
               {products.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
                   <div className="flex items-center gap-2.5 py-0.5">
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Package className="w-3.5 h-3.5 text-primary" />
-                    </div>
+                    {p.image_url ? (
+                      <img src={p.image_url} alt={p.name_ar} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Package className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                    )}
                     <div className="flex flex-col items-start">
                       <span className="text-sm font-medium leading-tight">{p.name_ar}</span>
                       {p.category && (
