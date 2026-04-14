@@ -113,8 +113,12 @@ export default function AdminReviews() {
   const { data: products = [] } = useQuery({
     queryKey: ["admin-products-list"],
     queryFn: async () => {
-      const { data } = await supabase.from("products").select("id, name_ar, category").order("name_ar");
-      return data || [];
+      const { data } = await supabase.from("products").select("id, name_ar, category, product_images(url, is_main)").order("name_ar");
+      return (data || []).map((p: any) => {
+        const mainImg = p.product_images?.find((img: any) => img.is_main);
+        const firstImg = p.product_images?.[0];
+        return { ...p, image_url: mainImg?.url || firstImg?.url || null };
+      });
     },
   });
 
