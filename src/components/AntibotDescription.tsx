@@ -123,7 +123,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
     } finally {
       setLoading(false);
     }
-  }, [productHandle, apiUrl]);
+  }, [productHandle, apiUrl, anonKey]);
 
   // On mount: check localStorage for saved country (only if cloaking is enabled)
   useEffect(() => {
