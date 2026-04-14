@@ -49,6 +49,7 @@ const AntibotDescription = ({ productHandle, defaultDescription }: Props) => {
   const [countrySelected, setCountrySelected] = useState(false);
   const [cloakingEnabled, setCloakingEnabled] = useState<boolean | null>(null);
   const [apiUrl, setApiUrl] = useState(DEFAULT_API_URL);
+  const [anonKey, setAnonKey] = useState<string | null>(null);
 
   // Load cloaking settings from store_settings
   useEffect(() => {
