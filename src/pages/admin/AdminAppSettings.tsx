@@ -219,6 +219,17 @@ const appConfigs: Record<string, AppConfig> = {
       { key: "upsell_enabled", label: "تفعيل Upsell", placeholder: "", type: "toggle" },
     ],
   },
+  "cloaking": {
+    name: "Cloaking Protection",
+    description: "حماية صفحات المنتجات من البوتات عبر نظام اختيار الدولة وجلب الوصف من سيرفر خارجي. أضف تاج 'antibot' للمنتجات التي تريد حمايتها.",
+    iconBg: "#7C3AED",
+    settingsKey: "app_config_cloaking",
+    fields: [
+      { key: "cloaking_enabled", label: "تفعيل نظام الكلوكينج", placeholder: "", type: "toggle" },
+      { key: "api_url", label: "رابط API الوصف (Supabase Function URL)", placeholder: "https://xxxxx.supabase.co/functions/v1/get-product-description", type: "text", helpText: "رابط Edge Function في حساب Supabase الخارجي" },
+      { key: "supabase_anon_key", label: "Supabase Anon Key (اختياري)", placeholder: "eyJhbGci...", type: "text", helpText: "مفتاح anon الخاص بمشروع Supabase الخارجي إذا كان مطلوباً" },
+    ],
+  },
 };
 
 export default function AdminAppSettings() {
